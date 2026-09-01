@@ -335,9 +335,12 @@ document.addEventListener('DOMContentLoaded', () => {
       else el.style.color = onDark ? '#fff' : '#1a1a1a';
     });
   };
-  intro.addEventListener('scroll', () => requestAnimationFrame(() => {
+  // Directly on scroll, not batched through rAF: the check early-outs when
+  // nothing changed, and browsers throttle rAF in background/embedded views
+  // while still delivering scroll events.
+  intro.addEventListener('scroll', () => {
     if (mode === 'intro') paintChrome();
-  }), { passive: true });
+  }, { passive: true });
 
   // The browser's own scrollTo({behavior:'smooth'}) is a short, near-linear
   // ease that reads as a snap, not a glide — nothing like the long, decelerating

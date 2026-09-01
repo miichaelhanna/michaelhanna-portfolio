@@ -55,6 +55,13 @@ a.hm-nav-link:hover{color:#1D1AEA;text-decoration:none}
 </head>
 <body>
 
+<!-- Same safe-area treatment as the home page: with viewport-fit=cover both
+     iOS bands paint from the one document background, so each gets its own
+     fixed strip — the top always continues the (always-white) sticky nav,
+     the bottom follows whatever is at the bottom edge (see the script). -->
+<div id="hm-safe-top" aria-hidden="true" style="position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:#fff;z-index:90;pointer-events:none"></div>
+<div id="hm-safe-bot" aria-hidden="true" style="position:fixed;bottom:0;left:0;right:0;height:env(safe-area-inset-bottom,0px);background:#fff;z-index:90;pointer-events:none"></div>
+
 <div id="pg" style="position:fixed;top:0;left:0;height:2px;width:0;background:#FF3334;z-index:60"></div>
 
 <nav style="position:sticky;top:0;z-index:50;background:#fff;display:flex;justify-content:space-between;align-items:center;gap:18px;padding:calc(20px + env(safe-area-inset-top,0px)) clamp(22px,6vw,96px) 20px;font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:lowercase">
@@ -260,7 +267,7 @@ a.hm-nav-link:hover{color:#1D1AEA;text-decoration:none}
   </div>
 </article>
 
-<div id="next" style="background:#000;color:#F5F5F7;padding:clamp(48px,8vh,100px) 24px">
+<div id="next" data-dark="" style="background:#000;color:#F5F5F7;padding:clamp(48px,8vh,100px) 24px">
   <div style="max-width:1040px;margin:0 auto">
     <span style="font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:#86868B">Next case · 01</span>
     <h2 style="margin:12px 0 0;font-weight:700;font-size:clamp(1.8rem,4.4vw,3.2rem);letter-spacing:-.03em;line-height:1.06"><a id="next-link" href="#" class="plain" style="color:#F5F5F7">Zinia <span style="display:inline-block;transition:transform .5s cubic-bezier(.22,1,.36,1);color:#FF3334">→</span></a></h2>
@@ -268,7 +275,7 @@ a.hm-nav-link:hover{color:#1D1AEA;text-decoration:none}
   </div>
 </div>
 
-<section style="background:#000;color:#fff;box-sizing:border-box;text-align:center;padding:clamp(54px,9vh,96px) clamp(22px,5vw,80px);overflow:hidden">
+<section data-dark="" style="background:#000;color:#fff;box-sizing:border-box;text-align:center;padding:clamp(54px,9vh,96px) clamp(22px,5vw,80px);overflow:hidden">
   <h2 id="hm-cta-head">Let's discuss your next <span class="cta-arrow">→</span> <span id="hm-cta-word" class="cta-word">idea.</span></h2>
   <div id="hm-cta-actions">
     <a class="cta-btn" href="mailto:Michaelhannafarag@gmail.com" target="_blank" rel="noopener noreferrer">Email Me</a>
@@ -276,7 +283,7 @@ a.hm-nav-link:hover{color:#1D1AEA;text-decoration:none}
   </div>
 </section>
 
-<footer style="background:#000;color:#fff;box-sizing:border-box;padding:clamp(28px,4.5vh,54px) 0 calc(clamp(40px,6vh,64px) + env(safe-area-inset-bottom,0px));overflow:hidden">
+<footer data-dark="" style="background:#000;color:#fff;box-sizing:border-box;padding:clamp(28px,4.5vh,54px) 0 calc(clamp(40px,6vh,64px) + env(safe-area-inset-bottom,0px));overflow:hidden">
   <div style="width:100%;max-width:1040px;margin:0 auto;padding:0 clamp(22px,6vw,44px);box-sizing:border-box">
     <div class="cta-id" style="margin:0">
     <div class="cta-name">Michael Hanna</div>
@@ -304,6 +311,6 @@ a.hm-nav-link:hover{color:#1D1AEA;text-decoration:none}
   </div>
 </footer>
 
-<script src="case-study-openbank.js"></script>
+<script src="case-study-openbank.js?v=3"></script>
 </body>
 </html>

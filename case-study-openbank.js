@@ -148,6 +148,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     resgrid.style.opacity = String(clamp((p - .86) / .1, 0, 1));
   };
+  // Same bottom-band tinting as the home page: iOS blends its bottom search
+  // bar from the document background (and the #hm-safe-bot strip paints the
+  // home-indicator band), so both follow whatever section sits at the bottom
+  // edge of the visual viewport. The top stays white — the sticky nav is
+  // always white and covers the status-bar band.
+  const darkSecs = [...document.querySelectorAll('[data-dark]')];
+  const safeBot = $('hm-safe-bot');
+  let wasBotDark = null;
+  const paintChrome = () => {
+    const seen = window.visualViewport ? Math.min(window.visualViewport.height, innerHeight) : innerHeight;
+    const botDark = darkSecs.some(s => {
+      const r = s.getBoundingClientRect();
+      return r.top < seen - 8 && r.bottom > seen - 8;
+    });
+    if (botDark === wasBotDark) return;
+    wasBotDark = botDark;
+    const c = botDark ? '#000000' : '#ffffff';
+    document.documentElement.style.background = c;
+    document.body.style.background = c;
+    if (safeBot) safeBot.style.background = c;
+  };
   const onScroll = () => {
     const total = document.documentElement.scrollHeight - innerHeight;
     bar.style.width = clamp(scrollY / (total || 1), 0, 1) * 100 + '%';
@@ -161,7 +182,13 @@ document.addEventListener('DOMContentLoaded', () => {
     setMoney(trackProg(moneyTrack));
   };
   addEventListener('scroll', () => requestAnimationFrame(onScroll), { passive: true });
+  // Chrome tinting runs directly on scroll, not through the rAF batch above:
+  // it's a cheap early-outing check, and browsers throttle rAF in background
+  // or embedded views while still delivering scroll events.
+  addEventListener('scroll', paintChrome, { passive: true });
+  addEventListener('resize', () => { wasBotDark = null; paintChrome(); });
   onScroll();
+  paintChrome();
 
   const nx = $('next-link'), na = nx.querySelector('span');
   nx.addEventListener('mouseenter', () => na.style.transform = 'translateX(9px)');
