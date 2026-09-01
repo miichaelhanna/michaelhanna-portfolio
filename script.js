@@ -21,9 +21,17 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   const ABOUT_BG = '#0c0c0e';
   // Mobile browsers tint their chrome from this, so it has to follow the page
-  // or the status bar reads as a mismatched band above a dark screen.
+  // or the status bar reads as a mismatched band above a dark screen. The
+  // meta tag alone isn't enough on iOS Safari: its status bar and bottom
+  // toolbar also blend from the document's own background (what shows through
+  // rubber-band overscroll and the safe areas), and with html left white every
+  // dark page still got white bands top and bottom. Painting the root element
+  // the same colour closes that gap.
   const themeMeta = document.querySelector('meta[name="theme-color"]');
-  const setTheme = c => { if (themeMeta) themeMeta.setAttribute('content', c); };
+  const setTheme = c => {
+    if (themeMeta) themeMeta.setAttribute('content', c);
+    document.documentElement.style.background = c;
+  };
   // The About page is dark, so the header has to follow it — but only the nav
   // ink: the [data-ch=name] rule must leave the home wordmark black, because the
   // two wordmarks are stacked on top of each other during the move.
@@ -262,6 +270,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (onDark === wasDark) return;
     wasDark = onDark;
     if (head) head.style.background = onDark ? '#0c0c0e' : '#fff';
+    // The header flip above only repaints the top ~40px; mobile Safari's status
+    // bar and bottom toolbar take their colour from the theme-color meta tag
+    // instead, so that has to track the same dark/light read or it's stuck
+    // showing whatever colour the page loaded in as you scroll through
+    // Work's black CTA/footer band.
+    setTheme(onDark ? '#0c0c0e' : '#ffffff');
     document.querySelectorAll('[data-ch]').forEach(el => {
       if (el.dataset.ch === 'name') el.style.color = onDark ? '#f5f5f7' : '#1a1a1a';
       else el.style.color = onDark ? '#fff' : '#1a1a1a';
@@ -459,11 +473,21 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncAbout);
 
+  // iOS Safari can restore this page from its back/forward cache without
+  // re-running the effects that set the status bar / bottom toolbar colour,
+  // so navigating back can leave that chrome on whatever it was when the
+  // page got cached. Re-derive it fresh whenever that happens.
+  window.addEventListener('pageshow', e => {
+    if (!e.persisted) return;
+    if (mode === 'intro') { wasDark = null; paintChrome(); }
+    else setChromeFor(mode);
+  });
+
   // Work footer's headline word alternates between what someone might be
   // reaching out for.
   const ctaWord = $('hm-cta-word');
   if (ctaWord) {
-    const words = ['idea.', 'hire.'];
+    const words = ['idea.', 'product.', 'launch.', 'bet.', 'hire.'];
     let wi = 0;
     setInterval(() => {
       ctaWord.classList.add('is-swap');

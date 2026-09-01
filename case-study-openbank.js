@@ -187,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // from the actual offset, not hard-coded, so it keeps up with DST).
   const ctaWord = $('hm-cta-word');
   if (ctaWord) {
-    const words = ['idea.', 'hire.'];
+    const words = ['idea.', 'product.', 'launch.', 'bet.', 'hire.'];
     let wi = 0;
     setInterval(() => {
       ctaWord.classList.add('is-swap');
