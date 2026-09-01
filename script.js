@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const l2 = h && h.querySelector('.wm-l2');
     if (l2) l2.style.transform = x == null ? '' : 'translateX(' + x + 'px)';
   };
-  const promote = (other, on) => [big, other].forEach(el => {
+  const promote = (a, b, on) => [a, b].forEach(el => {
     if (el) el.style.willChange = on ? 'transform' : '';
   });
   const tween = (ms, step) => new Promise(done => {
@@ -166,14 +166,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // One move, three pages. About enters from the left, After Hours from the
-  // right; the name travels between wherever the two pages keep it, and the
-  // second line slides between their alignments. Nothing here is per-page except
-  // the entries in this table.
-  const PAGES = {
+  // One move, any pair of pages. Home sits in the middle; About lives to its
+  // left and After Hours to its right, and each always wipes in from that
+  // same fixed side no matter where you're travelling from — so home<->about,
+  // home<->lab, and a direct about<->lab hop all read as one consistent room
+  // to move through, not three different effects. The name travels between
+  // wherever the two pages keep it, and the second line slides between their
+  // alignments. PAGES is kept as an alias for the non-home entries, since
+  // that's the set several checks below only care about.
+  const NODES = {
+    intro: { layer: intro, name: big },
     about: { layer: abt, name: abtName, fromLeft: true },
     lab:   { layer: lab, name: labName, fromLeft: false }
   };
+  const PAGES = { about: NODES.about, lab: NODES.lab };
   const wipe = (fromLeft, e) => fromLeft
     ? 'inset(0 ' + ((1 - e) * 100).toFixed(3) + '% 0 0)'
     : 'inset(0 0 0 ' + ((1 - e) * 100).toFixed(3) + '%)';
@@ -187,88 +193,53 @@ document.addEventListener('DOMContentLoaded', () => {
   // always measured against the font that's actually on screen.
   const whenFontsReady = fn => (document.fonts && document.fonts.status !== 'loaded')
     ? document.fonts.ready.then(fn) : fn();
-  const enter = key => {
-    const pg = PAGES[key];
-    if (navBusy || !pg || mode === key) return;
+  const travelTo = toKey => {
+    const from = NODES[mode], to = NODES[toKey];
+    if (navBusy || !to || !from || toKey === mode) return;
     navBusy = true;
     whenFontsReady(() => {
     // The name can only travel if it is on screen to travel from. Deeper into
     // the page it is not, and yanking the scroll to the top first read as a
-    // detour through the home screen, so from down there the curtain runs alone.
-    const travel = intro.scrollTop < intro.clientHeight * .5;
-    if (travel) intro.scrollTo({ top: 0, behavior: 'instant' });
-    setT(false); resetHover(); headClear(); promote(pg.name, true);
+    // detour, so from down there the curtain runs alone.
+    const travel = from.layer.scrollTop < from.layer.clientHeight * .5;
+    if (travel) from.layer.scrollTo({ top: 0, behavior: 'instant' });
+    setT(false); resetHover(); headClear(); promote(from.name, to.name, true);
     syncAbout();
-    pg.layer.style.visibility = 'visible'; pg.layer.style.opacity = 1;
-    pg.layer.style.pointerEvents = 'auto'; pg.layer.style.zIndex = 4;
-    pg.layer.scrollTop = 0;
-    const dx = travel ? big.getBoundingClientRect().left - pg.name.getBoundingClientRect().left : 0;
-    const cross = navCross(pg.fromLeft);
-    const oH = l2Of(big), oP = l2Of(pg.name);
+    to.layer.style.visibility = 'visible'; to.layer.style.opacity = 1;
+    to.layer.style.pointerEvents = 'auto'; to.layer.style.zIndex = 4;
+    to.layer.scrollTop = 0;
+    const dx = travel ? from.name.getBoundingClientRect().left - to.name.getBoundingClientRect().left : 0;
+    // Arriving somewhere uses that page's own fixed side; arriving back home
+    // reverses whichever side is being left.
+    const fromLeft = toKey === 'intro' ? !from.fromLeft : to.fromLeft;
+    const cross = navCross(fromLeft);
+    const oH = l2Of(from.name), oP = l2Of(to.name);
     let swapped = false;
     const step = e => {
       const P = oH + (oP - oH) * e;
-      l2Set(big, P - oH); l2Set(pg.name, P - oP);
-      pg.layer.style.clipPath = wipe(pg.fromLeft, e);
-      pg.name.style.transform = 'translateX(' + (dx * (1 - e)) + 'px)';
-      big.style.transform = 'translateX(' + (-dx * e) + 'px)';
-      if (!swapped && e > cross) { swapped = true; paintNav(key); navInk(true); }
+      l2Set(from.name, P - oH); l2Set(to.name, P - oP);
+      to.layer.style.clipPath = wipe(fromLeft, e);
+      to.name.style.transform = 'translateX(' + (dx * (1 - e)) + 'px)';
+      from.name.style.transform = 'translateX(' + (-dx * e) + 'px)';
+      if (!swapped && e > cross) { swapped = true; paintNav(toKey); navInk(toKey !== 'intro'); }
     };
     step(0);
     run(step).then(() => {
-      pg.layer.style.clipPath = 'none'; pg.layer.style.zIndex = 3;
-      headSettle(key);
-      pg.name.style.transform = ''; big.style.transform = '';
-      l2Set(big, null); l2Set(pg.name, null); promote(pg.name, false);
-      shw(intro, false);
-      Object.keys(PAGES).forEach(k => { if (k !== key) shw(PAGES[k].layer, false); });
-      setMode(key);
-      navBusy = false;
-    });
-    });
-  };
-
-  // The same move played backwards: the name returns to where the home page
-  // keeps it and the curtain comes in from the opposite side.
-  const leave = () => {
-    const pg = PAGES[mode];
-    if (navBusy || !pg) return;
-    navBusy = true;
-    whenFontsReady(() => {
-    setT(false); resetHover(); headClear(); promote(pg.name, true);
-    intro.scrollTo({ top: 0, behavior: 'instant' });
-    syncAbout();
-    shw(intro, true);
-    intro.style.zIndex = 4;
-    const dx = big.getBoundingClientRect().left - pg.name.getBoundingClientRect().left;
-    const cross = navCross(!pg.fromLeft);
-    const oH = l2Of(big), oP = l2Of(pg.name);
-    let swapped = false;
-    const step = e => {
-      const P = oP + (oH - oP) * e;
-      l2Set(big, P - oH); l2Set(pg.name, P - oP);
-      intro.style.clipPath = wipe(!pg.fromLeft, e);
-      big.style.transform = 'translateX(' + (-dx * (1 - e)) + 'px)';
-      pg.name.style.transform = 'translateX(' + (dx * e) + 'px)';
-      if (!swapped && e > cross) { swapped = true; paintNav('intro'); navInk(false); }
-    };
-    step(0);
-    run(step).then(() => {
-      intro.style.clipPath = 'none'; intro.style.zIndex = 2;
-      headSettle('intro');
-      big.style.transform = ''; pg.name.style.transform = '';
-      l2Set(big, null); l2Set(pg.name, null); promote(pg.name, false);
-      shw(pg.layer, false);
-      setMode('intro');
+      to.layer.style.clipPath = 'none'; to.layer.style.zIndex = toKey === 'intro' ? 2 : 3;
+      headSettle(toKey);
+      to.name.style.transform = ''; from.name.style.transform = '';
+      l2Set(from.name, null); l2Set(to.name, null); promote(from.name, to.name, false);
+      Object.keys(NODES).forEach(k => { if (k !== toKey) shw(NODES[k].layer, false); });
+      setMode(toKey);
       navBusy = false;
     });
     });
   };
 
   const nav = t => {
-    if (t === 'work') return PAGES[mode] ? leave() : showWork(false);
-    if (t === 'intro') return PAGES[mode] ? leave() : go('intro');
-    if (PAGES[t]) return mode === 'intro' ? enter(t) : go(t);
+    if (t === 'work') return PAGES[mode] ? travelTo('intro') : showWork(false);
+    if (t === 'intro') return PAGES[mode] ? travelTo('intro') : go('intro');
+    if (PAGES[t]) return travelTo(t);
     go(t);
   };
   document.querySelectorAll('[data-go]').forEach(el => el.addEventListener('click', () => nav(el.dataset.go)));
@@ -293,10 +264,35 @@ document.addEventListener('DOMContentLoaded', () => {
     if (mode === 'intro') paintChrome();
   }), { passive: true });
 
+  // The browser's own scrollTo({behavior:'smooth'}) is a short, near-linear
+  // ease that reads as a snap, not a glide — nothing like the long, decelerating
+  // scroll-jack Apple's product pages use. This drives scrollTop by hand instead,
+  // on an expo-out curve (fast away from the gesture, a long soft landing) over
+  // a deliberately unhurried second. CSS scroll-behavior has to be forced to
+  // 'auto' for the duration: left on 'smooth', every scrollTop write below would
+  // itself kick off a browser-smoothed hop, and the two would fight frame to frame.
+  const easeOutExpo = p => p >= 1 ? 1 : 1 - Math.pow(2, -10 * p);
+  const SNAP_MS = 900;
+  const scrollSnap = (el, toY, ms) => new Promise(done => {
+    const fromY = el.scrollTop, dist = toY - fromY;
+    if (!dist || !ms) { el.scrollTop = toY; return done(); }
+    const prevBehavior = el.style.scrollBehavior;
+    el.style.scrollBehavior = 'auto';
+    const t0 = performance.now();
+    const frame = t => {
+      const p = Math.min(1, (t - t0) / ms);
+      el.scrollTop = fromY + dist * easeOutExpo(p);
+      if (p < 1) return requestAnimationFrame(frame);
+      el.style.scrollBehavior = prevBehavior;
+      done();
+    };
+    requestAnimationFrame(frame);
+  });
+
   // Work is a scroll position on the home page now, not a layer of its own.
   const showWork = instant => {
     if (mode !== 'intro') go('intro');
-    intro.scrollTo({ top: work.offsetTop, behavior: instant ? 'instant' : 'smooth' });
+    scrollSnap(intro, work.offsetTop, instant || still.matches ? 0 : SNAP_MS);
     requestAnimationFrame(paintChrome);
   };
 
@@ -315,8 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     if (sectionLock || Math.abs(e.deltaY) < 6) return;
     sectionLock = true;
-    intro.scrollTo({ top: e.deltaY > 0 ? h : 0, behavior: 'smooth' });
-    setTimeout(() => { sectionLock = false; }, 620);
+    scrollSnap(intro, e.deltaY > 0 ? h : 0, still.matches ? 0 : SNAP_MS).then(() => { sectionLock = false; });
   }, { passive: false });
 
   const tune = () => {

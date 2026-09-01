@@ -58,8 +58,8 @@ function Lanyard({
         gl=${{ alpha: transparent }}
         onCreated=${({ gl }) => gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1)}
       >
-        <ambientLight intensity=${Math.PI * 0.55} />
-        <directionalLight position=${[0, 0, 10]} intensity=${Math.PI * 0.45} />
+        <ambientLight intensity=${Math.PI * 0.5} />
+        <directionalLight position=${[0, 0, 10]} intensity=${Math.PI * 0.35} />
         <${Physics} gravity=${gravity} timeStep=${isMobile ? 1 / 30 : 1 / 60}>
           <${Band}
             isMobile=${isMobile}
