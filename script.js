@@ -245,9 +245,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const fromLeft = toKey === 'intro' ? !from.fromLeft : to.fromLeft;
     const oH = l2Of(from.name), oP = l2Of(to.name);
     // Nav ink swaps when the curtain edge actually reaches the nav, not at a
-    // fixed halfway mark.
+    // fixed halfway mark. The browser chrome tint (status bar, bottom search
+    // bar) swaps separately, when the curtain crosses the middle of the
+    // screen — the bars span the full width, and waiting for the transition
+    // to land left them in the old colour for the whole 1.5s wipe, which
+    // read as lag.
+    const tintNow = () => {
+      if (toKey === 'intro') { wasDark = null; wasBotDark = null; paintChrome(); }
+      else setTheme(PAGE_BG[toKey]);
+    };
     const inkAt = setTimeout(() => { paintNav(toKey); navInk(toKey !== 'intro'); },
       still.matches ? 0 : timeAtProgress(navCross(fromLeft)));
+    const tintAt = setTimeout(tintNow, still.matches ? 0 : timeAtProgress(0.5));
     animateNav([
       [to.layer, 'clipPath', wipe(fromLeft, 0), wipe(fromLeft, 1)],
       [to.name, 'transform', 'translateX(' + dx + 'px)', 'translateX(0px)'],
@@ -255,7 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
       [l2El(from.name), 'transform', 'translateX(0px)', 'translateX(' + (oP - oH) + 'px)'],
       [l2El(to.name), 'transform', 'translateX(' + (oH - oP) + 'px)', 'translateX(0px)']
     ]).then(anims => {
-      clearTimeout(inkAt);
+      clearTimeout(inkAt); clearTimeout(tintAt);
       paintNav(toKey); navInk(toKey !== 'intro');
       to.layer.style.clipPath = 'none'; to.layer.style.zIndex = toKey === 'intro' ? 2 : 3;
       headSettle(toKey);

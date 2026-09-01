@@ -10,6 +10,17 @@
      clock. -->
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
+<script>
+  // Runs before first paint: a direct load of #about or #lab must start with
+  // the bars already in that page's colour — waiting for the main script at
+  // the end of the body left them white for the whole load.
+  (function () {
+    var c = { about: '#0c0c0e', lab: '#3A5B85' }[location.hash.slice(1)];
+    if (!c) return;
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', c);
+    document.documentElement.style.background = c;
+  })();
+</script>
 <title>Michael Hanna · Product Manager</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -515,7 +526,7 @@
   </div>
 
 </div>
-<script src="script.js?v=73"></script>
+<script src="script.js?v=74"></script>
 <script>
   // Lanyard is web-only: it's a heavy WebGL scene (three.js + rapier physics
   // + a 2.4MB card model) built around a pointer drag that touch can't
