@@ -20,18 +20,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
   const ABOUT_BG = '#0c0c0e';
-  // Mobile browsers tint their chrome from this, so it has to follow the page
-  // or the status bar reads as a mismatched band above a dark screen. The
-  // meta tag alone isn't enough on iOS Safari: its status bar and bottom
-  // toolbar also blend from the document's own background (what shows through
-  // rubber-band overscroll and the safe areas), and with html left white every
-  // dark page still got white bands top and bottom. Painting the root element
-  // the same colour closes that gap.
+  // iOS Safari tints its two chrome bands from two different sources, and this
+  // site defeats the automatic one: the body never scrolls (pages are layers
+  // with their own overflow scrollers inside a fixed stage), so Safari can't
+  // sample the content behind its bars. The status bar follows the theme-color
+  // meta — that has to match whatever is under the header. The bottom search
+  // bar blends from the document's own background — that has to match whatever
+  // is at the bottom of the viewport. Mid-scroll on the home page those are
+  // different colours (white "Trusted by" up top, black CTA band below), so
+  // the two are set independently.
   const themeMeta = document.querySelector('meta[name="theme-color"]');
-  const setTheme = c => {
-    if (themeMeta) themeMeta.setAttribute('content', c);
+  const setChromeTop = c => { if (themeMeta) themeMeta.setAttribute('content', c); };
+  const setChromeBottom = c => {
     document.documentElement.style.background = c;
+    document.body.style.background = c;
   };
+  const setTheme = c => { setChromeTop(c); setChromeBottom(c); };
   // The About page is dark, so the header has to follow it — but only the nav
   // ink: the [data-ch=name] rule must leave the home wordmark black, because the
   // two wordmarks are stacked on top of each other during the move.
@@ -41,7 +45,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const PAGE_BG = { about: ABOUT_BG, lab: '#3A5B85' };
   const setChromeFor = m => {
     setTheme(PAGE_BG[m] || '#ffffff');
-    if (!PAGE_BG[m]) { setChrome(false); return; }
+    // Landing back on home mid-scroll (the curtain-only return from deep in
+    // the page) must re-derive both bars from the actual scroll position —
+    // the flat white set above is only right at the top.
+    if (!PAGE_BG[m]) { setChrome(false); wasDark = null; wasBotDark = null; paintChrome(); return; }
     if (head) head.style.background = PAGE_BG[m];
     navInk(true);
     document.querySelectorAll('[data-ch="name"]').forEach(el => { el.style.color = '#1a1a1a'; });
@@ -275,19 +282,24 @@ document.addEventListener('DOMContentLoaded', () => {
   // light type only while a section marked [data-dark] is behind it.
   const darkSecs = [...work.querySelectorAll('[data-dark]')];
   const HEAD_Y = 40;
-  let wasDark = null;
+  let wasDark = null, wasBotDark = null;
+  const inDark = y => darkSecs.some(s => y >= s.offsetTop && y <= s.offsetTop + s.offsetHeight);
   const paintChrome = () => {
-    const y = intro.scrollTop + HEAD_Y;
-    const onDark = darkSecs.some(s => y >= s.offsetTop && y <= s.offsetTop + s.offsetHeight);
+    // Top and bottom of the viewport are read separately: the header, the
+    // status bar, and the theme-color follow what's under the top edge, while
+    // the document background — what iOS blends its bottom search bar from —
+    // follows what's under the bottom edge. Mid-scroll through Work's black
+    // band those two disagree, and a single read left one bar mismatched.
+    const onDark = inDark(intro.scrollTop + HEAD_Y);
+    const botDark = inDark(intro.scrollTop + intro.clientHeight - 8);
+    if (botDark !== wasBotDark) {
+      wasBotDark = botDark;
+      setChromeBottom(botDark ? '#000000' : '#ffffff');
+    }
     if (onDark === wasDark) return;
     wasDark = onDark;
     if (head) head.style.background = onDark ? '#0c0c0e' : '#fff';
-    // The header flip above only repaints the top ~40px; mobile Safari's status
-    // bar and bottom toolbar take their colour from the theme-color meta tag
-    // instead, so that has to track the same dark/light read or it's stuck
-    // showing whatever colour the page loaded in as you scroll through
-    // Work's black CTA/footer band.
-    setTheme(onDark ? '#0c0c0e' : '#ffffff');
+    setChromeTop(onDark ? '#0c0c0e' : '#ffffff');
     document.querySelectorAll('[data-ch]').forEach(el => {
       if (el.dataset.ch === 'name') el.style.color = onDark ? '#f5f5f7' : '#1a1a1a';
       else el.style.color = onDark ? '#fff' : '#1a1a1a';
@@ -349,6 +361,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const tune = () => {
     syncAbout();
+    // A resize (or iOS toolbar collapse) moves the viewport's bottom edge, so
+    // both chrome reads can change without any scroll happening.
+    if (mode === 'intro') { wasDark = null; wasBotDark = null; paintChrome(); }
   };
   addEventListener('resize', tune);
   tune();
@@ -491,7 +506,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // page got cached. Re-derive it fresh whenever that happens.
   window.addEventListener('pageshow', e => {
     if (!e.persisted) return;
-    if (mode === 'intro') { wasDark = null; paintChrome(); }
+    if (mode === 'intro') { wasDark = null; wasBotDark = null; paintChrome(); }
     else setChromeFor(mode);
   });
 

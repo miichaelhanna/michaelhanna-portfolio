@@ -2,7 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- viewport-fit=cover extends the page under the iOS status bar and home
+     indicator, so those bands show the page's own background instead of a
+     Safari-chosen fill — the only way their colour ALWAYS matches the screen,
+     since dynamic theme-color updates aren't reliably honoured on iOS. The
+     header offsets itself by env(safe-area-inset-top) to stay clear of the
+     clock. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
 <title>Michael Hanna · Product Manager</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -236,7 +242,7 @@
      reusable block — it appears on the About page under the reach figure and
      again in the Work footer, so its rules key off classes, not ids. */
   #hm-abt-cta{position:relative;box-sizing:border-box;text-align:center;
-      padding:0 clamp(22px,5vw,80px) clamp(24px,4vh,40px)}
+      padding:0 clamp(22px,5vw,80px) calc(clamp(24px,4vh,40px) + env(safe-area-inset-bottom,0px))}
   .cta-id{margin:0;text-align:center;
       font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;
       font-size:.92rem;font-weight:500;color:rgba(245,245,247,.6);line-height:1.5}
@@ -288,7 +294,7 @@
 
 <div id="hm-stage" data-screen-label="Home" style="position:relative;height:100vh;height:100dvh;overflow:hidden;background:#fff;transition:background .35s ease">
 
-  <div id="hm-head" data-screen-label="Header" style="position:absolute;top:0;left:0;right:0;z-index:5;background:#fff;transition:background .3s;display:flex;justify-content:space-between;align-items:center;gap:18px;padding:20px clamp(22px,6vw,96px)">
+  <div id="hm-head" data-screen-label="Header" style="position:absolute;top:0;left:0;right:0;z-index:5;background:#fff;transition:background .3s;display:flex;justify-content:space-between;align-items:center;gap:18px;padding:calc(20px + env(safe-area-inset-top,0px)) clamp(22px,6vw,96px) 20px">
     <!-- Ali's header, exactly: Work and About on the left, Contact on the right,
          the same on every page, no wordmark. Nothing here moves between pages. -->
     <span id="hm-nav" style="display:flex;gap:clamp(16px,3vw,30px);font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:lowercase;transition:transform .3s cubic-bezier(.22,1,.36,1)">
@@ -376,7 +382,7 @@
       </div>
     </section>
 
-    <footer data-dark="" class="wf" data-screen-label="Work — footer" style="background:#000;color:#fff;box-sizing:border-box;padding:clamp(28px,4.5vh,54px) 0 clamp(40px,6vh,64px);overflow:hidden">
+    <footer data-dark="" class="wf" data-screen-label="Work — footer" style="background:#000;color:#fff;box-sizing:border-box;padding:clamp(28px,4.5vh,54px) 0 calc(clamp(40px,6vh,64px) + env(safe-area-inset-bottom,0px));overflow:hidden">
       <div style="width:100%;max-width:1040px;margin:0 auto;padding:0 clamp(22px,6vw,44px);box-sizing:border-box">
         <div class="cta-id" style="margin:0">
         <div class="cta-name">Michael Hanna</div>
@@ -509,7 +515,7 @@
   </div>
 
 </div>
-<script src="script.js?v=72"></script>
+<script src="script.js?v=73"></script>
 <script>
   // Lanyard is web-only: it's a heavy WebGL scene (three.js + rapier physics
   // + a 2.4MB card model) built around a pointer drag that touch can't
