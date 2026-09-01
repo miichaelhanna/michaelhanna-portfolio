@@ -303,6 +303,17 @@
 </head>
 <body>
 
+<!-- The iOS safe areas (status bar strip, home-indicator strip) sit outside
+     the 100dvh stage, and with viewport-fit=cover they both show the document
+     background — one colour for two bands that often need to differ (white
+     header up top, black footer below, mid-scroll). These two fixed strips
+     give each band its own paint, driven from script.js alongside the header
+     and bottom reads. Transparent by default so the pre-paint hash tint in
+     the head shows through until the script takes over; zero-height anywhere
+     without safe-area insets. -->
+<div id="hm-safe-top" aria-hidden="true" style="position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);z-index:90;pointer-events:none"></div>
+<div id="hm-safe-bot" aria-hidden="true" style="position:fixed;bottom:0;left:0;right:0;height:env(safe-area-inset-bottom,0px);z-index:90;pointer-events:none"></div>
+
 <div id="hm-stage" data-screen-label="Home" style="position:relative;height:100vh;height:100dvh;overflow:hidden;background:#fff;transition:background .35s ease">
 
   <div id="hm-head" data-screen-label="Header" style="position:absolute;top:0;left:0;right:0;z-index:5;background:#fff;transition:background .3s;display:flex;justify-content:space-between;align-items:center;gap:18px;padding:calc(20px + env(safe-area-inset-top,0px)) clamp(22px,6vw,96px) 20px">
@@ -526,7 +537,7 @@
   </div>
 
 </div>
-<script src="script.js?v=74"></script>
+<script src="script.js?v=75"></script>
 <script>
   // Lanyard is web-only: it's a heavy WebGL scene (three.js + rapier physics
   // + a 2.4MB card model) built around a pointer drag that touch can't

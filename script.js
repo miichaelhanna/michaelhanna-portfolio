@@ -20,20 +20,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
   const ABOUT_BG = '#0c0c0e';
-  // iOS Safari tints its two chrome bands from two different sources, and this
-  // site defeats the automatic one: the body never scrolls (pages are layers
-  // with their own overflow scrollers inside a fixed stage), so Safari can't
-  // sample the content behind its bars. The status bar follows the theme-color
-  // meta — that has to match whatever is under the header. The bottom search
-  // bar blends from the document's own background — that has to match whatever
-  // is at the bottom of the viewport. Mid-scroll on the home page those are
-  // different colours (white "Trusted by" up top, black CTA band below), so
-  // the two are set independently.
+  // The site's body never scrolls (pages are layers with their own overflow
+  // scrollers inside a fixed 100dvh stage), so iOS Safari cannot sample the
+  // content behind its chrome, and with viewport-fit=cover both exposed
+  // safe-area bands paint from the single document background — one colour
+  // for two bands that often need to differ mid-scroll (white header at the
+  // top, black footer at the bottom). Two fixed strips in the markup
+  // (#hm-safe-top/#hm-safe-bot) give each band its own paint: the top strip
+  // always continues the header, the bottom strip always continues whatever
+  // is at the bottom edge. theme-color and the root background still track
+  // alongside for the browsers that use them (and for rubber-band overscroll).
   const themeMeta = document.querySelector('meta[name="theme-color"]');
-  const setChromeTop = c => { if (themeMeta) themeMeta.setAttribute('content', c); };
+  const safeTop = $('hm-safe-top'), safeBot = $('hm-safe-bot');
+  const setChromeTop = c => {
+    if (themeMeta) themeMeta.setAttribute('content', c);
+    if (safeTop) safeTop.style.background = c;
+  };
   const setChromeBottom = c => {
     document.documentElement.style.background = c;
     document.body.style.background = c;
+    if (safeBot) safeBot.style.background = c;
   };
   const setTheme = c => { setChromeTop(c); setChromeBottom(c); };
   // The About page is dark, so the header has to follow it — but only the nav
@@ -234,7 +240,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // detour, so from down there the curtain runs alone.
     const travel = from.layer.scrollTop < from.layer.clientHeight * .5;
     if (travel) from.layer.scrollTo({ top: 0, behavior: 'instant' });
-    setT(false); resetHover(); headClear();
+    setT(false); resetHover();
+    // The header only goes transparent (so the curtain edge can run through
+    // the top band) when departing from the top of a page, where the band
+    // behind it is empty. Deep in a page there's real content scrolled under
+    // the header, and clearing it mid-wipe exposed that content — a case
+    // study caption showing through the nav. From down there the header
+    // keeps its paint and recolours when the curtain crosses the middle.
+    if (travel) headClear();
     syncAbout();
     to.layer.style.visibility = 'visible'; to.layer.style.opacity = 1;
     to.layer.style.pointerEvents = 'auto'; to.layer.style.zIndex = 4;
@@ -251,6 +264,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // to land left them in the old colour for the whole 1.5s wipe, which
     // read as lag.
     const tintNow = () => {
+      // In the no-travel case the header stayed opaque, so recolour it here
+      // with a short fade rather than leaving it in the old page's colour
+      // until the transition settles.
+      if (!travel && head) { head.style.transition = 'background .3s'; head.style.background = PAGE_BG[toKey] || '#fff'; }
       if (toKey === 'intro') { wasDark = null; wasBotDark = null; paintChrome(); }
       else setTheme(PAGE_BG[toKey]);
     };
@@ -300,7 +317,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // follows what's under the bottom edge. Mid-scroll through Work's black
     // band those two disagree, and a single read left one bar mismatched.
     const onDark = inDark(intro.scrollTop + HEAD_Y);
-    const botDark = inDark(intro.scrollTop + intro.clientHeight - 8);
+    // The visible bottom edge on iOS is the visual viewport, not the layout
+    // one — 100dvh includes the area behind a collapsed toolbar, and reading
+    // there flipped the bottom band a section early.
+    const seen = window.visualViewport ? Math.min(window.visualViewport.height, intro.clientHeight) : intro.clientHeight;
+    const botDark = inDark(intro.scrollTop + seen - 8);
     if (botDark !== wasBotDark) {
       wasBotDark = botDark;
       setChromeBottom(botDark ? '#000000' : '#ffffff');
