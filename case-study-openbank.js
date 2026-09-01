@@ -181,4 +181,44 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   tune();
   addEventListener('resize', tune);
+
+  // Footer headline word alternates between what someone might be reaching
+  // out for; the ID card's clock reads Madrid local time (CET/CEST derived
+  // from the actual offset, not hard-coded, so it keeps up with DST).
+  const ctaWord = $('hm-cta-word');
+  if (ctaWord) {
+    const words = ['idea.', 'hire.'];
+    let wi = 0;
+    setInterval(() => {
+      ctaWord.classList.add('is-swap');
+      setTimeout(() => {
+        wi = (wi + 1) % words.length;
+        ctaWord.textContent = words[wi];
+        ctaWord.classList.remove('is-swap');
+      }, 250);
+    }, 2200);
+  }
+
+  const ctaTimes = document.querySelectorAll('.cta-time'), ctaTzs = document.querySelectorAll('.cta-tz');
+  if (ctaTimes.length) {
+    const MADRID = 'Europe/Madrid';
+    const offsetHours = date => {
+      const p = new Intl.DateTimeFormat('en-US', {
+        timeZone: MADRID, hour12: false,
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit'
+      }).formatToParts(date).reduce((a, x) => (a[x.type] = x.value, a), {});
+      const asUTC = Date.UTC(p.year, p.month - 1, p.day, p.hour === '24' ? 0 : p.hour, p.minute, p.second);
+      return Math.round((asUTC - date.getTime()) / 3600000);
+    };
+    const tick = () => {
+      const now = new Date();
+      const time = now.toLocaleTimeString('en-GB', { timeZone: MADRID, hour12: false });
+      const tz = offsetHours(now) === 2 ? 'CEST' : 'CET';
+      ctaTimes.forEach(el => { el.textContent = time; });
+      ctaTzs.forEach(el => { el.textContent = tz; });
+    };
+    tick();
+    setInterval(tick, 1000);
+  }
 });

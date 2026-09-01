@@ -179,10 +179,19 @@ document.addEventListener('DOMContentLoaded', () => {
     : 'inset(0 0 0 ' + ((1 - e) * 100).toFixed(3) + '%)';
 
   let navBusy = false;
+  // The wordmark's Archivo Black loads with font-display:swap, so a click that
+  // lands before it's in risks measuring dx/l2Of against the fallback font's
+  // metrics; if the swap then lands mid-tween, the two names reflow to
+  // different widths independently and the wipe shows two misaligned copies
+  // instead of one. Waiting on fonts.ready first means the geometry below is
+  // always measured against the font that's actually on screen.
+  const whenFontsReady = fn => (document.fonts && document.fonts.status !== 'loaded')
+    ? document.fonts.ready.then(fn) : fn();
   const enter = key => {
     const pg = PAGES[key];
     if (navBusy || !pg || mode === key) return;
     navBusy = true;
+    whenFontsReady(() => {
     // The name can only travel if it is on screen to travel from. Deeper into
     // the page it is not, and yanking the scroll to the top first read as a
     // detour through the home screen, so from down there the curtain runs alone.
@@ -216,6 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
       setMode(key);
       navBusy = false;
     });
+    });
   };
 
   // The same move played backwards: the name returns to where the home page
@@ -224,6 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const pg = PAGES[mode];
     if (navBusy || !pg) return;
     navBusy = true;
+    whenFontsReady(() => {
     setT(false); resetHover(); headClear(); promote(pg.name, true);
     intro.scrollTo({ top: 0, behavior: 'instant' });
     syncAbout();
@@ -250,6 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
       shw(pg.layer, false);
       setMode('intro');
       navBusy = false;
+    });
     });
   };
 

@@ -15,8 +15,6 @@ a{color:#D0161C;text-decoration:none}
 a:hover{text-decoration:underline}
 a.chrome-link{color:#1D1D1F;text-decoration:none}
 a.chrome-link:hover{color:#D0161C;text-decoration:none}
-a.footer-link{color:rgba(255,255,255,.8);text-decoration:none}
-a.footer-link:hover{color:#fff;text-decoration:none}
 a.plain{text-decoration:none}
 a.plain:hover{text-decoration:none}
 /* Same header as the rest of the site: Work and About left, Contact right,
@@ -24,6 +22,35 @@ a.plain:hover{text-decoration:none}
 a.hm-nav-link{color:#1a1a1a;text-decoration:none}
 a.hm-nav-link:hover{color:#1D1AEA;text-decoration:none}
 @media (max-width:700px){nav a.hm-nav-link{padding:13px 6px;margin:-13px -6px}}
+
+/* Footer: the same closing statement + ID card as the home page's Work
+   footer, kept in sync by hand since this page doesn't share script.js. */
+#hm-cta-head{margin:0;font-weight:700;letter-spacing:-.035em;line-height:1.04;
+    font-size:clamp(2.1rem,5.6vw,4.4rem);color:#fff;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,'Helvetica Neue',Helvetica,Arial,sans-serif}
+#hm-cta-head .cta-arrow{display:inline-block;padding:0 .12em;color:rgba(245,245,247,.45)}
+#hm-cta-head .cta-word{display:inline-block;min-width:3.6ch;text-align:left;
+    transition:opacity .25s ease}
+#hm-cta-head .cta-word.is-swap{opacity:0}
+#hm-cta-actions{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;
+    margin:clamp(28px,4.5vh,44px) 0 0}
+.cta-btn{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.1em;
+    text-transform:uppercase;color:#fff;text-decoration:none;background:none;
+    border:1.5px solid rgba(245,245,247,.35);border-radius:999px;
+    padding:14px 26px;transition:background .25s,color .25s,border-color .25s;display:inline-block}
+.cta-btn:hover{background:#fff;color:#0c0c0e;border-color:#fff;text-decoration:none}
+.cta-id{margin:0;text-align:center;
+    font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,'Helvetica Neue',Helvetica,Arial,sans-serif;
+    font-size:.92rem;font-weight:500;color:rgba(245,245,247,.6);line-height:1.5}
+.cta-name{font-weight:500;color:rgba(245,245,247,.6)}
+.cta-badges{display:flex;justify-content:center;align-items:center;
+    gap:9px;margin:clamp(8px,1.2vh,12px) 0 0}
+.cta-badge{display:flex;align-items:center;justify-content:center;color:rgba(245,245,247,.6)}
+.cta-badge svg{display:block;width:20px;height:20px}
+.cta-badge-text{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,'Helvetica Neue',Helvetica,Arial,sans-serif;
+    font-size:.5rem;font-weight:700;letter-spacing:.03em;line-height:1.15;
+    text-align:left;white-space:nowrap;color:rgba(245,245,247,.6)}
+.cta-clock{margin-top:clamp(22px,3.5vh,34px);font-weight:700;letter-spacing:.06em;
+    font-variant-numeric:tabular-nums;color:rgba(245,245,247,.85)}
 </style>
 </head>
 <body>
@@ -241,19 +268,40 @@ a.hm-nav-link:hover{color:#1D1AEA;text-decoration:none}
   </div>
 </div>
 
-<footer style="background:#000;color:#fff;padding:clamp(30px,5vh,60px) 0 0;overflow:hidden">
-  <div style="max-width:1040px;margin:0 auto;padding:0 24px">
-    <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 24px;margin-top:clamp(18px,3vh,34px);padding-top:14px;border-top:1px solid rgba(255,255,255,.18);font-size:.78rem;color:rgba(255,255,255,.5)">
-      <a href="mailto:Michaelhannafarag@gmail.com" target="_blank" rel="noopener noreferrer" class="footer-link">Michaelhannafarag@gmail.com</a>
-      <span style="display:flex;gap:20px">
-        <a href="index.html#work" class="footer-link">Selected products</a>
-        <a href="index.html#lab" class="footer-link">After hours</a>
-      </span>
+<section style="background:#000;color:#fff;box-sizing:border-box;text-align:center;padding:clamp(54px,9vh,96px) clamp(22px,5vw,80px);overflow:hidden">
+  <h2 id="hm-cta-head">Let's discuss your next <span class="cta-arrow">→</span> <span id="hm-cta-word" class="cta-word">idea.</span></h2>
+  <div id="hm-cta-actions">
+    <a class="cta-btn" href="mailto:Michaelhannafarag@gmail.com" target="_blank" rel="noopener noreferrer">Email Me</a>
+    <a class="cta-btn" href="mailto:Michaelhannafarag@gmail.com?subject=Let%27s%20book%20a%20call" target="_blank" rel="noopener noreferrer">Book a Call</a>
+  </div>
+</section>
+
+<footer style="background:#000;color:#fff;box-sizing:border-box;padding:clamp(28px,4.5vh,54px) 0 clamp(40px,6vh,64px);overflow:hidden">
+  <div style="width:100%;max-width:1040px;margin:0 auto;padding:0 clamp(22px,6vw,44px);box-sizing:border-box">
+    <div class="cta-id" style="margin:0">
+    <div class="cta-name">Michael Hanna</div>
+    <div>Product Manager</div>
+    <div>Based in Madrid, Spain</div>
+    <div class="cta-badges">
+      <span class="cta-badge" title="Built with Claude Code" aria-hidden="true"><svg viewBox="0 0 512 512" fill="currentColor">
+        <rect x="64" y="108" width="384" height="64"/>
+        <rect x="64" y="172" width="64" height="64"/>
+        <rect x="160" y="172" width="192" height="64"/>
+        <rect x="384" y="172" width="64" height="64"/>
+        <rect x="0" y="236" width="512" height="64"/>
+        <rect x="64" y="300" width="384" height="64"/>
+        <rect x="88" y="364" width="64" height="64"/>
+        <rect x="200" y="364" width="32" height="64"/>
+        <rect x="280" y="364" width="32" height="64"/>
+        <rect x="360" y="364" width="64" height="64"/>
+      </svg></span>
+      <span class="cta-badge" title="Figma" aria-hidden="true"><svg viewBox="0 0 15 15" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M7.00005 2.04999H5.52505C4.71043 2.04999 4.05005 2.71037 4.05005 3.52499C4.05005 4.33961 4.71043 4.99999 5.52505 4.99999H7.00005V2.04999ZM7.00005 1.04999H8.00005H9.47505C10.842 1.04999 11.95 2.15808 11.95 3.52499C11.95 4.33163 11.5642 5.04815 10.9669 5.49999C11.5642 5.95184 11.95 6.66836 11.95 7.475C11.95 8.8419 10.842 9.95 9.47505 9.95C8.92236 9.95 8.41198 9.76884 8.00005 9.46266V9.95L8.00005 11.425C8.00005 12.7919 6.89195 13.9 5.52505 13.9C4.15814 13.9 3.05005 12.7919 3.05005 11.425C3.05005 10.6183 3.43593 9.90184 4.03317 9.44999C3.43593 8.99814 3.05005 8.28163 3.05005 7.475C3.05005 6.66836 3.43594 5.95184 4.03319 5.5C3.43594 5.04815 3.05005 4.33163 3.05005 3.52499C3.05005 2.15808 4.15814 1.04999 5.52505 1.04999H7.00005ZM8.00005 2.04999V4.99999H9.47505C10.2897 4.99999 10.95 4.33961 10.95 3.52499C10.95 2.71037 10.2897 2.04999 9.47505 2.04999H8.00005ZM5.52505 8.94998H7.00005L7.00005 7.4788L7.00005 7.475L7.00005 7.4712V6H5.52505C4.71043 6 4.05005 6.66038 4.05005 7.475C4.05005 8.28767 4.70727 8.94684 5.5192 8.94999L5.52505 8.94998ZM4.05005 11.425C4.05005 10.6123 4.70727 9.95315 5.5192 9.94999L5.52505 9.95H7.00005L7.00005 11.425C7.00005 12.2396 6.33967 12.9 5.52505 12.9C4.71043 12.9 4.05005 12.2396 4.05005 11.425ZM8.00005 7.47206C8.00164 6.65879 8.66141 6 9.47505 6C10.2897 6 10.95 6.66038 10.95 7.475C10.95 8.28962 10.2897 8.95 9.47505 8.95C8.66141 8.95 8.00164 8.29121 8.00005 7.47794V7.47206Z"/></svg></span>
+      <span class="cta-badge" title="Jira" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.53,2a4.37,4.37,0,0,0,4.35,4.35h1.78v1.7A4.35,4.35,0,0,0,22,12.4V2.84A.85.85,0,0,0,21.16,2H11.53M6.77,6.8a4.36,4.36,0,0,0,4.34,4.34h1.8v1.72a4.36,4.36,0,0,0,4.34,4.34V7.63a.84.84,0,0,0-.83-.83H6.77M2,11.6a4.34,4.34,0,0,0,4.35,4.34H8.13v1.72A4.36,4.36,0,0,0,12.47,22V12.43a.85.85,0,0,0-.84-.84H2Z"/></svg></span>
+      <span class="cta-badge cta-badge-text" title="Product Department" aria-hidden="true">PRDT<br>DEPT</span>
+    </div>
+    <div class="cta-clock"><span class="cta-time">--:--:--</span> <span class="cta-tz">CET</span></div>
     </div>
   </div>
-  <a href="index.html" class="plain" style="display:block;margin-top:clamp(20px,3.5vh,44px);color:#fff">
-    <span style="display:block;font-weight:700;font-size:14.4vw;line-height:1;letter-spacing:-.055em;white-space:nowrap;text-align:center;padding:0 1vw">Michael Hanna</span>
-  </a>
 </footer>
 
 <script src="case-study-openbank.js"></script>
