@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<title>Michael Hanna — Product Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  body{margin:0;background:#fff;color:#1a1a1a;font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;overflow:hidden}
+  ::selection{background:#1D1AEA;color:#fff}
+  a{color:#1a1a1a;text-decoration:none}
+  a:hover{color:#1D1AEA}
+  @keyframes mq{to{transform:translateX(-50%)}}
+  @keyframes sway{from{transform:rotate(-1.6deg)}to{transform:rotate(1.6deg)}}
+  .ph{display:flex;align-items:center;justify-content:center;text-align:center;background:rgba(0,0,0,.04);color:rgba(0,0,0,.32);font-family:'IBM Plex Mono',monospace;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;border:1px dashed rgba(0,0,0,.14);box-sizing:border-box}
+  .ph.ph-dark{background:rgba(255,255,255,.06);color:rgba(255,255,255,.35);border-color:rgba(255,255,255,.16)}
+  .lanyard-wrapper{position:relative;z-index:0;width:100%;height:100%;display:flex;justify-content:center;align-items:center;transform:scale(1);transform-origin:center}
+  .lanyard-wrapper canvas{touch-action:pan-y !important}
+  /* Dragging the badge on a phone was starting a text selection instead —
+     the blue highlight ran across the whole section. Nothing here is text
+     worth selecting. */
+  .tb-sec{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  /* On touch there is no way to tell a drag from a scroll, so the badge
+     stops taking input and simply hangs: gestures pass through to the page
+     instead of fighting it. The drag stays on pointer devices. */
+  @media (hover:none){
+    #hm-lanyard-root{pointer-events:none}
+  }
+  .wf a,.wf [data-go]{color:rgba(255,255,255,.72);text-decoration:none;cursor:pointer;transition:color .25s}
+  .wf a:hover,.wf [data-go]:hover{color:#fff}
+
+  /* No scroll snapping — sections are shorter than the viewport, so snapping
+     grabbed the gesture instead of letting it run. scroll-behavior only affects
+     programmatic jumps (anchors, in-page links), never the wheel or trackpad. */
+  #hm-intro{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){
+    #hm-intro{scroll-behavior:auto}
+  }
+
+  /* Trusted by — content height, not 100vh, so it closes the page tight against
+     the footer. It used to sit under the header, where the strap read as hanging
+     from it; down here there is nothing above to hang from, so the top of the
+     canvas is faded instead (see #hm-lanyard-root) and the strap recedes out of
+     frame rather than ending on a hard cut. */
+  .tb-sec{min-height:0;display:flex;justify-content:center;padding:clamp(30px,5vh,58px) 0 clamp(32px,5vh,54px);box-sizing:border-box;background:#fff;color:#1a1a1a;overflow:hidden}
+  .tb-wrap{width:100%;display:flex;flex-direction:column;align-items:center}
+  /* Full-bleed canvas: the card is rendered inside it, so any narrower box
+     would clip the badge as soon as it is pulled sideways. Vertical field
+     of view is unchanged, so the card keeps its size. */
+  #hm-lanyard-root{position:relative;width:100%;height:clamp(360px,46vh,440px);
+      -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 clamp(38px,11%,72px));
+      mask-image:linear-gradient(180deg,transparent 0,#000 clamp(38px,11%,72px))}
+  .tb-label{margin-top:clamp(2px,.6vh,10px);font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:#8a8a8a}
+  .tb-marquee{width:100%;margin-top:clamp(14px,2.2vh,22px);overflow:hidden;
+              -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 7%,#000 93%,transparent 100%);
+              mask-image:linear-gradient(90deg,transparent 0,#000 7%,#000 93%,transparent 100%)}
+  .tb-track{display:flex;align-items:center;width:max-content;animation:mq 45s linear infinite}
+  .tb-marquee:hover .tb-track{animation-play-state:paused}
+  .tb-tile{flex:0 0 auto;width:clamp(118px,12vw,152px);margin-right:clamp(26px,3.4vw,54px);
+           height:clamp(30px,3.4vw,44px);display:flex;align-items:center;justify-content:center}
+  .tb-tile img{max-width:100%;max-height:100%;object-fit:contain}
+  .tb-tile a{display:flex;align-items:center;justify-content:center;width:100%;height:100%;
+             transition:opacity .2s}
+  .tb-tile a:hover{opacity:.55}
+
+  @media (max-width:900px){
+    .tb-sec{padding:clamp(26px,4.5vh,48px) 0 clamp(34px,6vh,58px)}
+    /* The 3D badge doesn't load on mobile at all (see the script gate near
+       the closing body tag) — touch can't drag it usefully, and downloading
+       three.js + rapier + a 2.4MB card model just to show a static badge
+       isn't worth it. Collapse its space so "Trusted by" doesn't sit under
+       a tall empty gap. */
+    #hm-lanyard-root{display:none}
+    .tb-tile{width:clamp(96px,26vw,124px);height:clamp(26px,7vw,36px);margin-right:clamp(22px,6vw,34px)}
+    .tb-track{animation-duration:32s}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .tb-track{animation:none}
+    .tb-marquee{overflow-x:auto}
+  }
+
+  /* The wordmark is one shared object across two pages, so its type lives in one
+     place. Right-aligned on desktop because the two lines have to keep an
+     identical shape while the pages hand it over mid-transition. */
+  .hm-wordmark{margin:0;font-weight:700;font-size:clamp(3rem,11vw,12.5rem);line-height:.8;
+               letter-spacing:-.05em;text-align:right;width:max-content;
+               transform-origin:left top}
+  #hm-name-row{flex:1;min-height:0;display:flex;justify-content:flex-end;align-items:flex-start;
+               padding-top:clamp(26px,6vh,72px)}
+  #hm-meta{display:flex;justify-content:space-between;align-items:flex-end;
+           gap:28px clamp(28px,6vw,80px);flex-wrap:wrap}
+  #hm-herotitle{margin-top:clamp(20px,4.5vh,44px)}
+  #hm-meta-bio{text-align:right;max-width:38ch}
+
+  /* Phone layout, after alitwotimes.com: a single left-aligned column — meta at
+     the top, wordmark centred and nearly full width, copy at the bottom. On that
+     site the wordmark sits in the same spot on both pages, so it has nowhere to
+     travel and the curtain does the whole transition. Same here. */
+  @media (max-width:700px){
+    /* Contact lives in the header on a phone, so repeating the address in the
+       hero is just a second copy of the same link. */
+    #hm-heroemail{display:none}
+    #hm-herotitle{margin-top:0}
+    #hm-nav > *, #hm-headname{padding:13px 6px;margin:-13px -6px}
+    #hm-navcontact{padding:13px 6px;margin-top:-13px;margin-bottom:-13px;margin-right:-6px}
+    .hm-wordmark{font-size:clamp(2.2rem,17vw,5rem)}
+    /* Name first, then Product Portfolio, then the bio. Centring the name left a
+       third of the About page empty above it — About has nothing to sit up there,
+       and its name is pinned to this one's height so the two stay level through
+       the transition. Lifting it here fixes both pages at once. */
+    #hm-meta{display:contents}
+    #hm-name-row{order:1;flex:0 0 auto;justify-content:center;align-items:flex-start;
+                 padding-top:clamp(30px,9vh,90px)}
+    /* The free space goes above Product Portfolio rather than between it and the
+       bio, so the two sit together as one block at the foot of the screen. */
+    #hm-meta-left{order:2;margin-top:auto}
+    #hm-meta-bio{order:3;margin-top:clamp(18px,3vh,34px);text-align:left;max-width:none}
+  }
+
+  /* About. The name's top is synced from the home hero at runtime, so the move
+     between the two pages stays level whatever the viewport does to the type. */
+  #hm-abt-hero{position:relative;min-height:100vh;min-height:100dvh;box-sizing:border-box}
+  #hm-abt-left{position:absolute;left:clamp(22px,5vw,80px);top:0;z-index:2}
+  /* The copy holds the right half — the side the name just left — and starts on
+     the name's own top line, so the two read as one spread. */
+  #hm-abt-copy{position:absolute;top:0;right:clamp(22px,5vw,80px);width:min(54ch,42vw);z-index:2;
+               font-weight:500;font-size:clamp(.92rem,1.02vw,1.02rem);line-height:1.72;text-wrap:pretty;
+               color:rgba(245,245,247,.72)}
+  #hm-abt-copy p{margin:0 0 1.15em}
+  #hm-abt-copy p:last-child{margin-bottom:0}
+  #hm-abt-copy .lede{font-size:clamp(1.15rem,1.7vw,1.55rem);font-weight:700;letter-spacing:-.02em;line-height:1.25;margin-bottom:1.4em;color:#fff}
+  #hm-abt-copy .close{font-weight:700;color:#fff}
+  @media (max-width:900px){
+    /* Two columns will not fit a phone, so the copy drops under the name. Its
+       top is measured off the name rather than guessed. */
+    #hm-abt-left{right:clamp(22px,5vw,80px)}
+    #hm-abt-copy{left:clamp(22px,5vw,80px);right:clamp(22px,5vw,80px);width:auto}
+  }
+
+  /* The reach band. Label in the left gutter, the figure filling the column to
+     a flush right edge, caption under it. The figure is sized at runtime off
+     its final string so the digits never resize mid-count. */
+  #hm-abt-stat{position:relative;box-sizing:border-box;
+               padding:clamp(44px,6.5vh,86px) clamp(22px,5vw,80px) clamp(64px,12vh,130px)}
+  #hm-abt-stat .st-label{position:absolute;left:clamp(22px,5vw,80px);top:clamp(44px,6.5vh,86px);
+      font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;
+      text-transform:uppercase;color:#f5f5f7;white-space:nowrap}
+  #hm-abt-stat .st-rule{display:block;width:20px;height:1.5px;background:#f5f5f7;margin-top:11px}
+  #hm-abt-stat .st-fig{margin-left:clamp(112px,16vw,250px);text-align:right;white-space:nowrap;
+      font-weight:700;line-height:.88;letter-spacing:-.045em;color:#fff;
+      font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+  /* Two tabular digits' worth of slot, so "million" holds still while the
+     number ticks from one digit to two. */
+  #hm-abt-stat .st-fig .num{display:inline-block;min-width:2ch;text-align:right}
+  #hm-abt-stat .st-cap{margin-top:clamp(20px,3.2vh,36px);text-align:right;
+      font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.14em;
+      text-transform:uppercase;color:#f5f5f7}
+  @media (max-width:900px){
+    #hm-abt-stat .st-label{position:static}
+    #hm-abt-stat .st-fig{margin-left:0;margin-top:clamp(22px,4.5vh,40px)}
+  }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.3.1",
+    "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
+    "react-dom": "https://esm.sh/react-dom@18.3.1",
+    "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
+    "three": "https://esm.sh/three@0.169.0",
+    "@react-three/fiber": "https://esm.sh/@react-three/fiber@8.17.10?external=react,react-dom,three",
+    "@react-three/drei": "https://esm.sh/@react-three/drei@9.114.3?external=react,react-dom,three,@react-three/fiber",
+    "@react-three/rapier": "https://esm.sh/@react-three/rapier@1.5.0?external=react,react-dom,three,@react-three/fiber",
+    "meshline": "https://esm.sh/meshline@3.3.1?external=three",
+    "htm": "https://esm.sh/htm@3.1.1"
+  }
+}
+</script>
+</head>
+<body>
+
+<div id="hm-stage" data-screen-label="Home" style="position:relative;height:100vh;height:100dvh;overflow:hidden;background:#fff;transition:background .35s ease">
+
+  <div id="hm-head" data-screen-label="Header" style="position:absolute;top:0;left:0;right:0;z-index:5;background:#fff;transition:background .3s;display:flex;justify-content:space-between;align-items:center;gap:18px;padding:20px clamp(22px,6vw,96px)">
+    <span id="hm-headname" data-go="intro" data-ch="name" style="cursor:pointer;font-weight:700;font-size:1rem;letter-spacing:-.02em;white-space:nowrap;color:#1a1a1a;opacity:0;pointer-events:none;transition:opacity .3s,color .3s">Michael Hanna</span>
+    <!-- Work and About travel together on the left, sitting after the wordmark
+         when it is showing; Contact holds the right edge on every page. -->
+    <span id="hm-nav" style="margin-left:clamp(16px,3vw,30px);display:flex;gap:clamp(16px,3vw,30px);font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;transition:transform .3s cubic-bezier(.22,1,.36,1)">
+      <span id="hm-navwork" data-go="work" data-ch="link" style="cursor:pointer;color:#1a1a1a;transition:color .3s;white-space:nowrap">Work</span>
+      <span id="hm-navabout" data-go="about" data-ch="link" style="cursor:pointer;color:#1a1a1a;transition:color .3s;white-space:nowrap">About me</span>
+    </span>
+    <a id="hm-navcontact" href="mailto:Michaelhannafarag@gmail.com" target="_blank" rel="noopener noreferrer" data-ch="link" style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:#1a1a1a;transition:color .3s;white-space:nowrap">Contact</a>
+  </div>
+
+  <div id="hm-intro" data-screen-label="Intro" style="position:absolute;inset:0;z-index:2;background:#fff;overflow-y:auto;overflow-x:hidden;transition:opacity .35s,visibility .35s">
+    <div id="hm-scene1" style="height:100%;display:flex;flex-direction:column;justify-content:space-between;padding:clamp(64px,10vh,92px) clamp(22px,5vw,80px) clamp(60px,9vh,90px);box-sizing:border-box">
+    <div id="hm-name-row">
+      <h1 id="hm-big" class="hm-wordmark" data-ch="name" style="color:#1a1a1a">Michael <br>Hanna</h1>
+    </div>
+    <div id="hm-meta">
+      <div id="hm-meta-left">
+        <a id="hm-heroemail" href="mailto:Michaelhannafarag@gmail.com" style="font-size:.95rem;font-weight:500;text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:1px" target="_blank" rel="noopener noreferrer">Michaelhannafarag@gmail.com</a>
+        <div id="hm-herotitle" style="font-weight:700;font-size:clamp(1.8rem,3.8vw,3.3rem);line-height:.98;letter-spacing:-.035em">Product<br>Portfolio 2020<span style="font-size: 0.4em; vertical-align: super;">©</span></div>
+      </div>
+      <div id="hm-meta-bio">
+      <p id="hm-hero" style="margin:14px 0 0;font-weight:500;font-size:clamp(.84rem,1.02vw,.98rem);line-height:1.6;transition:color .3s;text-wrap:pretty">Michael Hanna is a product manager from Madrid. He has shipped a $2B digital bank, BNPL used by two million people, and guest platforms for giga-projects in the Middle East.</p>
+      </div>
+    </div>
+    </div>
+  <div id="hm-work" data-screen-label="The Work" style="background:#fff">
+    <div data-screen-label="Work — opener" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:clamp(44px,8vh,84px) clamp(22px,6vw,44px) clamp(26px,4.2vh,46px);box-sizing:border-box">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:#8a8a8a">01 — 03</div>
+      <h2 style="margin:14px 0 0;font-weight:700;font-size:clamp(2.4rem,5.6vw,4.6rem);letter-spacing:-.035em;line-height:1.02">Selected Products.</h2>
+      <div style="margin-top:14px;font-size:clamp(.95rem,1.4vw,1.15rem);color:#8a8a8a">Three products. Three impossible timelines.</div>
+    </div>
+    <a data-screen-label="Work — Openbank" href="case-study-openbank.html" target="_blank" rel="noopener noreferrer" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:clamp(44px,6.5vh,78px) clamp(22px,6vw,44px);box-sizing:border-box;color:inherit;text-decoration:none">
+      <div style="font-weight:700;font-size:clamp(1.9rem,4.4vw,3.6rem);letter-spacing:-.035em;line-height:1.08">Two billion dollars.<br>Ten weeks.</div>
+      <div style="margin-top:12px;font-size:clamp(.95rem,1.3vw,1.1rem);color:#8a8a8a">Openbank USA. Fifty states, day one.</div>
+      <div style="width:min(620px,88vw);height:clamp(230px,36vh,350px);margin-top:clamp(24px,4.5vh,40px)"><img src="assets/openbank-billboards.jpg" alt="Openbank out-of-home campaign on two Manhattan billboards" style="width:100%;height:100%;object-fit:cover;border-radius:18px;display:block"></div>
+      <div style="margin-top:clamp(18px,3vh,26px);font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:#1D1AEA">Read the case →</div>
+    </a>
+    <div data-screen-label="Work — Zinia" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:clamp(44px,6.5vh,78px) clamp(22px,6vw,44px);box-sizing:border-box">
+      <div style="font-weight:700;font-size:clamp(1.9rem,4.4vw,3.6rem);letter-spacing:-.035em;line-height:1.08">Two million users.<br>Before the name.</div>
+      <div style="margin-top:12px;font-size:clamp(.95rem,1.3vw,1.1rem);color:#8a8a8a">Zinia. Chosen by Apple and Amazon at checkout.</div>
+      <div style="width:min(620px,88vw);height:clamp(230px,36vh,350px);margin-top:clamp(24px,4.5vh,40px)"><img src="assets/zinia-amazon-visa.jpg" alt="Amazon Visa card issued with Zinia by Santander" style="width:100%;height:100%;object-fit:cover;border-radius:18px;display:block"></div>
+      <div style="margin-top:clamp(18px,3vh,26px);font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:#b5b5b5">case study — soon</div>
+    </div>
+    <div data-screen-label="Work — Qiddiya" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:clamp(44px,6.5vh,78px) clamp(22px,6vw,44px);box-sizing:border-box">
+      <div style="font-weight:700;font-size:clamp(1.9rem,4.4vw,3.6rem);letter-spacing:-.035em;line-height:1.08">A city on paper.<br>An OS in a pocket.</div>
+      <div style="margin-top:12px;font-size:clamp(.95rem,1.3vw,1.1rem);color:#8a8a8a">Six Flags Qiddiya. 330 km², shipped for gate-open.</div>
+      <div style="width:min(620px,88vw);height:clamp(230px,36vh,350px);margin-top:clamp(24px,4.5vh,40px)"><img src="assets/qiddiya-park.jpg" alt="Six Flags Qiddiya City park at dusk" style="width:100%;height:100%;object-fit:cover;border-radius:18px;display:block"></div>
+      <div style="margin-top:clamp(18px,3vh,26px);font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:#b5b5b5">case study — soon</div>
+    </div>
+    <div data-screen-label="Work — Trusted by" class="tb-sec">
+      <div class="tb-wrap">
+        <div id="hm-lanyard-root"></div>
+        <div class="tb-label">Trusted by</div>
+        <div class="tb-marquee">
+          <div class="tb-track">
+            <div class="tb-tile" data-card="santander"><a href="https://www.santander.com" target="_blank" rel="noopener noreferrer"><img src="lanyard/logos/santander.png" alt="Santander"></a></div>
+            <div class="tb-tile" data-card="openbank"><a href="https://www.openbank.us" target="_blank" rel="noopener noreferrer"><img src="lanyard/logos/openbank.svg" alt="Openbank"></a></div>
+            <div class="tb-tile" data-card="ikea"><a href="https://www.ikea.com" target="_blank" rel="noopener noreferrer"><img src="assets/logo-ikea.png" alt="IKEA"></a></div>
+            <div class="tb-tile" data-card="globant"><a href="https://www.globant.com" target="_blank" rel="noopener noreferrer"><img src="lanyard/logos/globant.svg" alt="Globant"></a></div>
+            <div class="tb-tile" data-card="sixflags"><a href="https://sixflagsqiddiyacity.com" target="_blank" rel="noopener noreferrer"><img src="lanyard/logos/sixflags-lockup.png" alt="Six Flags Qiddiya City"></a></div>
+            <div class="tb-tile" data-card="mab"><a href="https://www.mortgageadvicebureau.com" target="_blank" rel="noopener noreferrer"><img src="lanyard/logos/mab.svg" alt="Mortgage Advice Bureau"></a></div>
+            <div class="tb-tile" data-card="noon"><a href="https://www.noon.com" target="_blank" rel="noopener noreferrer"><img src="lanyard/logos/noon.svg" alt="Noon"></a></div>
+            <div class="tb-tile" data-card="hanzo"><a href="https://hanzo.es" target="_blank" rel="noopener noreferrer"><img src="lanyard/logos/hanzo.png" alt="Hanzo"></a></div>
+            <div class="tb-tile"><a href="https://aib.ie" target="_blank" rel="noopener noreferrer"><img src="assets/logo-aib.png" alt="AIB"></a></div>
+            <div class="tb-tile" data-card="santander" aria-hidden="true"><a href="https://www.santander.com" target="_blank" rel="noopener noreferrer" tabindex="-1"><img src="lanyard/logos/santander.png" alt=""></a></div>
+            <div class="tb-tile" data-card="openbank" aria-hidden="true"><a href="https://www.openbank.us" target="_blank" rel="noopener noreferrer" tabindex="-1"><img src="lanyard/logos/openbank.svg" alt=""></a></div>
+            <div class="tb-tile" data-card="ikea" aria-hidden="true"><a href="https://www.ikea.com" target="_blank" rel="noopener noreferrer" tabindex="-1"><img src="assets/logo-ikea.png" alt=""></a></div>
+            <div class="tb-tile" data-card="globant" aria-hidden="true"><a href="https://www.globant.com" target="_blank" rel="noopener noreferrer" tabindex="-1"><img src="lanyard/logos/globant.svg" alt=""></a></div>
+            <div class="tb-tile" data-card="sixflags" aria-hidden="true"><a href="https://sixflagsqiddiyacity.com" target="_blank" rel="noopener noreferrer" tabindex="-1"><img src="lanyard/logos/sixflags-lockup.png" alt=""></a></div>
+            <div class="tb-tile" data-card="mab" aria-hidden="true"><a href="https://www.mortgageadvicebureau.com" target="_blank" rel="noopener noreferrer" tabindex="-1"><img src="lanyard/logos/mab.svg" alt=""></a></div>
+            <div class="tb-tile" data-card="noon" aria-hidden="true"><a href="https://www.noon.com" target="_blank" rel="noopener noreferrer" tabindex="-1"><img src="lanyard/logos/noon.svg" alt=""></a></div>
+            <div class="tb-tile" data-card="hanzo" aria-hidden="true"><a href="https://hanzo.es" target="_blank" rel="noopener noreferrer" tabindex="-1"><img src="lanyard/logos/hanzo.png" alt=""></a></div>
+            <div class="tb-tile" aria-hidden="true"><a href="https://aib.ie" target="_blank" rel="noopener noreferrer" tabindex="-1"><img src="assets/logo-aib.png" alt=""></a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer data-dark="" class="wf" data-screen-label="Work — footer" style="background:#000;color:#fff;box-sizing:border-box;padding:clamp(28px,4.5vh,54px) 0 0;overflow:hidden">
+      <div style="width:100%;max-width:1040px;margin:0 auto;padding:0 clamp(22px,6vw,44px);box-sizing:border-box">
+        <div style="display:flex;flex-wrap:wrap;justify-content:flex-end;gap:10px clamp(16px,3vw,24px);font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase">
+          <span data-go="about">About me</span>
+          <span data-go="lab">After hours</span>
+        </div>
+      </div>
+      <div data-go="intro" style="cursor:pointer;margin-top:clamp(16px,2.6vh,34px)">
+        <span class="wf-mark" style="display:block;color:#fff;font-weight:700;font-size:14.4vw;line-height:1;letter-spacing:-.055em;white-space:nowrap;text-align:center">Michael Hanna</span>
+      </div>
+    </footer>
+  </div>
+  </div>
+
+  <!-- About me. The name lands on the side opposite the home page's; its size
+       and its vertical position are synced from the home hero at runtime, so the
+       move between the two pages is a pure horizontal line. Alignment stays
+       right in both places — the two lines have to keep the same shape or the
+       name would visibly jump as the curtain edge crosses it. -->
+  <div id="hm-about" data-screen-label="About me" style="position:absolute;inset:0;z-index:3;background:#0c0c0e;color:#f5f5f7;opacity:0;visibility:hidden;pointer-events:none;overflow-y:auto;overflow-x:hidden">
+    <div id="hm-abt-hero">
+      <div id="hm-abt-left">
+        <h1 id="hm-abtname" class="hm-wordmark" style="color:#fff">Michael <br>Hanna</h1>
+      </div>
+      <div id="hm-abt-copy">
+        <p class="lede">I’ve always lived between worlds.</p>
+        <p>With roots in the Mediterranean and family scattered across Europe and North America, I grew up navigating different cultures, perspectives, and ways of thinking. That early exposure taught me how to read between the lines, adapt with ease, and build with empathy. It shaped how I listen, how I solve problems, and how I lead.</p>
+        <p>Today, I’m a Product Manager working at the edge of finance, design, and technology. I’ve helped launch digital banks from scratch, shaped buy-now-pay-later platforms trusted by millions, built guest platforms for giga-projects in the Middle East, and partnered with top creative studios to craft experiences that feel seamless, both physically and digitally.</p>
+        <p>I thrive in the in between, where strategy meets uncertainty, and vision needs clarity. Whether I’m defining roadmaps, aligning teams, or breaking down complexity into something people love to use, I bring a balance of structure, curiosity, and intent with one goal:</p>
+        <p class="close">Building products that feel human, no matter how complex they are underneath.</p>
+      </div>
+    </div>
+
+    <section id="hm-abt-stat" data-screen-label="About — reach">
+      <div class="st-label">Combined reach<span class="st-rule"></span></div>
+      <div class="st-fig"><span id="hm-stat-num" class="num">0</span> million</div>
+      <div class="st-cap">People using products I’ve worked on, across every company</div>
+    </section>
+  </div>
+
+  <div id="hm-lab" data-screen-label="The Lab" style="position:absolute;inset:0;background:#111;color:#fff;opacity:0;visibility:hidden;pointer-events:none;overflow-y:auto;transition:opacity .35s,visibility .35s">
+    <div style="max-width:840px;margin:0 auto;padding:clamp(84px,14vh,140px) clamp(22px,6vw,44px) clamp(84px,12vh,130px);box-sizing:border-box">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:#D7FF3F">AI side quests · no committee</div>
+      <h2 style="margin:16px 0 0;font-family:'Archivo Black',sans-serif;font-weight:400;font-size:clamp(2rem,6.4vw,4.6rem);line-height:1.02">SAME BRAIN,<br><span style="color:#D7FF3F">LOOSER</span> <span style="color:#FF4D00">TIE.</span></h2>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:clamp(20px,3.6vh,32px)">
+        <span style="border:1.5px solid #D7FF3F;color:#D7FF3F;border-radius:999px;padding:6px 16px;font-size:.85rem;white-space:nowrap;transform:rotate(-2deg)">prompt toys</span>
+        <span style="border:1.5px solid #FF4D00;color:#FF4D00;border-radius:999px;padding:6px 16px;font-size:.85rem;white-space:nowrap;transform:rotate(1.5deg)">agents</span>
+        <span style="border:1.5px solid #fff;color:#fff;border-radius:999px;padding:6px 16px;font-size:.85rem;white-space:nowrap;transform:rotate(-1deg)">weird demos</span>
+      </div>
+      <p style="margin:clamp(22px,4vh,36px) 0 0;max-width:52ch;font-size:clamp(.98rem,1.3vw,1.1rem);color:rgba(255,255,255,.75)">AI products I design, build and ship myself — real users, honest post-mortems, zero stakeholders. This is where I stay fast enough to deserve the day job.</p>
+      <div style="overflow:hidden;margin:clamp(24px,4.4vh,40px) calc(-1*clamp(22px,6vw,44px)) 0;border-top:1.5px solid #D7FF3F;border-bottom:1.5px solid #D7FF3F">
+        <div id="hm-mq" style="display:inline-flex;white-space:nowrap;font-family:'Archivo Black',sans-serif;font-size:.8rem;color:#D7FF3F;padding:9px 0">
+          <span style="padding-right:28px">SHIPPED WEEKLY ✦ BUILT AT 1AM ✦ NO ROADMAP ✦ SHIPPED WEEKLY ✦ BUILT AT 1AM ✦ NO ROADMAP ✦&nbsp;</span>
+          <span style="padding-right:28px">SHIPPED WEEKLY ✦ BUILT AT 1AM ✦ NO ROADMAP ✦ SHIPPED WEEKLY ✦ BUILT AT 1AM ✦ NO ROADMAP ✦&nbsp;</span>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-top:clamp(28px,5vh,48px)">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.45)">Projects docking here soon — currently in flight · <a href="mailto:Michaelhannafarag@gmail.com" target="_blank" rel="noopener noreferrer" style="color:#D7FF3F">want in early? →</a></span>
+        <span data-go="intro" style="cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:#D7FF3F">↩ back to the day job</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script src="script.js?v=49"></script>
+<script>
+  // Lanyard is web-only: it's a heavy WebGL scene (three.js + rapier physics
+  // + a 2.4MB card model) built around a pointer drag that touch can't
+  // reproduce well (see the .tb-sec comments above). Rather than ship that
+  // payload to mobile just to show a badge people can't usefully interact
+  // with, gate the module load itself on the same 900px breakpoint the rest
+  // of this section already treats as "mobile" — nothing downloads there.
+  if (window.matchMedia('(min-width: 901px)').matches) {
+    const s = document.createElement('script');
+    s.type = 'module';
+    s.src = 'lanyard/lanyard.js?v=29';
+    document.body.appendChild(s);
+  }
+</script>
+</body>
+</html>

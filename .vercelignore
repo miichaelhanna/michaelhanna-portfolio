@@ -1,0 +1,5 @@
+# gstack working files — contains local tokens and browse logs, never deploy
+.gstack/
+# local env / Vercel OIDC token
+.env*.local
+.env
