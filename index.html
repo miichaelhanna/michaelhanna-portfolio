@@ -46,11 +46,25 @@
   .tb-wrap{width:100%;display:flex;flex-direction:column;align-items:center}
   /* Full-bleed canvas: the card is rendered inside it, so any narrower box
      would clip the badge as soon as it is pulled sideways. Vertical field
-     of view is unchanged, so the card keeps its size. */
-  #hm-lanyard-root{position:relative;width:100%;height:clamp(360px,46vh,440px);
+     of view is unchanged, so the card keeps its size. #hm-lanyard-root is
+     React-owned (createRoot renders straight into it), so the hint lives on
+     a sibling inside this wrapper instead of as a static child that a
+     render would wipe out. */
+  .lanyard-stage{position:relative;width:100%;height:clamp(360px,46vh,440px)}
+  #hm-lanyard-root{position:absolute;inset:0;
       -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 clamp(38px,11%,72px));
       mask-image:linear-gradient(180deg,transparent 0,#000 clamp(38px,11%,72px))}
   .tb-label{margin-top:clamp(2px,.6vh,10px);font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:#8a8a8a}
+  /* Sits right where the card hangs at rest, arrow pointing back at it, so
+     the affordance reads as pointing at the thing to grab rather than
+     floating in a corner. Fades out for good the first time it's dragged
+     (see lanyard.js) — once found, it doesn't need to keep asking. */
+  .lanyard-hint{position:absolute;left:calc(50% + clamp(70px,9vw,100px));top:63%;
+      transform:translateY(-50%);font-family:'IBM Plex Mono',monospace;font-size:.62rem;
+      letter-spacing:.16em;text-transform:lowercase;color:rgba(26,26,26,.42);
+      pointer-events:none;z-index:1;transition:opacity .4s ease}
+  .lanyard-hint.is-hidden{opacity:0}
+  @media (max-width:900px){.lanyard-hint{display:none}}
   .tb-marquee{width:100%;margin-top:clamp(14px,2.2vh,22px);overflow:hidden;
               -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 7%,#000 93%,transparent 100%);
               mask-image:linear-gradient(90deg,transparent 0,#000 7%,#000 93%,transparent 100%)}
@@ -70,7 +84,7 @@
        three.js + rapier + a 2.4MB card model just to show a static badge
        isn't worth it. Collapse its space so "Trusted by" doesn't sit under
        a tall empty gap. */
-    #hm-lanyard-root{display:none}
+    .lanyard-stage{display:none}
     .tb-tile{width:clamp(96px,26vw,124px);height:clamp(26px,7vw,36px);margin-right:clamp(22px,6vw,34px)}
     .tb-track{animation-duration:32s}
   }
@@ -325,7 +339,10 @@
     </div>
     <div data-screen-label="Work — Trusted by" class="tb-sec">
       <div class="tb-wrap">
-        <div id="hm-lanyard-root"></div>
+        <div class="lanyard-stage">
+          <div id="hm-lanyard-root"></div>
+          <span class="lanyard-hint" aria-hidden="true">← drag</span>
+        </div>
         <div class="tb-label">Trusted by</div>
         <div class="tb-marquee">
           <div class="tb-track">

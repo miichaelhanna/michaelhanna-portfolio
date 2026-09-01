@@ -193,6 +193,31 @@ function Band({
     }
   }, [hovered, dragged]);
 
+  // Once the badge has actually been grabbed, the "← drag" label has done its
+  // job — fade it out for good rather than leaving it pointing at a card the
+  // visitor is now holding.
+  const hideHint = () => {
+    const hint = document.querySelector('.lanyard-hint');
+    if (hint) hint.classList.add('is-hidden');
+  };
+
+  // A one-time nudge a couple seconds after the card settles from its initial
+  // drop — a small tug and spin, just enough to read as "this moves", so the
+  // drag invites itself instead of waiting to be found. Skipped once the
+  // visitor has actually grabbed the card, and never fires twice.
+  const interacted = useRef(false);
+  useEffect(() => {
+    if (isMobile || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+    const t = setTimeout(() => {
+      if (interacted.current || !card.current) return;
+      interacted.current = true;
+      card.current.wakeUp();
+      card.current.applyImpulse({ x: 0.55, y: 0.08, z: 0.35 }, true);
+      card.current.applyTorqueImpulse({ x: 0, y: 0.3, z: 0.07 }, true);
+    }, 2200);
+    return () => clearTimeout(t);
+  }, [isMobile]);
+
   useFrame((state, delta) => {
     if (dragged) {
       vec.set(state.pointer.x, state.pointer.y, 0.5).unproject(state.camera);
@@ -250,6 +275,8 @@ function Band({
             onPointerUp=${e => (e.target.releasePointerCapture(e.pointerId), drag(false))}
             onPointerDown=${e => (
               e.target.setPointerCapture(e.pointerId),
+              interacted.current = true,
+              hideHint(),
               drag(new THREE.Vector3().copy(e.point).sub(vec.copy(card.current.translation())))
             )}
           >
