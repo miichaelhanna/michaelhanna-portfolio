@@ -99,23 +99,41 @@ document.addEventListener('DOMContentLoaded', () => {
   // quick through the middle. Both names are tweened together, which puts them
   // at the same screen x every frame: what you see is one name changing colour
   // as the curtain edge crosses it.
+  //
+  // The tween used to be a requestAnimationFrame loop writing style.transform
+  // and style.clipPath every frame. Chrome rendered that fine; Safari did not —
+  // WebKit composites per-frame JS style writes out of step with each other, so
+  // the curtain moved while both names sat frozen at their resting positions,
+  // reading as two misaligned copies of the wordmark. Driving the same
+  // keyframes through the Web Animations API hands the whole tween to the
+  // browser's own animation engine, which every engine keeps in sync.
   const NAV_MS = 1500;
+  // The same expo in-out shape the rAF loop computed, as a bezier the
+  // animation engine understands.
+  const NAV_EASE = 'cubic-bezier(0.87, 0, 0.13, 1)';
   const expoIO = p => p <= 0 ? 0 : p >= 1 ? 1
     : p < .5 ? Math.pow(2, 20 * p - 10) / 2
              : (2 - Math.pow(2, -20 * p + 10)) / 2;
+  // When the eased progress passes a given fraction of the screen — solved
+  // numerically since the curve doesn't invert in closed form. Used to fire
+  // the nav ink swap at the moment the curtain edge actually crosses the nav.
+  const timeAtProgress = target => {
+    let lo = 0, hi = 1;
+    for (let i = 0; i < 24; i++) {
+      const mid = (lo + hi) / 2;
+      if (expoIO(mid) < target) lo = mid; else hi = mid;
+    }
+    return ((lo + hi) / 2) * NAV_MS;
+  };
   const still = matchMedia('(prefers-reduced-motion:reduce)');
-  // will-change is a hint for the duration of an animation, not a permanent
-  // setting. Left on, it keeps both wordmarks on their own compositor layers for
-  // the life of the page — and on iOS a promoted layer inside an overflow
-  // scroller can be composited out of step with the content, so the name appears
-  // to hang in place while the page slides past it. Promote for the tween only.
-  // Home centres "Hanna" under "Michael"; About runs it flush left. Left alone
-  // that makes the two wordmarks different shapes, and the second line would jump
-  // sideways the instant the curtain edge crossed it. Both second lines are
-  // tweened to the same place every frame instead, so it slides into its new
-  // alignment as part of the move.
+  // Home centres "Hanna" under "Michael"; About runs both flush left. Left
+  // alone that makes the two wordmarks different shapes, and the second line
+  // would jump sideways the instant the curtain edge crossed it. Both second
+  // lines are tweened to the same place instead, so the line slides into its
+  // new alignment as part of the move.
+  const l2El = h => h && h.querySelector('.wm-l2');
   const l2Of = h => {
-    const l2 = h && h.querySelector('.wm-l2');
+    const l2 = l2El(h);
     if (!l2 || !h) return 0;
     const keep = l2.style.transform;
     l2.style.transform = 'none';
@@ -123,25 +141,16 @@ document.addEventListener('DOMContentLoaded', () => {
     l2.style.transform = keep;
     return o;
   };
-  const l2Set = (h, x) => {
-    const l2 = h && h.querySelector('.wm-l2');
-    if (l2) l2.style.transform = x == null ? '' : 'translateX(' + x + 'px)';
+  // One WAAPI animation per moving part, all sharing duration + easing so
+  // they stay in lockstep. Resolves when the set finishes; the caller then
+  // commits final styles and cancels the animations.
+  const animateNav = parts => {
+    const opts = { duration: still.matches ? 0 : NAV_MS, easing: NAV_EASE, fill: 'forwards' };
+    const anims = parts
+      .filter(([el]) => el)
+      .map(([el, prop, fromV, toV]) => el.animate([{ [prop]: fromV }, { [prop]: toV }], opts));
+    return Promise.all(anims.map(a => a.finished.catch(() => {}))).then(() => anims);
   };
-  const promote = (a, b, on) => [a, b].forEach(el => {
-    if (el) el.style.willChange = on ? 'transform' : '';
-  });
-  const tween = (ms, step) => new Promise(done => {
-    const t0 = performance.now();
-    const frame = t => {
-      const p = Math.min(1, (t - t0) / ms);
-      step(expoIO(p));
-      p < 1 ? requestAnimationFrame(frame) : done();
-    };
-    requestAnimationFrame(frame);
-  });
-  const run = step => still.matches
-    ? Promise.resolve().then(() => step(1))
-    : tween(NAV_MS, step);
 
   // The About name hangs off the home name's height, so the travel is level.
   // hm-big's viewport top plus the intro's scroll is its y with the intro at 0.
@@ -218,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // detour, so from down there the curtain runs alone.
     const travel = from.layer.scrollTop < from.layer.clientHeight * .5;
     if (travel) from.layer.scrollTo({ top: 0, behavior: 'instant' });
-    setT(false); resetHover(); headClear(); promote(from.name, to.name, true);
+    setT(false); resetHover(); headClear();
     syncAbout();
     to.layer.style.visibility = 'visible'; to.layer.style.opacity = 1;
     to.layer.style.pointerEvents = 'auto'; to.layer.style.zIndex = 4;
@@ -227,23 +236,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // Arriving somewhere uses that page's own fixed side; arriving back home
     // reverses whichever side is being left.
     const fromLeft = toKey === 'intro' ? !from.fromLeft : to.fromLeft;
-    const cross = navCross(fromLeft);
     const oH = l2Of(from.name), oP = l2Of(to.name);
-    let swapped = false;
-    const step = e => {
-      const P = oH + (oP - oH) * e;
-      l2Set(from.name, P - oH); l2Set(to.name, P - oP);
-      to.layer.style.clipPath = wipe(fromLeft, e);
-      to.name.style.transform = 'translateX(' + (dx * (1 - e)) + 'px)';
-      from.name.style.transform = 'translateX(' + (-dx * e) + 'px)';
-      if (!swapped && e > cross) { swapped = true; paintNav(toKey); navInk(toKey !== 'intro'); }
-    };
-    step(0);
-    run(step).then(() => {
+    // Nav ink swaps when the curtain edge actually reaches the nav, not at a
+    // fixed halfway mark.
+    const inkAt = setTimeout(() => { paintNav(toKey); navInk(toKey !== 'intro'); },
+      still.matches ? 0 : timeAtProgress(navCross(fromLeft)));
+    animateNav([
+      [to.layer, 'clipPath', wipe(fromLeft, 0), wipe(fromLeft, 1)],
+      [to.name, 'transform', 'translateX(' + dx + 'px)', 'translateX(0px)'],
+      [from.name, 'transform', 'translateX(0px)', 'translateX(' + (-dx) + 'px)'],
+      [l2El(from.name), 'transform', 'translateX(0px)', 'translateX(' + (oP - oH) + 'px)'],
+      [l2El(to.name), 'transform', 'translateX(' + (oH - oP) + 'px)', 'translateX(0px)']
+    ]).then(anims => {
+      clearTimeout(inkAt);
+      paintNav(toKey); navInk(toKey !== 'intro');
       to.layer.style.clipPath = 'none'; to.layer.style.zIndex = toKey === 'intro' ? 2 : 3;
       headSettle(toKey);
       to.name.style.transform = ''; from.name.style.transform = '';
-      l2Set(from.name, null); l2Set(to.name, null); promote(from.name, to.name, false);
+      const fl2 = l2El(from.name), tl2 = l2El(to.name);
+      if (fl2) fl2.style.transform = ''; if (tl2) tl2.style.transform = '';
+      anims.forEach(a => a.cancel());
       Object.keys(NODES).forEach(k => { if (k !== toKey) shw(NODES[k].layer, false); });
       setMode(toKey);
       navBusy = false;
@@ -482,6 +494,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (mode === 'intro') { wasDark = null; paintChrome(); }
     else setChromeFor(mode);
   });
+
+  // TEMP: auto-cycles the page transition for cross-browser verification.
+  if (location.search.includes('transition-test')) {
+    const cycle = ['about', 'intro', 'lab', 'intro'];
+    let ci = 0;
+    setInterval(() => { nav(cycle[ci]); ci = (ci + 1) % cycle.length; }, 4000);
+  }
 
   // Work footer's headline word alternates between what someone might be
   // reaching out for.
