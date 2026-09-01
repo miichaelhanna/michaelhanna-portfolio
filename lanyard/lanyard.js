@@ -171,43 +171,6 @@ function Band({
     prevMap.current = cardMap;
   }, [cardMap, materials.base.map]);
 
-  // The card is unlit and most faces are white, so on a white page it would
-  // have no edge at all. A soft contact shadow behind it does the separating —
-  // what a physical badge casts, without reintroducing reflections.
-  //
-  // The shadow plane is oversized versus the card (see below) so a halo can
-  // peek out past its silhouette — but the opaque rect drawn here has to
-  // actually reach that halo band before blur softens it. A rect padded
-  // this far in stayed entirely inside the card's own footprint, so all
-  // that ever showed was the blur's already-faded tail: invisible in
-  // practice. Padding it much less means real shadow, not just tail,
-  // extends past the card edge.
-  const shadowTex = useMemo(() => {
-    const W = 256, H = 358;                       // card aspect, so the blur isn't stretched
-    const c = document.createElement('canvas');
-    c.width = W; c.height = H;
-    const x = c.getContext('2d');
-    x.filter = 'blur(18px)';
-    x.fillStyle = 'rgba(18,18,24,.45)';
-    const p = 14;
-    x.beginPath();
-    x.roundRect(p, p, W - p * 2, H - p * 2, 26);
-    x.fill();
-    const t = new THREE.CanvasTexture(c);
-    t.colorSpace = THREE.SRGBColorSpace;
-    t.needsUpdate = true;
-    return t;
-  }, []);
-
-  // Match the shadow to the card mesh's own bounds rather than guessing.
-  const shadow = useMemo(() => {
-    const g = nodes.card.geometry;
-    g.computeBoundingBox();
-    const c = g.boundingBox.getCenter(new THREE.Vector3());
-    const s = g.boundingBox.getSize(new THREE.Vector3());
-    return { pos: [c.x, c.y - 0.035, c.z - 0.045], size: [s.x * 1.42, s.y * 1.30] };
-  }, [nodes.card.geometry]);
-
   const [curve] = useState(
     () =>
       new THREE.CatmullRomCurve3([new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()])
@@ -290,10 +253,6 @@ function Band({
               drag(new THREE.Vector3().copy(e.point).sub(vec.copy(card.current.translation())))
             )}
           >
-            <mesh position=${shadow.pos} renderOrder=${-1}>
-              <planeGeometry args=${shadow.size} />
-              <meshBasicMaterial map=${shadowTex} transparent=${true} depthWrite=${false} toneMapped=${false} />
-            </mesh>
             <mesh geometry=${nodes.card.geometry}>
               <meshLambertMaterial map=${cardMap} map-anisotropy=${16} toneMapped=${false} />
             </mesh>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#ffffff">
-<title>Michael Hanna — Product Manager</title>
+<title>Michael Hanna · Product Manager</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -28,8 +28,6 @@
   @media (hover:none){
     #hm-lanyard-root{pointer-events:none}
   }
-  .wf a,.wf [data-go]{color:rgba(255,255,255,.72);text-decoration:none;cursor:pointer;transition:color .25s}
-  .wf a:hover,.wf [data-go]:hover{color:#fff}
 
   /* No scroll snapping — sections are shorter than the viewport, so snapping
      grabbed the gesture instead of letting it run. scroll-behavior only affects
@@ -87,8 +85,15 @@
   .hm-wordmark{margin:0;font-weight:700;font-size:clamp(3rem,11vw,12.5rem);line-height:.8;
                letter-spacing:-.05em;text-align:right;width:max-content;
                transform-origin:left top}
+  /* Home centres its second line under the first; About runs both flush left.
+     The shapes therefore differ, so the transition tweens the second line
+     between the two so it never jumps as the curtain crosses it. */
+  #hm-big{text-align:center}
+  #hm-abtname{text-align:left}
+  .wm-l2{display:inline-block}
   #hm-name-row{flex:1;min-height:0;display:flex;justify-content:flex-end;align-items:flex-start;
                padding-top:clamp(26px,6vh,72px)}
+  #hm-scene1{padding:clamp(64px,10vh,92px) clamp(22px,5vw,80px) clamp(60px,9vh,90px)}
   #hm-meta{display:flex;justify-content:space-between;align-items:flex-end;
            gap:28px clamp(28px,6vw,80px);flex-wrap:wrap}
   #hm-herotitle{margin-top:clamp(20px,4.5vh,44px)}
@@ -103,7 +108,7 @@
        hero is just a second copy of the same link. */
     #hm-heroemail{display:none}
     #hm-herotitle{margin-top:0}
-    #hm-nav > *, #hm-headname{padding:13px 6px;margin:-13px -6px}
+    #hm-nav > *{padding:13px 6px;margin:-13px -6px}
     #hm-navcontact{padding:13px 6px;margin-top:-13px;margin-bottom:-13px;margin-right:-6px}
     .hm-wordmark{font-size:clamp(2.2rem,17vw,5rem)}
     /* Name first, then Product Portfolio, then the bio. Centring the name left a
@@ -111,13 +116,64 @@
        and its name is pinned to this one's height so the two stay level through
        the transition. Lifting it here fixes both pages at once. */
     #hm-meta{display:contents}
-    #hm-name-row{order:1;flex:0 0 auto;justify-content:center;align-items:flex-start;
-                 padding-top:clamp(30px,9vh,90px)}
-    /* The free space goes above Product Portfolio rather than between it and the
-       bio, so the two sit together as one block at the foot of the screen. */
-    #hm-meta-left{order:2;margin-top:auto}
+    /* The name row takes the free space and centres the wordmark inside it, so
+       the wordmark sits in the middle of the band between the header and
+       Product Portfolio. About's name is pinned to this height, so it follows. */
+    /* The header overlays the hero, so the hero's own top padding has to match
+       the header's height — otherwise the band the name centres in is not the
+       band you can actually see, and it sits low by the difference. */
+    #hm-scene1{padding-top:58px}
+    #hm-name-row{order:1;flex:1;justify-content:center;align-items:center;padding-top:0}
+    #hm-meta-left{order:2}
     #hm-meta-bio{order:3;margin-top:clamp(18px,3vh,34px);text-align:left;max-width:none}
   }
+
+  /* The bench. Cards lie at an angle and straighten as you bring one to the
+     middle, so it reads as objects on a work surface rather than a slideshow.
+     It is a native horizontal scroller, so a phone swipes it and vertical page
+     scrolling is never intercepted. */
+  .wb{margin-top:clamp(30px,5.5vh,58px)}
+  .wb-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;
+           font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;
+           text-transform:lowercase;color:rgba(255,255,255,.7)}
+  .wb-rail{display:flex;gap:clamp(14px,1.8vw,24px);overflow-x:auto;overscroll-behavior-x:contain;
+           scroll-snap-type:x mandatory;-webkit-user-select:none;user-select:none;cursor:grab;
+           margin:clamp(16px,2.6vh,28px) calc(50% - 50vw) 0;
+           padding:clamp(10px,1.6vh,18px)
+                   max(clamp(22px,6vw,44px), calc(50vw - 420px + clamp(22px,6vw,44px)))
+                   clamp(20px,3.2vh,32px);
+           scrollbar-width:none}
+  .wb-rail::-webkit-scrollbar{display:none}
+  .wb-rail.is-drag{cursor:grabbing}
+  .wb-card{flex:0 0 auto;scroll-snap-align:center;box-sizing:border-box;
+           width:clamp(220px,24vw,296px);min-height:clamp(262px,29vh,330px);
+           display:flex;flex-direction:column;padding:clamp(16px,1.6vw,22px);
+           background:#F4F1EA;color:#1a1a1a}
+  .wb-card.is-open{background:none;color:#fff;border:1.5px dashed rgba(255,255,255,.55)}
+  /* Japanese-Americana palette: indigo cloth, ecru card stock, and the red of a
+     Toyo steel toolbox. Red carries almost no contrast against this blue
+     (1.26:1), so it never becomes type on it — it arrives as an object instead,
+     one painted card in the row, and as stamped numbering on the cream. */
+  .wb-card.is-live{background:#C0362C;color:#F4F1EA}
+  .wb-no{font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;color:#C0362C}
+  .wb-card.is-live .wb-no{color:rgba(244,241,234,.8)}
+  .wb-card.is-open .wb-no{color:rgba(255,255,255,.8)}
+  .wb-card.is-live .wb-desc{color:rgba(244,241,234,.82)}
+  .wb-card.is-live .wb-status{color:rgba(244,241,234,.78)}
+  .wb-card.is-open .wb-status{color:rgba(255,255,255,.55)}
+  .wb-title{margin:clamp(14px,2vh,22px) 0 0;font-weight:700;letter-spacing:-.03em;line-height:1.05;
+            font-size:clamp(1.3rem,2.1vw,1.75rem)}
+  .wb-desc{margin:10px 0 0;font-size:clamp(.86rem,1vw,.95rem);line-height:1.55;color:rgba(26,26,26,.72)}
+  .wb-card.is-open .wb-desc{color:rgba(255,255,255,.72)}
+  .wb-status{margin-top:auto;padding-top:16px;font-family:'IBM Plex Mono',monospace;
+             font-size:.62rem;letter-spacing:.14em;text-transform:lowercase;color:rgba(26,26,26,.5)}
+  @media (prefers-reduced-motion:reduce){.wb-card{transform:none !important}}
+
+  /* After Hours anchors its wordmark on the right — the side the home page keeps
+     it — so the name barely moves and the dark page wipes in from that side. */
+  #hm-lab-hero{position:relative;box-sizing:border-box}
+  #hm-lab-mark{position:absolute;right:clamp(22px,5vw,80px);top:0;z-index:2}
+  #hm-labname{text-align:right}
 
   /* About. The name's top is synced from the home hero at runtime, so the move
      between the two pages stays level whatever the viewport does to the type. */
@@ -161,6 +217,41 @@
     #hm-abt-stat .st-label{position:static}
     #hm-abt-stat .st-fig{margin-left:0;margin-top:clamp(22px,4.5vh,40px)}
   }
+
+  /* The ID card (name / role / location / badges / live Madrid clock) is a
+     reusable block — it appears on the About page under the reach figure and
+     again in the Work footer, so its rules key off classes, not ids. */
+  #hm-abt-cta{position:relative;box-sizing:border-box;text-align:center;
+      padding:0 clamp(22px,5vw,80px) clamp(24px,4vh,40px)}
+  .cta-id{margin:0;text-align:center;
+      font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;
+      font-size:.92rem;font-weight:500;color:rgba(245,245,247,.6);line-height:1.5}
+  .cta-name{font-weight:500;color:rgba(245,245,247,.6)}
+  .cta-badges{display:flex;justify-content:center;align-items:center;
+      gap:9px;margin:clamp(8px,1.2vh,12px) 0 0}
+  .cta-badge{display:flex;align-items:center;justify-content:center;color:rgba(245,245,247,.6)}
+  .cta-badge svg{display:block;width:20px;height:20px}
+  .cta-badge-text{font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;
+      font-size:.5rem;font-weight:700;letter-spacing:.03em;line-height:1.15;
+      text-align:left;white-space:nowrap;color:rgba(245,245,247,.6)}
+  .cta-clock{margin-top:clamp(22px,3.5vh,34px);font-weight:700;letter-spacing:.06em;
+      font-variant-numeric:tabular-nums;color:rgba(245,245,247,.85)}
+
+  /* Work footer's opening statement: a rotating headline ("idea." / "hire."
+     swap so the same line reads as two different asks) and two entry points. */
+  #hm-cta-head{margin:0;font-weight:700;letter-spacing:-.035em;line-height:1.04;
+      font-size:clamp(2.1rem,5.6vw,4.4rem);color:#fff}
+  #hm-cta-head .cta-arrow{display:inline-block;padding:0 .12em;color:rgba(245,245,247,.45)}
+  #hm-cta-head .cta-word{display:inline-block;min-width:3.6ch;text-align:left;
+      transition:opacity .25s ease}
+  #hm-cta-head .cta-word.is-swap{opacity:0}
+  #hm-cta-actions{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;
+      margin:clamp(28px,4.5vh,44px) 0 0}
+  .cta-btn{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.1em;
+      text-transform:uppercase;color:#fff;text-decoration:none;background:none;
+      border:1.5px solid rgba(245,245,247,.35);border-radius:999px;
+      padding:14px 26px;transition:background .25s,color .25s,border-color .25s}
+  .cta-btn:hover{background:#fff;color:#0c0c0e;border-color:#fff}
 </style>
 <script type="importmap">
 {
@@ -184,20 +275,19 @@
 <div id="hm-stage" data-screen-label="Home" style="position:relative;height:100vh;height:100dvh;overflow:hidden;background:#fff;transition:background .35s ease">
 
   <div id="hm-head" data-screen-label="Header" style="position:absolute;top:0;left:0;right:0;z-index:5;background:#fff;transition:background .3s;display:flex;justify-content:space-between;align-items:center;gap:18px;padding:20px clamp(22px,6vw,96px)">
-    <span id="hm-headname" data-go="intro" data-ch="name" style="cursor:pointer;font-weight:700;font-size:1rem;letter-spacing:-.02em;white-space:nowrap;color:#1a1a1a;opacity:0;pointer-events:none;transition:opacity .3s,color .3s">Michael Hanna</span>
-    <!-- Work and About travel together on the left, sitting after the wordmark
-         when it is showing; Contact holds the right edge on every page. -->
-    <span id="hm-nav" style="margin-left:clamp(16px,3vw,30px);display:flex;gap:clamp(16px,3vw,30px);font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;transition:transform .3s cubic-bezier(.22,1,.36,1)">
+    <!-- Ali's header, exactly: Work and About on the left, Contact on the right,
+         the same on every page, no wordmark. Nothing here moves between pages. -->
+    <span id="hm-nav" style="display:flex;gap:clamp(16px,3vw,30px);font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:lowercase;transition:transform .3s cubic-bezier(.22,1,.36,1)">
+      <span id="hm-navabout" data-go="about" data-ch="link" style="cursor:pointer;color:#1a1a1a;transition:color .3s;white-space:nowrap">About</span>
       <span id="hm-navwork" data-go="work" data-ch="link" style="cursor:pointer;color:#1a1a1a;transition:color .3s;white-space:nowrap">Work</span>
-      <span id="hm-navabout" data-go="about" data-ch="link" style="cursor:pointer;color:#1a1a1a;transition:color .3s;white-space:nowrap">About me</span>
     </span>
-    <a id="hm-navcontact" href="mailto:Michaelhannafarag@gmail.com" target="_blank" rel="noopener noreferrer" data-ch="link" style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:#1a1a1a;transition:color .3s;white-space:nowrap">Contact</a>
+    <span id="hm-navlab" data-go="lab" data-ch="link" style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:lowercase;color:#1a1a1a;transition:color .3s;white-space:nowrap;cursor:pointer">After hours</span>
   </div>
 
   <div id="hm-intro" data-screen-label="Intro" style="position:absolute;inset:0;z-index:2;background:#fff;overflow-y:auto;overflow-x:hidden;transition:opacity .35s,visibility .35s">
-    <div id="hm-scene1" style="height:100%;display:flex;flex-direction:column;justify-content:space-between;padding:clamp(64px,10vh,92px) clamp(22px,5vw,80px) clamp(60px,9vh,90px);box-sizing:border-box">
+    <div id="hm-scene1" style="height:100%;display:flex;flex-direction:column;justify-content:space-between;box-sizing:border-box">
     <div id="hm-name-row">
-      <h1 id="hm-big" class="hm-wordmark" data-ch="name" style="color:#1a1a1a">Michael <br>Hanna</h1>
+      <h1 id="hm-big" class="hm-wordmark" data-ch="name" style="color:#1a1a1a">Michael <br><span class="wm-l2">Hanna</span></h1>
     </div>
     <div id="hm-meta">
       <div id="hm-meta-left">
@@ -211,7 +301,7 @@
     </div>
   <div id="hm-work" data-screen-label="The Work" style="background:#fff">
     <div data-screen-label="Work — opener" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:clamp(44px,8vh,84px) clamp(22px,6vw,44px) clamp(26px,4.2vh,46px);box-sizing:border-box">
-      <div style="font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:#8a8a8a">01 — 03</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:#8a8a8a">01 · 03</div>
       <h2 style="margin:14px 0 0;font-weight:700;font-size:clamp(2.4rem,5.6vw,4.6rem);letter-spacing:-.035em;line-height:1.02">Selected Products.</h2>
       <div style="margin-top:14px;font-size:clamp(.95rem,1.4vw,1.15rem);color:#8a8a8a">Three products. Three impossible timelines.</div>
     </div>
@@ -225,13 +315,13 @@
       <div style="font-weight:700;font-size:clamp(1.9rem,4.4vw,3.6rem);letter-spacing:-.035em;line-height:1.08">Two million users.<br>Before the name.</div>
       <div style="margin-top:12px;font-size:clamp(.95rem,1.3vw,1.1rem);color:#8a8a8a">Zinia. Chosen by Apple and Amazon at checkout.</div>
       <div style="width:min(620px,88vw);height:clamp(230px,36vh,350px);margin-top:clamp(24px,4.5vh,40px)"><img src="assets/zinia-amazon-visa.jpg" alt="Amazon Visa card issued with Zinia by Santander" style="width:100%;height:100%;object-fit:cover;border-radius:18px;display:block"></div>
-      <div style="margin-top:clamp(18px,3vh,26px);font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:#b5b5b5">case study — soon</div>
+      <div style="margin-top:clamp(18px,3vh,26px);font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:#b5b5b5">case study · soon</div>
     </div>
     <div data-screen-label="Work — Qiddiya" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:clamp(44px,6.5vh,78px) clamp(22px,6vw,44px);box-sizing:border-box">
       <div style="font-weight:700;font-size:clamp(1.9rem,4.4vw,3.6rem);letter-spacing:-.035em;line-height:1.08">A city on paper.<br>An OS in a pocket.</div>
       <div style="margin-top:12px;font-size:clamp(.95rem,1.3vw,1.1rem);color:#8a8a8a">Six Flags Qiddiya. 330 km², shipped for gate-open.</div>
       <div style="width:min(620px,88vw);height:clamp(230px,36vh,350px);margin-top:clamp(24px,4.5vh,40px)"><img src="assets/qiddiya-park.jpg" alt="Six Flags Qiddiya City park at dusk" style="width:100%;height:100%;object-fit:cover;border-radius:18px;display:block"></div>
-      <div style="margin-top:clamp(18px,3vh,26px);font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:#b5b5b5">case study — soon</div>
+      <div style="margin-top:clamp(18px,3vh,26px);font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:#b5b5b5">case study · soon</div>
     </div>
     <div data-screen-label="Work — Trusted by" class="tb-sec">
       <div class="tb-wrap">
@@ -261,15 +351,39 @@
         </div>
       </div>
     </div>
-    <footer data-dark="" class="wf" data-screen-label="Work — footer" style="background:#000;color:#fff;box-sizing:border-box;padding:clamp(28px,4.5vh,54px) 0 0;overflow:hidden">
-      <div style="width:100%;max-width:1040px;margin:0 auto;padding:0 clamp(22px,6vw,44px);box-sizing:border-box">
-        <div style="display:flex;flex-wrap:wrap;justify-content:flex-end;gap:10px clamp(16px,3vw,24px);font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase">
-          <span data-go="about">About me</span>
-          <span data-go="lab">After hours</span>
-        </div>
+    <section id="hm-work-cta" data-dark="" data-screen-label="Work — contact" style="background:#000;color:#fff;box-sizing:border-box;text-align:center;padding:clamp(54px,9vh,96px) clamp(22px,5vw,80px);overflow:hidden">
+      <h2 id="hm-cta-head">Let's discuss your next <span class="cta-arrow">→</span> <span id="hm-cta-word" class="cta-word">idea.</span></h2>
+      <div id="hm-cta-actions">
+        <a class="cta-btn" href="mailto:Michaelhannafarag@gmail.com" target="_blank" rel="noopener noreferrer">Email Me</a>
+        <a class="cta-btn" href="mailto:Michaelhannafarag@gmail.com?subject=Let%27s%20book%20a%20call" target="_blank" rel="noopener noreferrer">Book a Call</a>
       </div>
-      <div data-go="intro" style="cursor:pointer;margin-top:clamp(16px,2.6vh,34px)">
-        <span class="wf-mark" style="display:block;color:#fff;font-weight:700;font-size:14.4vw;line-height:1;letter-spacing:-.055em;white-space:nowrap;text-align:center">Michael Hanna</span>
+    </section>
+
+    <footer data-dark="" class="wf" data-screen-label="Work — footer" style="background:#000;color:#fff;box-sizing:border-box;padding:clamp(28px,4.5vh,54px) 0 clamp(40px,6vh,64px);overflow:hidden">
+      <div style="width:100%;max-width:1040px;margin:0 auto;padding:0 clamp(22px,6vw,44px);box-sizing:border-box">
+        <div class="cta-id" style="margin:0">
+        <div class="cta-name">Michael Hanna</div>
+        <div>Product Manager</div>
+        <div>Based in Madrid, Spain</div>
+        <div class="cta-badges">
+          <span class="cta-badge" title="Built with Claude Code" aria-hidden="true"><svg viewBox="0 0 512 512" fill="currentColor">
+            <rect x="64" y="108" width="384" height="64"/>
+            <rect x="64" y="172" width="64" height="64"/>
+            <rect x="160" y="172" width="192" height="64"/>
+            <rect x="384" y="172" width="64" height="64"/>
+            <rect x="0" y="236" width="512" height="64"/>
+            <rect x="64" y="300" width="384" height="64"/>
+            <rect x="88" y="364" width="64" height="64"/>
+            <rect x="200" y="364" width="32" height="64"/>
+            <rect x="280" y="364" width="32" height="64"/>
+            <rect x="360" y="364" width="64" height="64"/>
+          </svg></span>
+          <span class="cta-badge" title="Figma" aria-hidden="true"><svg viewBox="0 0 15 15" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M7.00005 2.04999H5.52505C4.71043 2.04999 4.05005 2.71037 4.05005 3.52499C4.05005 4.33961 4.71043 4.99999 5.52505 4.99999H7.00005V2.04999ZM7.00005 1.04999H8.00005H9.47505C10.842 1.04999 11.95 2.15808 11.95 3.52499C11.95 4.33163 11.5642 5.04815 10.9669 5.49999C11.5642 5.95184 11.95 6.66836 11.95 7.475C11.95 8.8419 10.842 9.95 9.47505 9.95C8.92236 9.95 8.41198 9.76884 8.00005 9.46266V9.95L8.00005 11.425C8.00005 12.7919 6.89195 13.9 5.52505 13.9C4.15814 13.9 3.05005 12.7919 3.05005 11.425C3.05005 10.6183 3.43593 9.90184 4.03317 9.44999C3.43593 8.99814 3.05005 8.28163 3.05005 7.475C3.05005 6.66836 3.43594 5.95184 4.03319 5.5C3.43594 5.04815 3.05005 4.33163 3.05005 3.52499C3.05005 2.15808 4.15814 1.04999 5.52505 1.04999H7.00005ZM8.00005 2.04999V4.99999H9.47505C10.2897 4.99999 10.95 4.33961 10.95 3.52499C10.95 2.71037 10.2897 2.04999 9.47505 2.04999H8.00005ZM5.52505 8.94998H7.00005L7.00005 7.4788L7.00005 7.475L7.00005 7.4712V6H5.52505C4.71043 6 4.05005 6.66038 4.05005 7.475C4.05005 8.28767 4.70727 8.94684 5.5192 8.94999L5.52505 8.94998ZM4.05005 11.425C4.05005 10.6123 4.70727 9.95315 5.5192 9.94999L5.52505 9.95H7.00005L7.00005 11.425C7.00005 12.2396 6.33967 12.9 5.52505 12.9C4.71043 12.9 4.05005 12.2396 4.05005 11.425ZM8.00005 7.47206C8.00164 6.65879 8.66141 6 9.47505 6C10.2897 6 10.95 6.66038 10.95 7.475C10.95 8.28962 10.2897 8.95 9.47505 8.95C8.66141 8.95 8.00164 8.29121 8.00005 7.47794V7.47206Z"/></svg></span>
+          <span class="cta-badge" title="Jira" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.53,2a4.37,4.37,0,0,0,4.35,4.35h1.78v1.7A4.35,4.35,0,0,0,22,12.4V2.84A.85.85,0,0,0,21.16,2H11.53M6.77,6.8a4.36,4.36,0,0,0,4.34,4.34h1.8v1.72a4.36,4.36,0,0,0,4.34,4.34V7.63a.84.84,0,0,0-.83-.83H6.77M2,11.6a4.34,4.34,0,0,0,4.35,4.34H8.13v1.72A4.36,4.36,0,0,0,12.47,22V12.43a.85.85,0,0,0-.84-.84H2Z"/></svg></span>
+          <span class="cta-badge cta-badge-text" title="Product Department" aria-hidden="true">PRDT<br>DEPT</span>
+        </div>
+        <div class="cta-clock"><span class="cta-time">--:--:--</span> <span class="cta-tz">CET</span></div>
+        </div>
       </div>
     </footer>
   </div>
@@ -283,7 +397,7 @@
   <div id="hm-about" data-screen-label="About me" style="position:absolute;inset:0;z-index:3;background:#0c0c0e;color:#f5f5f7;opacity:0;visibility:hidden;pointer-events:none;overflow-y:auto;overflow-x:hidden">
     <div id="hm-abt-hero">
       <div id="hm-abt-left">
-        <h1 id="hm-abtname" class="hm-wordmark" style="color:#fff">Michael <br>Hanna</h1>
+        <h1 id="hm-abtname" class="hm-wordmark" style="color:#fff">Michael <br><span class="wm-l2">Hanna</span></h1>
       </div>
       <div id="hm-abt-copy">
         <p class="lede">I’ve always lived between worlds.</p>
@@ -299,33 +413,86 @@
       <div class="st-fig"><span id="hm-stat-num" class="num">0</span> million</div>
       <div class="st-cap">People using products I’ve worked on, across every company</div>
     </section>
+
+    <section id="hm-abt-cta" data-screen-label="About — contact">
+      <div class="cta-id">
+        <div class="cta-name">Michael Hanna</div>
+        <div>Product Manager</div>
+        <div>Based in Madrid, Spain</div>
+        <div class="cta-badges">
+          <span class="cta-badge" title="Built with Claude Code" aria-hidden="true"><svg viewBox="0 0 512 512" fill="currentColor">
+            <rect x="64" y="108" width="384" height="64"/>
+            <rect x="64" y="172" width="64" height="64"/>
+            <rect x="160" y="172" width="192" height="64"/>
+            <rect x="384" y="172" width="64" height="64"/>
+            <rect x="0" y="236" width="512" height="64"/>
+            <rect x="64" y="300" width="384" height="64"/>
+            <rect x="88" y="364" width="64" height="64"/>
+            <rect x="200" y="364" width="32" height="64"/>
+            <rect x="280" y="364" width="32" height="64"/>
+            <rect x="360" y="364" width="64" height="64"/>
+          </svg></span>
+          <span class="cta-badge" title="Figma" aria-hidden="true"><svg viewBox="0 0 15 15" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M7.00005 2.04999H5.52505C4.71043 2.04999 4.05005 2.71037 4.05005 3.52499C4.05005 4.33961 4.71043 4.99999 5.52505 4.99999H7.00005V2.04999ZM7.00005 1.04999H8.00005H9.47505C10.842 1.04999 11.95 2.15808 11.95 3.52499C11.95 4.33163 11.5642 5.04815 10.9669 5.49999C11.5642 5.95184 11.95 6.66836 11.95 7.475C11.95 8.8419 10.842 9.95 9.47505 9.95C8.92236 9.95 8.41198 9.76884 8.00005 9.46266V9.95L8.00005 11.425C8.00005 12.7919 6.89195 13.9 5.52505 13.9C4.15814 13.9 3.05005 12.7919 3.05005 11.425C3.05005 10.6183 3.43593 9.90184 4.03317 9.44999C3.43593 8.99814 3.05005 8.28163 3.05005 7.475C3.05005 6.66836 3.43594 5.95184 4.03319 5.5C3.43594 5.04815 3.05005 4.33163 3.05005 3.52499C3.05005 2.15808 4.15814 1.04999 5.52505 1.04999H7.00005ZM8.00005 2.04999V4.99999H9.47505C10.2897 4.99999 10.95 4.33961 10.95 3.52499C10.95 2.71037 10.2897 2.04999 9.47505 2.04999H8.00005ZM5.52505 8.94998H7.00005L7.00005 7.4788L7.00005 7.475L7.00005 7.4712V6H5.52505C4.71043 6 4.05005 6.66038 4.05005 7.475C4.05005 8.28767 4.70727 8.94684 5.5192 8.94999L5.52505 8.94998ZM4.05005 11.425C4.05005 10.6123 4.70727 9.95315 5.5192 9.94999L5.52505 9.95H7.00005L7.00005 11.425C7.00005 12.2396 6.33967 12.9 5.52505 12.9C4.71043 12.9 4.05005 12.2396 4.05005 11.425ZM8.00005 7.47206C8.00164 6.65879 8.66141 6 9.47505 6C10.2897 6 10.95 6.66038 10.95 7.475C10.95 8.28962 10.2897 8.95 9.47505 8.95C8.66141 8.95 8.00164 8.29121 8.00005 7.47794V7.47206Z"/></svg></span>
+          <span class="cta-badge" title="Jira" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.53,2a4.37,4.37,0,0,0,4.35,4.35h1.78v1.7A4.35,4.35,0,0,0,22,12.4V2.84A.85.85,0,0,0,21.16,2H11.53M6.77,6.8a4.36,4.36,0,0,0,4.34,4.34h1.8v1.72a4.36,4.36,0,0,0,4.34,4.34V7.63a.84.84,0,0,0-.83-.83H6.77M2,11.6a4.34,4.34,0,0,0,4.35,4.34H8.13v1.72A4.36,4.36,0,0,0,12.47,22V12.43a.85.85,0,0,0-.84-.84H2Z"/></svg></span>
+          <span class="cta-badge cta-badge-text" title="Product Department" aria-hidden="true">PRDT<br>DEPT</span>
+        </div>
+        <div class="cta-clock"><span class="cta-time">--:--:--</span> <span class="cta-tz">CET</span></div>
+      </div>
+    </section>
   </div>
 
-  <div id="hm-lab" data-screen-label="The Lab" style="position:absolute;inset:0;background:#111;color:#fff;opacity:0;visibility:hidden;pointer-events:none;overflow-y:auto;transition:opacity .35s,visibility .35s">
-    <div style="max-width:840px;margin:0 auto;padding:clamp(84px,14vh,140px) clamp(22px,6vw,44px) clamp(84px,12vh,130px);box-sizing:border-box">
-      <div style="font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:#D7FF3F">AI side quests · no committee</div>
-      <h2 style="margin:16px 0 0;font-family:'Archivo Black',sans-serif;font-weight:400;font-size:clamp(2rem,6.4vw,4.6rem);line-height:1.02">SAME BRAIN,<br><span style="color:#D7FF3F">LOOSER</span> <span style="color:#FF4D00">TIE.</span></h2>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:clamp(20px,3.6vh,32px)">
-        <span style="border:1.5px solid #D7FF3F;color:#D7FF3F;border-radius:999px;padding:6px 16px;font-size:.85rem;white-space:nowrap;transform:rotate(-2deg)">prompt toys</span>
-        <span style="border:1.5px solid #FF4D00;color:#FF4D00;border-radius:999px;padding:6px 16px;font-size:.85rem;white-space:nowrap;transform:rotate(1.5deg)">agents</span>
-        <span style="border:1.5px solid #fff;color:#fff;border-radius:999px;padding:6px 16px;font-size:.85rem;white-space:nowrap;transform:rotate(-1deg)">weird demos</span>
-      </div>
-      <p style="margin:clamp(22px,4vh,36px) 0 0;max-width:52ch;font-size:clamp(.98rem,1.3vw,1.1rem);color:rgba(255,255,255,.75)">AI products I design, build and ship myself — real users, honest post-mortems, zero stakeholders. This is where I stay fast enough to deserve the day job.</p>
-      <div style="overflow:hidden;margin:clamp(24px,4.4vh,40px) calc(-1*clamp(22px,6vw,44px)) 0;border-top:1.5px solid #D7FF3F;border-bottom:1.5px solid #D7FF3F">
-        <div id="hm-mq" style="display:inline-flex;white-space:nowrap;font-family:'Archivo Black',sans-serif;font-size:.8rem;color:#D7FF3F;padding:9px 0">
+  <div id="hm-lab" data-screen-label="The Lab" style="position:absolute;inset:0;background-color:#3A5B85;color:#fff;opacity:0;visibility:hidden;pointer-events:none;overflow-y:auto;overflow-x:hidden;transition:opacity .35s,visibility .35s">
+    <div id="hm-lab-hero">
+      <div id="hm-lab-mark"><h1 id="hm-labname" class="hm-wordmark" style="color:#fff">Michael <br><span class="wm-l2">Hanna</span></h1></div>
+    </div>
+    <div style="max-width:840px;margin:0 auto;padding:0 clamp(22px,6vw,44px) clamp(84px,12vh,130px);box-sizing:border-box">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:lowercase;color:rgba(255,255,255,.72)">my virtual work bench</div>
+      <h2 style="margin:16px 0 0;font-weight:700;font-size:clamp(2.1rem,5.4vw,4.2rem);letter-spacing:-.035em;line-height:1.02">Same brain,<br>looser tie.</h2>
+      <p style="margin:clamp(22px,4vh,36px) 0 0;max-width:52ch;font-size:clamp(.98rem,1.3vw,1.1rem);color:rgba(255,255,255,.75)">Everything on it exists for exactly one reason: I wanted it to exist. No business case, no roadmap, nobody to convince. The same instincts that ship the day job, just pointed somewhere stranger, with a lot less distance between the idea and the thing actually running.</p>
+      <div style="overflow:hidden;margin:clamp(24px,4.4vh,40px) calc(-1*clamp(22px,6vw,44px)) 0;border-top:1.5px solid rgba(255,255,255,.55);border-bottom:1.5px solid rgba(255,255,255,.55)">
+        <div id="hm-mq" style="display:inline-flex;white-space:nowrap;font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:lowercase;color:#fff;padding:9px 0">
           <span style="padding-right:28px">SHIPPED WEEKLY ✦ BUILT AT 1AM ✦ NO ROADMAP ✦ SHIPPED WEEKLY ✦ BUILT AT 1AM ✦ NO ROADMAP ✦&nbsp;</span>
           <span style="padding-right:28px">SHIPPED WEEKLY ✦ BUILT AT 1AM ✦ NO ROADMAP ✦ SHIPPED WEEKLY ✦ BUILT AT 1AM ✦ NO ROADMAP ✦&nbsp;</span>
         </div>
       </div>
+      <section class="wb" aria-label="On the bench">
+        <div class="wb-head"><span>on the bench</span><span aria-hidden="true">drag →</span></div>
+        <div class="wb-rail" id="hm-bench">
+          <article class="wb-card">
+            <span class="wb-no">01</span>
+            <h3 class="wb-title">Prompt toys</h3>
+            <p class="wb-desc">Single-purpose things that do one trick properly. Built in an evening, kept only if they still feel good a week later.</p>
+            <span class="wb-status">on the bench</span>
+          </article>
+          <article class="wb-card is-live">
+            <span class="wb-no">02</span>
+            <h3 class="wb-title">Agents</h3>
+            <p class="wb-desc">Software that goes and does the boring part. Most of them start as something I got tired of doing by hand.</p>
+            <span class="wb-status">in flight</span>
+          </article>
+          <article class="wb-card">
+            <span class="wb-no">03</span>
+            <h3 class="wb-title">Weird demos</h3>
+            <p class="wb-desc">Ideas that exist only to find out whether they can. No use case required, and none offered.</p>
+            <span class="wb-status">on the bench</span>
+          </article>
+          <article class="wb-card is-open">
+            <span class="wb-no">04</span>
+            <h3 class="wb-title">Slot open</h3>
+            <p class="wb-desc">Whatever I get curious about next. This one fills itself in.</p>
+            <span class="wb-status">empty</span>
+          </article>
+        </div>
+      </section>
       <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-top:clamp(28px,5vh,48px)">
-        <span style="font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.45)">Projects docking here soon — currently in flight · <a href="mailto:Michaelhannafarag@gmail.com" target="_blank" rel="noopener noreferrer" style="color:#D7FF3F">want in early? →</a></span>
-        <span data-go="intro" style="cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:#D7FF3F">↩ back to the day job</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.45)">Projects docking here soon. Currently in flight · <a href="mailto:Michaelhannafarag@gmail.com" target="_blank" rel="noopener noreferrer" style="color:#fff;text-decoration:underline;text-underline-offset:4px">want in early? →</a></span>
+        <span data-go="intro" style="cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:#fff">↩ back to the day job</span>
       </div>
     </div>
   </div>
 
 </div>
-<script src="script.js?v=49"></script>
+<script src="script.js?v=65"></script>
 <script>
   // Lanyard is web-only: it's a heavy WebGL scene (three.js + rapier physics
   // + a 2.4MB card model) built around a pointer drag that touch can't
@@ -336,7 +503,7 @@
   if (window.matchMedia('(min-width: 901px)').matches) {
     const s = document.createElement('script');
     s.type = 'module';
-    s.src = 'lanyard/lanyard.js?v=29';
+    s.src = 'lanyard/lanyard.js?v=40';
     document.body.appendChild(s);
   }
 </script>

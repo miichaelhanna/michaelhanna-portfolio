@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Openbank USA · Case Study · Michael Hanna</title>
+<meta name="theme-color" content="#ffffff">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 html{scroll-behavior:smooth;overflow-x:clip}
 body{margin:0;background:#fff;color:#1D1D1F;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,'Helvetica Neue',Helvetica,Arial,sans-serif;line-height:1.62;-webkit-font-smoothing:antialiased}
@@ -16,20 +19,23 @@ a.footer-link{color:rgba(255,255,255,.8);text-decoration:none}
 a.footer-link:hover{color:#fff;text-decoration:none}
 a.plain{text-decoration:none}
 a.plain:hover{text-decoration:none}
+/* Same header as the rest of the site: Work and About left, Contact right,
+   no wordmark, current page underlined. */
+a.hm-nav-link{color:#1a1a1a;text-decoration:none}
+a.hm-nav-link:hover{color:#1D1AEA;text-decoration:none}
+@media (max-width:700px){nav a.hm-nav-link{padding:13px 6px;margin:-13px -6px}}
 </style>
 </head>
 <body>
 
 <div id="pg" style="position:fixed;top:0;left:0;height:2px;width:0;background:#FF3334;z-index:60"></div>
 
-<nav style="position:sticky;top:0;z-index:50;background:rgba(255,255,255,.86);backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid rgba(0,0,0,.09)">
-  <div style="max-width:1040px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:16px;height:50px;padding:0 24px">
-    <a href="index.html" class="chrome-link" style="font-size:.9rem;font-weight:600;letter-spacing:-.012em">Michael Hanna</a>
-    <span style="display:flex;align-items:center;gap:clamp(14px,2.4vw,26px);font-size:.78rem;font-weight:600;letter-spacing:-.008em">
-      <a href="index.html#about" class="chrome-link">About me</a>
-      <a href="index.html#lab" class="chrome-link">After hours</a>
-    </span>
-  </div>
+<nav style="position:sticky;top:0;z-index:50;background:#fff;display:flex;justify-content:space-between;align-items:center;gap:18px;padding:20px clamp(22px,6vw,96px);font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:lowercase">
+  <span style="display:flex;gap:clamp(16px,3vw,30px)">
+    <a href="index.html#about" class="hm-nav-link" style="white-space:nowrap">About</a>
+    <a href="index.html#work" class="hm-nav-link" style="text-decoration:underline;text-underline-offset:5px;white-space:nowrap">Work</a>
+  </span>
+  <a href="mailto:Michaelhannafarag@gmail.com" target="_blank" rel="noopener noreferrer" class="hm-nav-link" style="white-space:nowrap">Contact</a>
 </nav>
 
 <article style="max-width:1040px;margin:0 auto;padding:0 24px">

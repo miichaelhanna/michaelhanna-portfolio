@@ -4,8 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const abt = $('hm-about'), abtLeft = $('hm-abt-left'), abtName = $('hm-abtname'), big = $('hm-big');
   const abtCopy = $('hm-abt-copy'), abtHero = $('hm-abt-hero');
   const statFig = document.querySelector('#hm-abt-stat .st-fig'), statNum = $('hm-stat-num');
-  const navAbout = $('hm-navabout'), navContact = $('hm-navcontact'), navWork = $('hm-navwork');
-  const navRow = $('hm-nav');
+  const navAbout = $('hm-navabout'), navWork = $('hm-navwork'), navLab = $('hm-navlab');
+  const labName = $('hm-labname'), labMark = $('hm-lab-mark'), labHero = $('hm-lab-hero');
   const hero = $('hm-hero');
   const touch = matchMedia('(hover:none)').matches;
   const layers = [intro, lab, abt];
@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (head) head.style.background = dark ? '#111' : '#fff';
     document.querySelectorAll('[data-ch]').forEach(el => {
       if (el.dataset.ch === 'name') el.style.color = dark ? '#D7FF3F' : '#1a1a1a';
-      else el.style.color = dark ? 'rgba(255,255,255,.6)' : '#8a8a8a';
+      else el.style.color = dark ? '#fff' : '#1a1a1a';
     });
   };
   const ABOUT_BG = '#0c0c0e';
@@ -28,12 +28,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // ink: the [data-ch=name] rule must leave the home wordmark black, because the
   // two wordmarks are stacked on top of each other during the move.
   const navInk = dark => document.querySelectorAll('[data-ch="link"]').forEach(el => {
-    el.style.color = dark ? 'rgba(245,245,247,.62)' : '#8a8a8a';
+    el.style.color = dark ? '#fff' : '#1a1a1a';
   });
+  const PAGE_BG = { about: ABOUT_BG, lab: '#3A5B85' };
   const setChromeFor = m => {
-    setTheme(m === 'about' ? ABOUT_BG : m === 'lab' ? '#111' : '#ffffff');
-    if (m !== 'about') { setChrome(m === 'lab'); return; }
-    if (head) head.style.background = ABOUT_BG;
+    setTheme(PAGE_BG[m] || '#ffffff');
+    if (!PAGE_BG[m]) { setChrome(false); return; }
+    if (head) head.style.background = PAGE_BG[m];
     navInk(true);
     document.querySelectorAll('[data-ch="name"]').forEach(el => { el.style.color = '#1a1a1a'; });
   };
@@ -43,33 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // The nav is not in the middle of the screen, so flipping its ink at the
   // halfway mark leaves it the wrong colour — light on white — for a beat. Swap
   // it when the curtain edge actually reaches it instead.
-  // The nav sits opposite the big wordmark. On the home landing the name is off
-  // to the right and the header's left is empty, so the links move over to fill
-  // it; once the name drops into the header — or on About, where the name is
-  // already on the left — they go back to the right. The row keeps its layout
-  // box either way and is only translated, so nothing reflows.
-  let navDx = 0, navLeft = null;
-  const measureNav = () => {
-    if (!navRow || !head) return;
-    const tf = navRow.style.transform, tr = navRow.style.transition;
-    navRow.style.transition = 'none';
-    navRow.style.transform = 'none';
-    const padLeft = parseFloat(getComputedStyle(head).paddingLeft) || 0;
-    navDx = Math.round(head.getBoundingClientRect().left + padLeft - navRow.getBoundingClientRect().left);
-    navRow.style.transform = tf;
-    void navRow.offsetWidth;
-    navRow.style.transition = tr;
-  };
-  const placeNav = left => {
-    if (!navRow || left === navLeft) return;
-    navLeft = left;
-    if (!left) { navRow.style.transform = 'translateX(0)'; return; }
-    // Measure now rather than trusting the cached offset: the row is narrower on
-    // About, where it holds only Work, so the distance to the left margin differs.
-    measureNav();
-    navRow.style.transform = 'translateX(' + navDx + 'px)';
-  };
-
   const navCross = fromLeft => {
     const r = navAbout.parentElement.getBoundingClientRect();
     const mid = (r.left + r.width / 2) / innerWidth;
@@ -89,12 +63,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // every page. The page you are on is underlined rather than hidden, so the nav
   // never changes shape as you move between them.
   const paintNav = m => {
-    const on = m === 'about';
-    headName.style.display = on ? 'none' : '';
-    navWork.style.textDecoration = on ? 'none' : 'underline';
-    navAbout.style.textDecoration = on ? 'underline' : 'none';
-    [navWork, navAbout].forEach(el => { el.style.textUnderlineOffset = '5px'; });
-    navLeft = null;   // the row may have shifted, so any cached offset is stale
+    const cur = { about: navAbout, lab: navLab }[m] || navWork;
+    [navAbout, navWork, navLab].forEach(el => {
+      el.style.textDecoration = el === cur ? 'underline' : 'none';
+      el.style.textUnderlineOffset = '5px';
+    });
   };
   const setMode = m => {
     mode = m;
@@ -105,11 +78,10 @@ document.addEventListener('DOMContentLoaded', () => {
     setT(true); resetHover();
     setChromeFor(m);
     shw(intro, m === 'intro'); shw(lab, m === 'lab'); shw(abt, m === 'about');
-    if (m === 'lab') lab.scrollTo({ top: 0, behavior: 'instant' });
+    if (m === 'lab') { syncAbout(); lab.scrollTo({ top: 0, behavior: 'instant' }); }
     if (m === 'intro') intro.scrollTo({ top: 0, behavior: 'instant' });
     if (m === 'about') { syncAbout(); abt.scrollTo({ top: 0, behavior: 'instant' }); }
     setMode(m);
-    updateHead();
   };
 
   // Page moves lifted from alitwotimes.com: the name travels one straight
@@ -129,7 +101,25 @@ document.addEventListener('DOMContentLoaded', () => {
   // the life of the page — and on iOS a promoted layer inside an overflow
   // scroller can be composited out of step with the content, so the name appears
   // to hang in place while the page slides past it. Promote for the tween only.
-  const promote = on => [big, abtName].forEach(el => {
+  // Home centres "Hanna" under "Michael"; About runs it flush left. Left alone
+  // that makes the two wordmarks different shapes, and the second line would jump
+  // sideways the instant the curtain edge crossed it. Both second lines are
+  // tweened to the same place every frame instead, so it slides into its new
+  // alignment as part of the move.
+  const l2Of = h => {
+    const l2 = h && h.querySelector('.wm-l2');
+    if (!l2 || !h) return 0;
+    const keep = l2.style.transform;
+    l2.style.transform = 'none';
+    const o = Math.round(l2.getBoundingClientRect().left - h.getBoundingClientRect().left);
+    l2.style.transform = keep;
+    return o;
+  };
+  const l2Set = (h, x) => {
+    const l2 = h && h.querySelector('.wm-l2');
+    if (l2) l2.style.transform = x == null ? '' : 'translateX(' + x + 'px)';
+  };
+  const promote = (other, on) => [big, other].forEach(el => {
     if (el) el.style.willChange = on ? 'transform' : '';
   });
   const tween = (ms, step) => new Promise(done => {
@@ -168,78 +158,105 @@ document.addEventListener('DOMContentLoaded', () => {
     const floor = bottom + Math.round(innerHeight * .035);
     const wanted = statFig ? innerHeight - PEEK - statFig.offsetTop : innerHeight;
     abtHero.style.minHeight = Math.max(floor, wanted) + 'px';
+    // After Hours carries the same wordmark at the same height, so its move is
+    // level too; the hero below it is only as tall as the name needs.
+    if (labMark && labHero) {
+      labMark.style.top = top + 'px';
+      labHero.style.minHeight = (top + labMark.offsetHeight + Math.round(innerHeight * .07)) + 'px';
+    }
   };
 
+  // One move, three pages. About enters from the left, After Hours from the
+  // right; the name travels between wherever the two pages keep it, and the
+  // second line slides between their alignments. Nothing here is per-page except
+  // the entries in this table.
+  const PAGES = {
+    about: { layer: abt, name: abtName, fromLeft: true },
+    lab:   { layer: lab, name: labName, fromLeft: false }
+  };
+  const wipe = (fromLeft, e) => fromLeft
+    ? 'inset(0 ' + ((1 - e) * 100).toFixed(3) + '% 0 0)'
+    : 'inset(0 0 0 ' + ((1 - e) * 100).toFixed(3) + '%)';
+
   let navBusy = false;
-  const toAbout = () => {
-    if (navBusy || mode === 'about') return;
+  const enter = key => {
+    const pg = PAGES[key];
+    if (navBusy || !pg || mode === key) return;
     navBusy = true;
     // The name can only travel if it is on screen to travel from. Deeper into
-    // the page it is not, and yanking the scroll to the top first to make room
-    // for it read as a redirect through the home screen before the About page
-    // arrived. From down there the curtain runs on its own and the scroll is
-    // left alone.
+    // the page it is not, and yanking the scroll to the top first read as a
+    // detour through the home screen, so from down there the curtain runs alone.
     const travel = intro.scrollTop < intro.clientHeight * .5;
     if (travel) intro.scrollTo({ top: 0, behavior: 'instant' });
-    setT(false); resetHover(); headClear(); promote(true);
+    setT(false); resetHover(); headClear(); promote(pg.name, true);
     syncAbout();
-    abt.style.visibility = 'visible'; abt.style.opacity = 1;
-    abt.style.pointerEvents = 'auto'; abt.style.zIndex = 4;
-    const dx = travel ? big.getBoundingClientRect().left - abtName.getBoundingClientRect().left : 0;
-    const cross = navCross(true);
+    pg.layer.style.visibility = 'visible'; pg.layer.style.opacity = 1;
+    pg.layer.style.pointerEvents = 'auto'; pg.layer.style.zIndex = 4;
+    pg.layer.scrollTop = 0;
+    const dx = travel ? big.getBoundingClientRect().left - pg.name.getBoundingClientRect().left : 0;
+    const cross = navCross(pg.fromLeft);
+    const oH = l2Of(big), oP = l2Of(pg.name);
     let swapped = false;
     const step = e => {
-      abt.style.clipPath = 'inset(0 ' + ((1 - e) * 100).toFixed(3) + '% 0 0)';
-      abtName.style.transform = 'translateX(' + (dx * (1 - e)) + 'px)';
+      const P = oH + (oP - oH) * e;
+      l2Set(big, P - oH); l2Set(pg.name, P - oP);
+      pg.layer.style.clipPath = wipe(pg.fromLeft, e);
+      pg.name.style.transform = 'translateX(' + (dx * (1 - e)) + 'px)';
       big.style.transform = 'translateX(' + (-dx * e) + 'px)';
-      if (!swapped && e > cross) { swapped = true; paintNav('about'); navInk(true); placeNav(true); }
+      if (!swapped && e > cross) { swapped = true; paintNav(key); navInk(true); }
     };
     step(0);
     run(step).then(() => {
-      abt.style.clipPath = 'none'; abt.style.zIndex = 3;
-      headSettle('about');
-      abtName.style.transform = ''; big.style.transform = ''; promote(false);
-      shw(intro, false); shw(work, false); shw(lab, false);
-      setMode('about');
+      pg.layer.style.clipPath = 'none'; pg.layer.style.zIndex = 3;
+      headSettle(key);
+      pg.name.style.transform = ''; big.style.transform = '';
+      l2Set(big, null); l2Set(pg.name, null); promote(pg.name, false);
+      shw(intro, false);
+      Object.keys(PAGES).forEach(k => { if (k !== key) shw(PAGES[k].layer, false); });
+      setMode(key);
       navBusy = false;
     });
   };
 
-  // The same move played backwards: the name runs right, back to where the home
-  // page keeps it, and the curtain comes in from the right behind it.
-  const toHome = () => {
-    if (navBusy || mode !== 'about') return;
+  // The same move played backwards: the name returns to where the home page
+  // keeps it and the curtain comes in from the opposite side.
+  const leave = () => {
+    const pg = PAGES[mode];
+    if (navBusy || !pg) return;
     navBusy = true;
-    setT(false); resetHover(); headClear(); promote(true);
+    setT(false); resetHover(); headClear(); promote(pg.name, true);
     intro.scrollTo({ top: 0, behavior: 'instant' });
     syncAbout();
     shw(intro, true);
     intro.style.zIndex = 4;
-    const dx = big.getBoundingClientRect().left - abtName.getBoundingClientRect().left;
-    const cross = navCross(false);
+    const dx = big.getBoundingClientRect().left - pg.name.getBoundingClientRect().left;
+    const cross = navCross(!pg.fromLeft);
+    const oH = l2Of(big), oP = l2Of(pg.name);
     let swapped = false;
     const step = e => {
-      intro.style.clipPath = 'inset(0 0 0 ' + ((1 - e) * 100).toFixed(3) + '%)';
+      const P = oP + (oH - oP) * e;
+      l2Set(big, P - oH); l2Set(pg.name, P - oP);
+      intro.style.clipPath = wipe(!pg.fromLeft, e);
       big.style.transform = 'translateX(' + (-dx * (1 - e)) + 'px)';
-      abtName.style.transform = 'translateX(' + (dx * e) + 'px)';
-      if (!swapped && e > cross) { swapped = true; paintNav('intro'); navInk(false); placeNav(true); }
+      pg.name.style.transform = 'translateX(' + (dx * e) + 'px)';
+      if (!swapped && e > cross) { swapped = true; paintNav('intro'); navInk(false); }
     };
     step(0);
     run(step).then(() => {
       intro.style.clipPath = 'none'; intro.style.zIndex = 2;
       headSettle('intro');
-      big.style.transform = ''; abtName.style.transform = ''; promote(false);
-      shw(abt, false);
+      big.style.transform = ''; pg.name.style.transform = '';
+      l2Set(big, null); l2Set(pg.name, null); promote(pg.name, false);
+      shw(pg.layer, false);
       setMode('intro');
-      updateHead();
       navBusy = false;
     });
   };
 
   const nav = t => {
-    if (t === 'work') return mode === 'about' ? toHome() : showWork(false);
-    if (t === 'about') return mode === 'intro' ? toAbout() : go('about');
-    if (t === 'intro' && mode === 'about') return toHome();
+    if (t === 'work') return PAGES[mode] ? leave() : showWork(false);
+    if (t === 'intro') return PAGES[mode] ? leave() : go('intro');
+    if (PAGES[t]) return mode === 'intro' ? enter(t) : go(t);
     go(t);
   };
   document.querySelectorAll('[data-go]').forEach(el => el.addEventListener('click', () => nav(el.dataset.go)));
@@ -257,21 +274,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (head) head.style.background = onDark ? '#0c0c0e' : '#fff';
     document.querySelectorAll('[data-ch]').forEach(el => {
       if (el.dataset.ch === 'name') el.style.color = onDark ? '#f5f5f7' : '#1a1a1a';
-      else el.style.color = onDark ? 'rgba(255,255,255,.65)' : '#8a8a8a';
+      else el.style.color = onDark ? '#fff' : '#1a1a1a';
     });
   };
-  const headName = $('hm-headname');
-  // The home page is one scroll now: the opening screen, then the work itself.
-  // The header name appears once the opening screen is behind you.
-  const updateHead = () => {
-    const on = mode !== 'intro' || intro.scrollTop > intro.clientHeight * .35;
-    headName.style.opacity = on ? 1 : 0;
-    headName.style.pointerEvents = on ? 'auto' : 'none';
-    // About keeps its single Work link on the left.
-    placeNav(mode === 'about' || (mode === 'intro' && !on));
-  };
   intro.addEventListener('scroll', () => requestAnimationFrame(() => {
-    updateHead();
     if (mode === 'intro') paintChrome();
   }), { passive: true });
 
@@ -279,7 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const showWork = instant => {
     if (mode !== 'intro') go('intro');
     intro.scrollTo({ top: work.offsetTop, behavior: instant ? 'instant' : 'smooth' });
-    requestAnimationFrame(() => { updateHead(); paintChrome(); });
+    requestAnimationFrame(paintChrome);
   };
 
   // One gesture moves one section. Mandatory snapping alone isn't enough: a
@@ -303,8 +309,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const tune = () => {
     syncAbout();
-    measureNav();
-    if (navLeft) navRow.style.transform = 'translateX(' + navDx + 'px)';
   };
   addEventListener('resize', tune);
   tune();
@@ -389,6 +393,44 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { root: abt, threshold: .8 }).observe(statFig);
   }
 
+  // The bench: cards tilt and sink with their distance from the middle of the
+  // rail, and straighten as one arrives. Driven off the rail's own scroll, so
+  // trackpad, swipe, drag and keyboard all feed the same thing.
+  const bench = $('hm-bench');
+  if (bench) {
+    const cards = [...bench.querySelectorAll('.wb-card')];
+    const lay = () => {
+      const r = bench.getBoundingClientRect();
+      if (!r.width) return;
+      const mid = r.left + r.width / 2;
+      cards.forEach((c, i) => {
+        const b = c.getBoundingClientRect();
+        const d = Math.max(-1, Math.min(1, (b.left + b.width / 2 - mid) / (r.width / 2)));
+        const a = Math.abs(d);
+        c.style.transform = 'translateY(' + (a * 16).toFixed(1) + 'px) rotate(' +
+                            ((i % 2 ? 1.9 : -2.4) * a).toFixed(2) + 'deg)';
+        c.style.opacity = (1 - a * .3).toFixed(3);
+      });
+    };
+    bench.addEventListener('scroll', () => requestAnimationFrame(lay), { passive: true });
+    addEventListener('resize', lay);
+    lay();
+
+    // A horizontal scrollbar is a poor handle on a desktop, so the rail drags.
+    // Touch is left alone: the browser already does this better than script can.
+    let down = false, sx = 0, sl = 0;
+    bench.addEventListener('pointerdown', e => {
+      if (e.pointerType === 'touch') return;
+      down = true; sx = e.clientX; sl = bench.scrollLeft;
+      bench.classList.add('is-drag');
+      bench.setPointerCapture(e.pointerId);
+    });
+    bench.addEventListener('pointermove', e => { if (down) bench.scrollLeft = sl - (e.clientX - sx); });
+    const release = () => { down = false; bench.classList.remove('is-drag'); };
+    bench.addEventListener('pointerup', release);
+    bench.addEventListener('pointercancel', release);
+  }
+
   const mq = $('hm-mq');
   if (mq) mq.style.animation = 'mq 10s linear infinite';
 
@@ -402,4 +444,47 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncAbout);
+
+  // Work footer's headline word alternates between what someone might be
+  // reaching out for.
+  const ctaWord = $('hm-cta-word');
+  if (ctaWord) {
+    const words = ['idea.', 'hire.'];
+    let wi = 0;
+    setInterval(() => {
+      ctaWord.classList.add('is-swap');
+      setTimeout(() => {
+        wi = (wi + 1) % words.length;
+        ctaWord.textContent = words[wi];
+        ctaWord.classList.remove('is-swap');
+      }, 250);
+    }, 2200);
+  }
+
+  // The ID card's clock appears twice (About page + Work footer), so every
+  // tick updates all instances rather than one element by id. Madrid's
+  // CET/CEST label is derived from the actual UTC offset, not hard-coded, so
+  // it keeps up with DST on its own.
+  const ctaTimes = document.querySelectorAll('.cta-time'), ctaTzs = document.querySelectorAll('.cta-tz');
+  if (ctaTimes.length) {
+    const MADRID = 'Europe/Madrid';
+    const offsetHours = date => {
+      const p = new Intl.DateTimeFormat('en-US', {
+        timeZone: MADRID, hour12: false,
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit'
+      }).formatToParts(date).reduce((a, x) => (a[x.type] = x.value, a), {});
+      const asUTC = Date.UTC(p.year, p.month - 1, p.day, p.hour === '24' ? 0 : p.hour, p.minute, p.second);
+      return Math.round((asUTC - date.getTime()) / 3600000);
+    };
+    const tick = () => {
+      const now = new Date();
+      const time = now.toLocaleTimeString('en-GB', { timeZone: MADRID, hour12: false });
+      const tz = offsetHours(now) === 2 ? 'CEST' : 'CET';
+      ctaTimes.forEach(el => { el.textContent = time; });
+      ctaTzs.forEach(el => { el.textContent = tz; });
+    };
+    tick();
+    setInterval(tick, 1000);
+  }
 });
