@@ -189,10 +189,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // lands before it's in risks measuring dx/l2Of against the fallback font's
   // metrics; if the swap then lands mid-tween, the two names reflow to
   // different widths independently and the wipe shows two misaligned copies
-  // instead of one. Waiting on fonts.ready first means the geometry below is
-  // always measured against the font that's actually on screen.
-  const whenFontsReady = fn => (document.fonts && document.fonts.status !== 'loaded')
-    ? document.fonts.ready.then(fn) : fn();
+  // instead of one. document.fonts.ready alone isn't enough — WebKit has been
+  // seen resolving it a frame or two before the swapped font is actually
+  // painted, so Safari still hit this after Chrome stopped. Two more rAFs
+  // after the promise settles gives that repaint somewhere to land before
+  // anything below measures a rect.
+  const nextPaint = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  const whenFontsReady = async fn => {
+    if (document.fonts && document.fonts.ready) { try { await document.fonts.ready; } catch (e) {} }
+    await nextPaint();
+    fn();
+  };
   const travelTo = toKey => {
     const from = NODES[mode], to = NODES[toKey];
     if (navBusy || !to || !from || toKey === mode) return;
