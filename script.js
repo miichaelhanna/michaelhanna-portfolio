@@ -230,9 +230,9 @@ document.addEventListener('DOMContentLoaded', () => {
     await nextPaint();
     fn();
   };
-  const travelTo = toKey => {
+  const travelTo = (toKey, onDone) => {
     const from = NODES[mode], to = NODES[toKey];
-    if (navBusy || !to || !from || toKey === mode) return;
+    if (navBusy || !to || !from || toKey === mode) { if (onDone) onDone(); return; }
     navBusy = true;
     whenFontsReady(() => {
     // The name can only travel if it is on screen to travel from. Deeper into
@@ -241,6 +241,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const travel = from.layer.scrollTop < from.layer.clientHeight * .5;
     if (travel) from.layer.scrollTo({ top: 0, behavior: 'instant' });
     setT(false); resetHover();
+    // Belt and braces: if any earlier travel was trampled and left forwards-
+    // filling animations parked on a wordmark or layer, sweep them before
+    // measuring — a stale transform here poisons dx and every later move.
+    Object.values(NODES).forEach(n => {
+      [n.layer, n.name, l2El(n.name)].forEach(el => {
+        if (el && el.getAnimations) el.getAnimations().forEach(a => a.cancel());
+      });
+    });
     // The header only goes transparent (so the curtain edge can run through
     // the top band) when departing from the top of a page, where the band
     // behind it is empty. Deep in a page there's real content scrolled under
@@ -281,22 +289,89 @@ document.addEventListener('DOMContentLoaded', () => {
       [l2El(from.name), 'transform', 'translateX(0px)', 'translateX(' + (oP - oH) + 'px)'],
       [l2El(to.name), 'transform', 'translateX(' + (oH - oP) + 'px)', 'translateX(0px)']
     ]).then(anims => {
-      clearTimeout(inkAt); clearTimeout(tintAt);
-      paintNav(toKey); navInk(toKey !== 'intro');
-      to.layer.style.clipPath = 'none'; to.layer.style.zIndex = toKey === 'intro' ? 2 : 3;
-      headSettle(toKey);
-      to.name.style.transform = ''; from.name.style.transform = '';
-      const fl2 = l2El(from.name), tl2 = l2El(to.name);
-      if (fl2) fl2.style.transform = ''; if (tl2) tl2.style.transform = '';
-      anims.forEach(a => a.cancel());
-      Object.keys(NODES).forEach(k => { if (k !== toKey) shw(NODES[k].layer, false); });
-      setMode(toKey);
-      navBusy = false;
+      // The lock and the animation sweep must survive anything the commit
+      // below throws — a stuck navBusy deadens every nav link on the site.
+      try {
+        clearTimeout(inkAt); clearTimeout(tintAt);
+        paintNav(toKey); navInk(toKey !== 'intro');
+        to.layer.style.clipPath = 'none'; to.layer.style.zIndex = toKey === 'intro' ? 2 : 3;
+        headSettle(toKey);
+        to.name.style.transform = ''; from.name.style.transform = '';
+        const fl2 = l2El(from.name), tl2 = l2El(to.name);
+        if (fl2) fl2.style.transform = ''; if (tl2) tl2.style.transform = '';
+        Object.keys(NODES).forEach(k => { if (k !== toKey) shw(NODES[k].layer, false); });
+        setMode(toKey);
+      } finally {
+        anims.forEach(a => a.cancel());
+        navBusy = false;
+        if (onDone) onDone();
+      }
     });
     });
   };
 
+  // Landing straight on About or After Hours — from a case study's nav, or a
+  // bookmark. Home is never shown, not even as a surface: the page is there
+  // from the first paint in its own colour, and the wordmark alone makes the
+  // move it makes when you come from home — sliding in from where home keeps
+  // it, on the same curve and clock, its second line settling into the
+  // page's alignment on the way — while the rest of the page fades in
+  // around it. The home name is measured while hidden; it's still laid out.
+  const landOn = toKey => {
+    const to = NODES[toKey];
+    const lift = () => document.documentElement.classList.remove('hm-landing');
+    go(toKey);
+    // go() swaps layers and recolours the header with their usual fades —
+    // a third of a second of home ghosting through. Nothing here fades:
+    // the change is committed with transitions off, and they come back
+    // once it's on screen.
+    const inks = [...document.querySelectorAll('[data-ch]')];
+    layers.forEach(x => x.style.transition = 'none');
+    if (head) head.style.transition = 'none';
+    inks.forEach(el => el.style.transition = 'none');
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      setT(true);
+      if (head) head.style.transition = 'background .3s';
+      inks.forEach(el => el.style.transition = 'color .3s');
+    }));
+    if (!to || still.matches) return lift();
+    navBusy = true;
+    const guard = setTimeout(() => { lift(); navBusy = false; }, 4000);
+    whenFontsReady(() => {
+      syncAbout();
+      const home = NODES.intro.name;
+      const dx = home.getBoundingClientRect().left - to.name.getBoundingClientRect().left;
+      const oH = l2Of(home), oP = l2Of(to.name);
+      // Everything on the page but the wordmark's own block.
+      const rest = [];
+      [...to.layer.children].forEach(el => {
+        if (!el.contains(to.name)) rest.push(el);
+        else [...el.children].forEach(c => { if (!c.contains(to.name)) rest.push(c); });
+      });
+      const fades = rest.map(el => el.animate(
+        [{ opacity: 0 }, { opacity: 0, offset: .3 }, { opacity: 1 }],
+        { duration: NAV_MS, easing: 'ease', fill: 'backwards' }));
+      const moves = animateNav([
+        [to.name, 'transform', 'translateX(' + dx + 'px)', 'translateX(0px)'],
+        [l2El(to.name), 'transform', 'translateX(' + (oH - oP) + 'px)', 'translateX(0px)']
+      ]);
+      lift();
+      moves.then(anims => {
+        clearTimeout(guard);
+        to.name.style.transform = '';
+        const l2 = l2El(to.name); if (l2) l2.style.transform = '';
+        anims.forEach(a => a.cancel()); fades.forEach(a => a.cancel());
+        navBusy = false;
+      });
+    });
+  };
+
   const nav = t => {
+    // go() and showWork() used to slip past the navBusy lock, so a click that
+    // routed to them mid-wipe mutated layer state under the in-flight travel —
+    // its fill:forwards transforms were never cancelled and the wordmark stayed
+    // parked off-position on every page. One gate for every nav path.
+    if (navBusy) return;
     if (t === 'work') return PAGES[mode] ? travelTo('intro') : showWork(false);
     if (t === 'intro') return PAGES[mode] ? travelTo('intro') : go('intro');
     if (PAGES[t]) return travelTo(t);
@@ -519,11 +594,54 @@ document.addEventListener('DOMContentLoaded', () => {
     bench.addEventListener('pointercancel', release);
   }
 
+  // Leaving for a case study. Every picture in the Work section is the exact
+  // hero of the page it opens, so instead of a new tab: everything but that
+  // picture fades, its on-screen rectangle (and the hover scale it's at) is
+  // handed over, and the case study starts with its hero in that spot and
+  // grows it into place (arrive.js). Modifier clicks keep their browser
+  // meaning — a cmd-click still opens a tab.
+  const cards = [...work.querySelectorAll('.wk-card')];
+  const depart = (card, url) => {
+    const pic = card.querySelector('.wk-pic'), img = pic && pic.querySelector('img');
+    if (still.matches || !pic) { location.href = url; return; }
+    const r = pic.getBoundingClientRect();
+    let sc = 1;
+    if (img) { const m = /matrix\(([\d.]+)/.exec(getComputedStyle(img).transform); if (m) sc = +m[1]; }
+    try {
+      sessionStorage.setItem('hm-arrive', JSON.stringify({
+        key: card.dataset.case, x: r.left, y: r.top, w: r.width, h: r.height,
+        radius: getComputedStyle(pic).borderTopLeftRadius,
+        img: card.dataset.hero, bg: card.dataset.heroBg || '#ececec', ty: 0, sc, t: Date.now()
+      }));
+    } catch (e) {}
+    work.classList.add('is-leaving'); card.classList.add('is-going');
+    setTimeout(() => { location.href = url; }, 300);
+  };
+  cards.forEach(card => card.addEventListener('click', e => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    e.preventDefault();
+    depart(card, card.getAttribute('href'));
+  }));
+  // A bfcache return (the case study's back arrow, or the browser's) brings
+  // the page back exactly as it was left — mid-fade. Undo that.
+  window.addEventListener('pageshow', e => {
+    if (!e.persisted) return;
+    work.classList.remove('is-leaving');
+    cards.forEach(c => c.classList.remove('is-going'));
+  });
+
   const mq = $('hm-mq');
   if (mq) mq.style.animation = 'mq 10s linear infinite';
 
   const h = (location.hash || '').replace('#', '');
-  if (h === 'lab' || h === 'about') go(h);
+  if (h === 'lab' || h === 'about') {
+    // Landing straight on About or After Hours — from a case study's nav, or
+    // a bookmark — arrives the way it does from home: the name travels and
+    // the curtain wipes the page in, rather than the page simply being
+    // there. Nobody is sent through home to get it; home is only the surface
+    // the wipe crosses. Reduced motion keeps the plain cut.
+    landOn(h);
+  }
   else {
     go('intro');
     if (h === 'work') {

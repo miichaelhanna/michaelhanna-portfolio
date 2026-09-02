@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Openbank USA · Case Study · Michael Hanna</title>
+<meta name="theme-color" content="#ffffff">
+<meta name="description" content="The five minutes that decided whether a bank was real: how Openbank launched in all fifty states with one product, funded in under five minutes, and took two billion dollars in deposits in ten weeks.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The five minutes that decided whether a bank was real">
+<meta property="og:description" content="Openbank had already won in Spain, Germany and Argentina. Launching in all fifty states meant deposits, fast, against the best fintech ever built.">
+<meta property="og:image" content="https://www.michaelhanna.info/assets/openbank-billboards.jpg">
+<meta property="og:url" content="https://www.michaelhanna.info/openbank">
+<meta name="twitter:card" content="summary_large_image">
+<script>
+  // Arriving from the home page: the picture that was clicked there is this
+  // page's hero, and it is still on screen at a known spot. Flag the document
+  // before first paint so the page starts hidden behind a stand-in placed in
+  // that spot (top of body), which arrive.js then grows into the real hero.
+  (function () {
+    try {
+      var raw = sessionStorage.getItem('hm-arrive');
+      if (!raw) return;
+      sessionStorage.removeItem('hm-arrive');
+      var a = JSON.parse(raw);
+      if (a.key !== 'openbank' || Date.now() - a.t > 4000) return;
+      if (matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+      window.__hmArrive = a;
+      document.documentElement.classList.add('hm-arriving');
+    } catch (e) {}
+  })();
+</script>
+<style>
+  html.hm-arriving body > :not(nav):not(#hm-safe-top):not(#hm-safe-bot):not(#pg):not(#hm-arrive){opacity:0}
+  #hm-arrive{position:fixed;z-index:40;overflow:hidden;pointer-events:none;background:#ececec;transform:translateZ(0)}
+  #hm-arrive img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+  /* The way back to the section this case was opened from: one arrow, in
+     the nav's own type, that leans the way it points on hover. */
+  a.hm-back{display:inline-block;font-size:.95rem;line-height:1;margin-right:2px;transition:transform .35s cubic-bezier(.22,1,.36,1)}
+  @media (hover:hover){a.hm-back:hover{transform:translateX(-4px)}}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Openbank US's own palette, sampled from openbank.us: warm cream panels,
+   near-black type, pure red as the single accent. Clean and precise. */
+:root{--ink:#222222;--navy:#222222;--red:#FF0000;--red-ink:#D40000;--grey:#F8F7F3;--grey-line:#E8E5DE;--grey-ink:#6F6A62;--soft:#8C877E;--card-line:#ECE9E2}
+html{scroll-behavior:smooth;overflow-x:clip}
+body{margin:0;background:#fff;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,'Helvetica Neue',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+::selection{background:var(--red);color:#fff}
+a{color:var(--ink);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px;text-decoration-color:var(--red)}
+/* Hover effects are gated on a real pointer: a tap latches :hover until the
+   next tap elsewhere, and leaving the page never fires mouseleave. */
+@media (hover:hover){a:hover{text-decoration-thickness:2px}}
+a.plain,a.plain:hover{text-decoration:none}
+a.hm-nav-link{color:#1a1a1a;text-decoration:none}
+@media (hover:hover){a.hm-nav-link:hover{color:#666;text-decoration:none}}
+@media (max-width:700px){nav a.hm-nav-link{padding:13px 6px;margin:-13px -6px}}
+img{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-user-drag:none;pointer-events:none}
+.mono{font-family:'IBM Plex Mono',monospace}
+.kick{font-family:'IBM Plex Mono',monospace;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--soft)}
+.band{margin-left:-24px;margin-right:-24px}
+
+/* ————— Hero: the billboards, with the headline over them ————— */
+.hero{max-width:1080px;margin:clamp(10px,2vh,24px) auto 0;border-radius:clamp(16px,3vw,28px);position:relative;overflow:hidden;min-height:clamp(420px,62vh,640px);display:flex;align-items:flex-end;color:#fff;background:var(--navy)}
+.hero .bg{position:absolute;inset:0;background:url(assets/openbank-billboards.jpg) center/cover no-repeat;transform:scale(1.04)}
+.hero .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,20,20,0) 0%,rgba(20,20,20,.22) 40%,rgba(20,20,20,.84) 100%)}
+.hero .inner{position:relative;padding:clamp(40px,7vh,80px) clamp(24px,6vw,72px);width:100%;box-sizing:border-box}
+.hero h1{margin:0;font-weight:700;font-size:clamp(2.3rem,5.8vw,4.4rem);line-height:1.04;letter-spacing:-.034em;text-wrap:balance;max-width:16ch;text-shadow:0 2px 24px rgba(0,0,0,.25)}
+.hero p{margin:18px 0 0;max-width:600px;font-size:clamp(1.04rem,1.55vw,1.24rem);line-height:1.56;color:rgba(255,255,255,.88);text-wrap:pretty}
+.attrib{max-width:1080px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:20px;padding:clamp(18px,3vh,28px) clamp(4px,1vw,12px) 0}
+.attrib .who{display:flex;align-items:center;gap:14px;font-family:'IBM Plex Mono',monospace;font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--grey-ink);text-align:left}
+.attrib .who img{height:30px;width:auto;display:block}
+.attrib .span{display:flex;align-items:center;gap:12px;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.8rem;letter-spacing:.1em;color:var(--ink)}
+.attrib .span .rule{position:relative;width:clamp(56px,9vw,120px);height:2px;background:var(--grey-line);overflow:hidden}
+.attrib .span .rule i{position:absolute;inset:0;background:var(--red);transform:scaleX(0);transform-origin:left;transition:transform 1.4s cubic-bezier(.22,1,.36,1) .4s}
+.attrib.in .span .rule i{transform:scaleX(1)}
+@media (max-width:640px){.attrib{flex-direction:column;gap:16px}.attrib .who{flex-direction:column;gap:10px;text-align:center}}
+
+/* ————— Body copy ————— */
+.prose{max-width:660px;margin:0 auto;font-size:clamp(1.04rem,1.35vw,1.16rem);line-height:1.72;color:#1b1f20}
+.prose p{margin:0 0 1.35em}
+.prose b{font-weight:650}
+h2.sec{max-width:660px;margin:clamp(52px,9vh,100px) auto 22px;font-weight:700;font-size:clamp(1.45rem,2.5vw,1.95rem);line-height:1.22;letter-spacing:-.022em}
+h2.sec .no{font-family:'IBM Plex Mono',monospace;display:block;font-weight:500;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;margin-bottom:12px;color:var(--red-ink)}
+.dropcap::first-letter{float:left;font-size:5em;line-height:.8;padding:.05em .12em 0 0;font-weight:800;color:var(--red)}
+.decision{max-width:660px;margin:clamp(30px,5vh,52px) auto;font-weight:700;font-size:clamp(1.5rem,3.2vw,2.4rem);line-height:1.18;letter-spacing:-.028em;color:var(--navy);text-wrap:balance}
+.decision .lbl{display:block;font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--red-ink);margin-bottom:14px}
+
+/* ————— Scroll-driven stages ————— */
+.stage-track{position:relative}
+/* The pinned block carries the section's heading and intro together with the
+   stage, so the reader sees they belong together; when the animation ends the
+   pin releases and the page scrolls on. --stick is set by script so the block
+   never runs past the bottom of the viewport. */
+.stage{position:sticky;top:var(--stick,80px);display:block;padding:0 0 16px}
+.stage .pinned h2.sec{margin-top:0}
+.stage .pinned .prose p:last-child{margin-bottom:clamp(18px,3vh,28px)}
+.stage-in{margin:0 auto}
+.stage-in{width:min(600px,100%)}
+.stage-in.wide{width:min(900px,100%)}
+.stage-tag{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink);text-align:center;margin-bottom:10px;font-weight:600}
+.sprog{display:block;width:min(200px,50%);height:2px;margin:0 auto 16px;background:var(--grey-line);border-radius:2px;overflow:hidden}
+.sprog i{display:block;height:100%;width:0;background:var(--red)}
+.card{position:relative;background:#fff;border:1px solid var(--card-line);border-radius:18px;padding:clamp(20px,3.5vw,30px);box-sizing:border-box;box-shadow:0 18px 50px rgba(34,34,34,.08)}
+.panel{background:var(--grey);border-radius:clamp(16px,3vw,28px);padding:clamp(26px,4.5vh,44px) clamp(22px,4vw,44px);box-sizing:border-box}
+
+/* 01 · the three forces: each takes the room in turn */
+.forces{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.force{background:#fff;border-radius:14px;padding:20px 18px;border-top:3px solid var(--grey-line);opacity:.42;transform:translateY(0);transition:opacity .35s,transform .45s cubic-bezier(.22,1,.36,1),border-color .35s,box-shadow .35s}
+.force .fk{font-family:'IBM Plex Mono',monospace;font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--grey-ink)}
+.force h4{margin:10px 0 0;font-weight:700;font-size:1.05rem;letter-spacing:-.014em;line-height:1.3;color:var(--navy)}
+.force p{margin:8px 0 0;font-size:.92rem;line-height:1.58;color:#3b444c}
+.force.on{opacity:1;transform:translateY(-6px);border-top-color:var(--red);box-shadow:0 16px 36px rgba(34,34,34,.12)}
+.force-line{margin:18px auto 0;max-width:46ch;text-align:center;font-size:clamp(1rem,1.5vw,1.18rem);line-height:1.5;color:var(--navy);font-weight:650;opacity:0;transform:translateY(8px);transition:opacity .5s,transform .5s}
+.force-line.on{opacity:1;transform:none}
+@media (max-width:700px){.forces{grid-template-columns:1fr;gap:10px}.force{padding:16px 16px}.force.on{transform:none}}
+
+/* 03 · the cut: nine products in the plan, one that shipped */
+.cut-n{text-align:center;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.05em;line-height:.9;font-size:clamp(5rem,20vw,13rem);color:var(--navy);transition:color .35s}
+.cut-n.one{color:var(--red)}
+.cut-k{text-align:center;font-family:'IBM Plex Mono',monospace;font-size:.64rem;letter-spacing:.18em;text-transform:uppercase;color:var(--grey-ink);margin-top:8px}
+.cutwrap{position:relative;margin-top:clamp(18px,3vh,30px);min-height:clamp(120px,18vh,170px);display:flex;align-items:center;justify-content:center}
+.cutgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(8px,1.6vh,16px) clamp(14px,3vw,40px);width:100%;text-align:center;transition:opacity .4s}
+.cutgrid span{font-weight:700;font-size:clamp(1.05rem,2.6vw,1.8rem);letter-spacing:-.024em;line-height:1.1;color:var(--navy);transition:opacity .35s,transform .35s,color .35s}
+.cutpay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;opacity:0;pointer-events:none}
+.cutpay div{font-weight:700;font-size:clamp(1.3rem,3.2vw,2.4rem);letter-spacing:-.028em;line-height:1.14;max-width:24ch;color:var(--navy)}
+.cutpay div b{color:var(--red)}
+
+/* 04 · what the five minutes had to contain: his three decisions as cards */
+.dec-band{background:var(--grey);padding:clamp(40px,6.5vh,72px) 0;margin-top:clamp(28px,4.5vh,48px)}
+.dec-head{max-width:660px;margin:0 auto clamp(22px,3.5vh,34px);padding:0 24px;text-align:center}
+.dec-head .kick{color:var(--grey-ink)}
+.dec-head h3{margin:10px 0 0;color:var(--navy);font-weight:700;font-size:clamp(1.3rem,2.4vw,1.8rem);letter-spacing:-.02em;line-height:1.25;text-wrap:balance}
+.decs{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:1000px;margin:0 auto;padding:0 24px;box-sizing:border-box}
+.dec{background:#fff;border-radius:16px;padding:24px 22px;box-shadow:0 8px 24px rgba(34,34,34,.06);transition:transform .35s cubic-bezier(.22,1,.36,1),box-shadow .35s}
+.dec .dn{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--red-ink)}
+.dec h4{margin:10px 0 0;font-weight:700;font-size:1.1rem;letter-spacing:-.016em;line-height:1.28;color:var(--navy)}
+.dec p{margin:10px 0 0;font-size:.95rem;line-height:1.62;color:#3b444c}
+@media (hover:hover){.dec:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(34,34,34,.12)}}
+.swipe-hint{display:none}
+@media (max-width:700px){
+  .decs{display:grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:86%;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:6px}
+  .decs::-webkit-scrollbar{display:none}
+  .dec{scroll-snap-align:center}
+  .swipe-hint{display:block;margin-top:14px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--grey-ink)}
+}
+
+/* 05 · the rails: one promise, three ways of keeping it */
+.rails{position:relative}
+.rails svg{width:100%;height:auto;overflow:visible;display:block}
+.railcap{margin:18px auto 0;max-width:52ch;text-align:center;min-height:3.2em;font-size:clamp(.98rem,1.4vw,1.1rem);line-height:1.55;color:#3b444c}
+.railcap b{font-weight:650;color:var(--navy)}
+
+/* 06 · four cities, one sentence: the navy band */
+.city-band{background:var(--navy);padding:clamp(56px,9vh,100px) 24px;margin-top:clamp(40px,6.5vh,72px);text-align:center;color:#fff}
+.cities{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px;font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.45)}
+.cities span{opacity:.35;transition:opacity .4s,color .4s}
+.cities span.on{opacity:1;color:#fff}
+.city-line{margin:clamp(20px,3.5vh,30px) auto 0;max-width:18ch;font-weight:700;font-size:clamp(1.8rem,5vw,3.4rem);line-height:1.1;letter-spacing:-.03em;text-wrap:balance;opacity:0;transform:translateY(10px);transition:opacity .6s,transform .6s}
+.city-line.on{opacity:1;transform:none}
+.city-line b{color:var(--red)}
+
+/* 07 · what the numbers said: the counter, on a grey panel */
+.money-wrap{max-width:900px;margin:clamp(22px,3.5vh,34px) auto 0}
+.money{text-align:center}
+.money .mk{font-family:'IBM Plex Mono',monospace;font-size:.64rem;letter-spacing:.18em;text-transform:uppercase;color:var(--grey-ink)}
+.money .mn{display:flex;align-items:baseline;justify-content:center;gap:.04em;margin-top:8px;font-weight:700;letter-spacing:-.05em;line-height:.9;font-variant-numeric:tabular-nums;color:var(--red)}
+.money .mn .s{font-size:clamp(2.4rem,7vw,5.6rem)}
+.money .mn .n{font-size:clamp(4.4rem,17vw,12rem)}
+.money .bar{position:relative;max-width:min(680px,86%);margin:clamp(14px,2.4vh,26px) auto 0;height:2px;background:var(--grey-line)}
+.money .bar i{position:absolute;left:0;top:0;height:2px;width:0;background:var(--red)}
+.money .ml{margin:clamp(12px,2vh,22px) auto 0;max-width:36ch;font-size:clamp(1rem,1.5vw,1.24rem);line-height:1.45;color:var(--navy);font-weight:600;min-height:2.9em}
+.resgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(14px,3vw,30px);max-width:min(720px,100%);margin:clamp(18px,3vh,32px) auto 0;padding-top:clamp(14px,2.2vh,22px);border-top:1px solid var(--grey-line);text-align:center;opacity:0;transition:opacity .5s}
+.resgrid .rv{font-weight:700;font-size:clamp(1.3rem,3vw,2.1rem);letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums;color:var(--navy);white-space:nowrap}
+.resgrid .rk{margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--grey-ink)}
+@media (max-width:520px){.resgrid{grid-template-columns:1fr;gap:16px}}
+
+/* ————— More work: the other two cases, as cards on the page. Desktop
+   two-up with hover lift, mobile a swipe row. ————— */
+.legal{max-width:1080px;margin:clamp(18px,3vh,28px) auto 0;padding-top:10px;border-top:1px solid #ECE9E2;font-family:'IBM Plex Mono',monospace;font-size:.54rem;letter-spacing:.02em;line-height:1.55;color:#B4B4B8}
+.more{max-width:1080px;margin:clamp(40px,7vh,72px) auto 0;padding-bottom:clamp(48px,8vh,96px)}
+.more .mk{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:#8a8f8c}
+.more-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+.mcard{display:block;text-decoration:none;color:inherit;border-radius:18px;overflow:hidden;background:#fff;border:1px solid #ECE9E2;box-shadow:0 8px 24px rgba(20,20,20,.06);transition:transform .35s cubic-bezier(.22,1,.36,1),box-shadow .35s}
+.mcard img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
+.mcard .mb{padding:18px 20px 22px}
+.mcard .mn{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--red-ink)}
+.mcard h3{margin:6px 0 0;font-weight:700;font-size:clamp(1.15rem,1.9vw,1.4rem);letter-spacing:-.02em;line-height:1.2}
+.mcard h3 span{display:inline-block;margin-left:.3em;color:var(--red-ink);transition:transform .4s cubic-bezier(.22,1,.36,1)}
+.mcard p{margin:6px 0 0;font-size:.95rem;line-height:1.5;color:#666}
+@media (hover:hover){.mcard:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(20,20,20,.12)}.mcard:hover h3 span{transform:translateX(6px)}}
+@media (max-width:700px){
+  .more-grid{display:grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:86%;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:6px}
+  .more-grid::-webkit-scrollbar{display:none}
+  .mcard{scroll-snap-align:center}
+}
+
+/* shared footer chrome, kept in sync with the rest of the site by hand */
+#hm-cta-head{margin:0;font-weight:700;letter-spacing:-.035em;line-height:1.04;
+    font-size:clamp(2.1rem,5.6vw,4.4rem);color:#fff;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,'Helvetica Neue',Helvetica,Arial,sans-serif}
+#hm-cta-head .cta-arrow{display:inline-block;padding:0 .12em;color:rgba(245,245,247,.45)}
+#hm-cta-head .cta-word{display:inline-block;min-width:5ch;text-align:left;transition:opacity .25s ease}
+#hm-cta-head .cta-word.is-swap{opacity:0}
+#hm-cta-actions{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin:clamp(28px,4.5vh,44px) 0 0}
+.cta-btn{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.1em;
+    text-transform:uppercase;color:#fff;text-decoration:none;background:none;
+    border:1.5px solid rgba(245,245,247,.35);border-radius:999px;
+    padding:14px 26px;transition:background .25s,color .25s,border-color .25s;display:inline-block}
+/* Gated on a real pointer: a tap latches :hover until the next tap, so a touch
+   device (or a return from the mail client) would leave the button stuck in
+   its clicked-looking state. */
+@media (hover:hover){.cta-btn:hover{background:#fff;color:#0c0c0e;border-color:#fff;text-decoration:none}}
+.cta-id{margin:0;text-align:center;font-size:.92rem;font-weight:500;color:rgba(245,245,247,.6);line-height:1.5}
+.cta-name{font-weight:500;color:rgba(245,245,247,.6)}
+.cta-badges{display:flex;justify-content:center;align-items:center;gap:9px;margin:clamp(8px,1.2vh,12px) 0 0}
+.cta-badge{display:flex;align-items:center;justify-content:center;color:rgba(245,245,247,.6)}
+.cta-badge svg{display:block;width:20px;height:20px}
+.cta-badge-text{font-size:.5rem;font-weight:700;letter-spacing:.03em;line-height:1.15;text-align:left;white-space:nowrap;color:rgba(245,245,247,.6)}
+.cta-clock{margin-top:clamp(22px,3.5vh,34px);font-weight:700;letter-spacing:.06em;font-variant-numeric:tabular-nums;color:rgba(245,245,247,.85)}
+</style>
+</head>
+<body>
+
+<script>
+  // The stand-in for the picture handed over from the home page — built
+  // here, before any content, so it is on screen from the very first paint.
+  (function () {
+    var a = window.__hmArrive; if (!a) return;
+    var c = document.createElement('div'); c.id = 'hm-arrive';
+    c.style.cssText = 'left:' + a.x + 'px;top:' + a.y + 'px;width:' + a.w + 'px;height:' + a.h + 'px;border-radius:' + a.radius + ';background:' + a.bg;
+    if (a.img) {
+      var i = document.createElement('img'); i.src = a.img; i.alt = '';
+      i.style.transform = 'translate3d(0,' + (a.ty || 0) + '%,0) scale(' + (a.sc || 1) + ')';
+      c.appendChild(i);
+    }
+    document.body.appendChild(c);
+  })();
+</script>
+
+<div id="hm-safe-top" aria-hidden="true" style="position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:#fff;z-index:90;pointer-events:none"></div>
+<div id="hm-safe-bot" aria-hidden="true" style="position:fixed;bottom:0;left:0;right:0;height:env(safe-area-inset-bottom,0px);background:#fff;z-index:90;pointer-events:none"></div>
+
+<div id="pg" style="position:fixed;top:0;left:0;height:2px;width:0;background:var(--red);z-index:60"></div>
+
+<nav style="position:sticky;top:0;z-index:50;background:#fff;display:flex;justify-content:space-between;align-items:center;gap:18px;padding:calc(20px + env(safe-area-inset-top,0px)) clamp(22px,6vw,96px) 20px;font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:lowercase">
+  <span style="display:flex;gap:clamp(16px,3vw,30px)">
+    <a href="/#work" class="hm-nav-link hm-back" aria-label="Back to selected products" title="Back to selected products">←</a>
+    <a href="/#about" class="hm-nav-link" style="white-space:nowrap">About</a>
+    <a href="/#work" class="hm-nav-link" style="text-decoration:underline;text-underline-offset:5px;white-space:nowrap">Work</a>
+  </span>
+  <a href="/#lab" class="hm-nav-link" style="margin-left:auto;white-space:nowrap">After hours</a>
+</nav>
+
+<article style="position:relative;background:#fff;padding:0 24px">
+
+  <header class="hero" id="hero">
+    <div class="bg" aria-hidden="true"></div>
+    <div class="shade" aria-hidden="true"></div>
+    <div class="inner">
+      <h1>The five minutes that decided whether a bank was real</h1>
+      <p>Openbank had already won in Spain, Germany and Argentina. Launching in all fifty states meant deposits, fast, against the best fintech ever built.</p>
+    </div>
+  </header>
+  <div class="attrib" id="attrib">
+    <div class="who"><img src="lanyard/logos/openbank-us.svg" alt="Openbank by Santander"><span>U.S. launch</span></div>
+    <div class="span" aria-label="2020 to 2023"><span>2020</span><span class="rule"><i></i></span><span>2023</span></div>
+  </div>
+
+  <div class="prose" style="margin-top:clamp(44px,7.5vh,80px)">
+    <p data-fx="" class="dropcap">The brief we were given did not describe a customer at all. It described a business need: <b>deposits, fast, nationwide, compliant on day one</b>, to fund a lending pipeline that was already counting on the money. Openbank had launched before, in Spain, Germany and Argentina, and won. America was different in one specific way. Every customer here had already seen every fintech pitch, and most were carrying a perfectly good money app in their pocket.</p>
+    <p data-fx="">Deposits do not arrive in bulk. They arrive one person at a time, each of them alone with a phone, deciding. That reframed the question we were actually answering. Not how to sell the bank. Which product had to exist before a single transfer could happen at all.</p>
+    <p data-fx="">Everything my team spent a year on happened inside a new customer's first five minutes.</p>
+  </div>
+
+  <div class="stage-track" id="forces-track">
+    <div class="stage">
+      <div class="pinned">
+  <h2 class="sec" data-fx=""><span class="no">01</span>Three forces, and nothing that satisfied all three</h2>
+  <div class="prose">
+    <p data-fx="">The year was governed by three pressures that did not agree. The business needed velocity, because deposits fund lending and there was no second attempt. Customers needed the standard set by the apps already on their phones: instant onboarding, instant confirmation, anything slower reading as legacy. Compliance needed fifty states and zero mistakes: KYC (know your customer), AML (anti-money-laundering) and fraud prevention that could not fail publicly.</p>
+    <p data-fx="">Every decision that follows is a trade between those three. It helps to see them pulling.</p>
+  </div>
+      </div>
+<div class="stage-in wide">
+      <div class="stage-tag">The three forces</div>
+      <span class="sprog" aria-hidden="true"><i id="forces-prog"></i></span>
+      <div class="panel">
+        <div class="forces">
+          <div class="force" data-f="0"><div class="fk">Business</div><h4>Velocity, or the window closes</h4><p>Deposits fund lending. No time for iteration, polish, or a second attempt.</p></div>
+          <div class="force" data-f="1"><div class="fk">Customers</div><h4>Cash App is the baseline, not the ceiling</h4><p>Seamless onboarding. Instant confirmation. Anything less reads as legacy.</p></div>
+          <div class="force" data-f="2"><div class="fk">Compliance</div><h4>Fifty states, zero mistakes</h4><p>KYC. AML. Fraud prevention that cannot fail publicly, immediately.</p></div>
+        </div>
+        <div class="force-line" id="force-line">Every decision that follows is a trade between those three.</div>
+      </div>
+    </div></div>
+  </div>
+
+  <h2 class="sec" data-fx=""><span class="no">02</span>I signed up for Cash App. Then SoFi. Then Chime.</h2>
+  <div class="prose">
+    <p data-fx="">Each time with the same question in mind: <b>when did I decide this bank was real?</b> We mapped the journeys, audited the onboarding flows, and put that question to everyone we interviewed, both people who had recently switched banks and people who had given up on banks altogether.</p>
+    <p data-fx="">The answers barely varied. It was not the sign-up page, and it was not the card arriving in the mail. It was the first time money moved and landed. Before that, a bank is a set of promises on a screen. After it, the relationship exists.</p>
+    <p data-fx="">Using the competition rather than reading about it is what made the difference visible. On a feature chart these apps sit in roughly the same place. In the flows they do not. Where a first transfer confirmed quickly, the whole product changed character. Where the confirmation was slow or vague, nothing further down the app recovered it.</p>
+  </div>
+
+  <p class="decision" data-fx=""><span class="lbl">What the research settled</span>The funding moment is the product. Everything before it is theatre, and everything after it depends on that one transfer having worked.</p>
+
+  <div class="prose">
+    <p data-fx="">Which left an uncomfortable conclusion in the room. The roadmap described a full-service bank: checking, debit, bill pay, transfers, savings, investing, budgeting, rewards, credit. Nine products, one year, and eight of them nobody would reach until the ninth worked.</p>
+  </div>
+
+  <div class="stage-track" id="cut-track">
+    <div class="stage">
+      <div class="pinned">
+  <h2 class="sec" data-fx=""><span class="no">03</span>Nine sponsors, one launch date</h2>
+  <div class="prose">
+    <p data-fx="">Nine products also meant nine people accountable for shipping one, and none had volunteered to go last.</p>
+  </div>
+      </div>
+<div class="stage-in wide">
+      <div class="stage-tag" id="cut-kick">Products in the plan</div>
+      <span class="sprog" aria-hidden="true"><i id="cut-prog"></i></span>
+      <div class="panel">
+        <div class="cut-n" id="cut-n">9</div>
+        <div class="cutwrap">
+          <div class="cutgrid" id="cutgrid">
+            <span data-feat="">Checking</span><span data-feat="">Debit cards</span><span data-feat="">Bill pay</span>
+            <span data-feat="">Transfers</span><span data-feat="" data-keep="">Savings</span><span data-feat="">Investing</span>
+            <span data-feat="">Budgeting</span><span data-feat="">Rewards</span><span data-feat="">Credit</span>
+          </div>
+          <div class="cutpay" id="cutpay"><div>One product. <b>A high-yield savings account, funded in under five minutes.</b></div></div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="prose" style="margin-top:clamp(16px,3vh,28px)">
+    <p data-fx="">So the argument was not about value. It was about sequence. Bill pay, cards, transfers and investing each assume an account with money in it. Savings, funded in minutes, is what creates one. Going first was not a preference; it was the condition the other eight needed in order to exist at all.</p>
+    <p data-fx="">The cut had a real price, and it is worth saying plainly. A one-product bank compares badly against a full-service app and gives a customer fewer reasons to stay past the first month. We took that exposure knowingly, because the alternative was nine unfinished products arriving late in a market that decides in five minutes.</p>
+  </div>
+
+  <h2 class="sec" data-fx=""><span class="no">04</span>What the five minutes had to contain</h2>
+  <div class="prose">
+    <p data-fx="">Calling the funding moment the product is only useful if you can say where it ends. Ours ran from opening the app to money confirmed in the account: identity established, an outside account linked and verified, a transfer sent, and a confirmation the customer could believe. Under five minutes, on a phone, on the first attempt.</p>
+    <p data-fx="">That line did the rest of the year's prioritisation for us. Inside it, work was launch-blocking and got everyone's attention. Outside it, work was deferred.</p>
+    <p data-fx="">It also settled what "done" meant. A step that worked most of the time was not done, because nobody making a first transfer to an unfamiliar bank tries twice. Three decisions came out of that standard, and each one is a trade that shows up on a new customer's screen.</p>
+  </div>
+
+  <div class="band dec-band" data-fx="">
+    <div class="dec-head">
+      <div class="kick">Three decisions</div>
+      <h3>Each one a trade that shows up on the screen</h3>
+    </div>
+    <div class="decs">
+      <div class="dec">
+        <div class="dn">Decision 01</div>
+        <h4>Instant verification, not three-day micro-deposits</h4>
+        <p>Micro-deposits were the conventional choice and the easier one to defend in a fraud review. They also put three days between a customer's decision and its confirmation. In a market where instant is the baseline, that gap is where accounts are abandoned, so verification had to finish inside the session, and the risk of finishing it there had to be carried elsewhere.</p>
+      </div>
+      <div class="dec">
+        <div class="dn">Decision 02</div>
+        <h4>A visible compliance wait</h4>
+        <p>Identity and anti-money-laundering (AML) checks happen whether or not anyone designs around them. Undesigned, they read as an unexplained pause: the exact moment a new customer assumes something has broken and closes the app. We said what was happening, how long it would take, and what came next. The most regulated step in the flow became one of the most carefully written.</p>
+      </div>
+      <div class="dec">
+        <div class="dn">Decision 03</div>
+        <h4>Failure states with words of their own</h4>
+        <p>For the person standing at the funding moment, the edge case is the product. Timeouts, delayed settlement and fraud review were written as flows with their own copy and their own next step, rather than routed to a generic error screen, and they were reviewed as closely as the path where everything works.</p>
+      </div>
+    </div>
+    <div class="swipe-hint">swipe →</div>
+  </div>
+
+  <div class="stage-track" id="rails-track">
+    <div class="stage">
+      <div class="pinned">
+  <h2 class="sec" data-fx=""><span class="no">05</span>Owning the moment meant owning its failures</h2>
+  <div class="prose">
+    <p data-fx="">Once the moment is the product, a payment failure is not an infrastructure incident. It is the product failing in front of someone deciding, right then, whether to trust a bank they had never heard of a week ago. Rail availability stopped being an engineering matter and became a product one.</p>
+    <p data-fx="">So we specified the moment to survive itself: one promise to the customer and three ways of keeping it. A transfer leaves on ACH (Automated Clearing House, the bank-to-bank network). If ACH fails it reroutes to RTP (Real-Time Payments, the instant rail). If RTP is unavailable, a debit top-up through Plaid, the service that links an app to a customer's existing bank account, carries it. The customer never hits a wall.</p>
+  </div>
+      </div>
+<div class="stage-in wide">
+      <div class="stage-tag">One promise, three rails</div>
+      <span class="sprog" aria-hidden="true"><i id="rails-prog"></i></span>
+      <div class="card rails">
+        <svg viewBox="0 0 860 300" aria-label="Diagram: a transfer travels the ACH lane; when it becomes unavailable it drops to the RTP lane, then to a debit top-up lane, so the customer never hits a wall.">
+          <text x="60" y="30" style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;fill:#222222">CUSTOMER</text>
+          <text x="800" y="272" text-anchor="end" style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;fill:#222222">FUNDED</text>
+          <text x="60" y="58" id="t-ach" style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;fill:#8C877E;transition:fill .4s">ACH</text>
+          <text x="60" y="138" id="t-rtp" style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;fill:#8C877E;transition:fill .4s">RTP</text>
+          <text x="60" y="218" id="t-deb" style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;fill:#8C877E;transition:fill .4s">DEBIT TOP-UP · PLAID</text>
+          <line x1="60" y1="70" x2="430" y2="70" stroke="#222222" stroke-width="1.5" opacity=".16"></line>
+          <line id="achpost" x1="430" y1="70" x2="800" y2="70" stroke="#222222" stroke-width="1.5" opacity=".16" style="transition:opacity .5s"></line>
+          <line x1="60" y1="150" x2="560" y2="150" stroke="#222222" stroke-width="1.5" opacity=".16"></line>
+          <line id="rtppost" x1="560" y1="150" x2="800" y2="150" stroke="#222222" stroke-width="1.5" opacity=".16" style="transition:opacity .5s"></line>
+          <line x1="60" y1="230" x2="800" y2="230" stroke="#222222" stroke-width="1.5" opacity=".16"></line>
+          <line x1="430" y1="70" x2="430" y2="150" stroke="#222222" stroke-width="1.5" opacity=".12" stroke-dasharray="2 6"></line>
+          <line x1="560" y1="150" x2="560" y2="230" stroke="#222222" stroke-width="1.5" opacity=".12" stroke-dasharray="2 6"></line>
+          <text id="una" x="444" y="58" opacity="0" style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1.5px;fill:#8C877E;transition:opacity .5s">UNAVAILABLE</text>
+          <text id="unr" x="574" y="138" opacity="0" style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1.5px;fill:#8C877E;transition:opacity .5s">UNAVAILABLE</text>
+          <path id="route" d="M60 70 H430 V150 H560 V230 H800" fill="none" stroke="none"></path>
+          <path id="live" d="M60 70 H430 V150 H560 V230 H800" fill="none" stroke="#FF0000" stroke-width="3" stroke-linecap="round"></path>
+          <circle cx="60" cy="70" r="5" fill="#222222"></circle>
+          <circle cx="800" cy="230" r="5" fill="#222222"></circle>
+          <circle id="rdot" r="7" fill="#FF0000" cx="60" cy="70"></circle>
+        </svg>
+        <div class="railcap" id="railcap"><b>A transfer leaves on ACH.</b> The default rail: cheap, proven, slow.</div>
+      </div>
+    </div></div>
+  </div>
+
+  <h2 class="sec" data-fx=""><span class="no">06</span>Three cities, one sentence</h2>
+  <div class="prose">
+    <p data-fx="">Teams in London, Madrid and Boston. That arrangement usually loses its time to translation between teams rather than to the work itself.</p>
+    <p data-fx="">What held it together was not process. It was a single shared test. Every region, every discipline, every review measured against the same sentence: <b>the funding moment is the product</b>. Work that could explain itself in those terms went ahead. Work that could not was deferred, without anyone arguing about whose function mattered more.</p>
+  </div>
+
+  <div class="band city-band" id="city-band">
+    <div class="cities" id="cities"><span>London</span><span>Madrid</span><span>Boston</span></div>
+    <div class="city-line" id="city-line">The funding moment <b>is the product.</b></div>
+  </div>
+
+  <div class="stage-track" id="money-track">
+    <div class="stage">
+      <div class="pinned">
+  <h2 class="sec" data-fx=""><span class="no">07</span>What the numbers said</h2>
+  <div class="prose">
+    <p data-fx="">Then the money started arriving, and it did not stop.</p>
+  </div>
+      </div>
+<div class="stage-in wide">
+    <div class="panel money">
+      <div class="mk" id="money-kick">Deposits · ten weeks after launch</div>
+      <div class="mn"><span class="s">$</span><span class="n" id="money-n">0.00</span><span class="s">B</span></div>
+      <div class="bar"><i id="money-fill"></i></div>
+      <div class="ml" id="money-line">One product, in all fifty states, funded five minutes at a time.</div>
+      <div class="resgrid" id="resgrid">
+        <div><div class="rv">$2.0B</div><div class="rk">Deposits, ten weeks</div></div>
+        <div><div class="rv">50</div><div class="rk">States, day one</div></div>
+        <div><div class="rv">&lt;5m</div><div class="rk">Onboarding to funded</div></div>
+      </div>
+    </div>
+    </div></div>
+  </div>
+
+  <div class="prose" style="margin-top:clamp(24px,4vh,40px);padding-bottom:clamp(48px,8vh,96px)">
+    <p data-fx="">Taken together they say the same thing: the constraint was the strategy. Two billion is what the market paid for one product that worked. Fifty states on day one is compliance built in rather than bolted on. Five minutes is the line that made both possible.</p>
+  </div>
+
+  <div class="more">
+    <div class="mk">More work</div>
+    <div class="more-grid">
+      <a class="mcard" href="/zinia"><img src="assets/zinia-amazon-visa.jpg" alt="Zinia by Santander"><div class="mb"><div class="mn">Case 02</div><h3>Zinia by Santander<span>→</span></h3><p>Building trust at checkout.</p></div></a>
+      <a class="mcard" href="/sixflags"><img src="assets/sixflags-open-dusk.jpg" alt="Six Flags Qiddiya City"><div class="mb"><div class="mn">Case 03</div><h3>Six Flags Qiddiya City<span>→</span></h3><p>A guest's day, designed before the park existed.</p></div></a>
+    </div>
+  </div>
+</article>
+
+
+<section data-dark="" style="background:#000;color:#fff;box-sizing:border-box;text-align:center;padding:clamp(54px,9vh,96px) clamp(22px,5vw,80px);overflow:hidden">
+  <h2 id="hm-cta-head">Let's discuss your next <span class="cta-arrow">→</span> <span id="hm-cta-word" class="cta-word">idea.</span></h2>
+  <div id="hm-cta-actions">
+    <a class="cta-btn" href="mailto:Michaelhannafarag@gmail.com" target="_blank" rel="noopener noreferrer">Email Me</a>
+    <a class="cta-btn" href="https://calendar.app.google/tHrhek8WerVMwURK9" target="_blank" rel="noopener noreferrer">Book a Call</a>
+  </div>
+</section>
+
+<footer data-dark="" style="background:#000;color:#fff;box-sizing:border-box;padding:clamp(28px,4.5vh,54px) 0 calc(clamp(40px,6vh,64px) + env(safe-area-inset-bottom,0px));overflow:hidden">
+  <div style="width:100%;max-width:1040px;margin:0 auto;padding:0 clamp(22px,6vw,44px);box-sizing:border-box">
+    <div class="cta-id" style="margin:0">
+    <div class="cta-name">Michael Hanna</div>
+    <div>Product Manager</div>
+    <div>Based in Madrid, Spain</div>
+    <div class="cta-badges">
+      <span class="cta-badge" title="Built with Claude Code" aria-hidden="true"><svg viewBox="0 0 512 512" fill="currentColor">
+        <rect x="64" y="108" width="384" height="64"/>
+        <rect x="64" y="172" width="64" height="64"/>
+        <rect x="160" y="172" width="192" height="64"/>
+        <rect x="384" y="172" width="64" height="64"/>
+        <rect x="0" y="236" width="512" height="64"/>
+        <rect x="64" y="300" width="384" height="64"/>
+        <rect x="88" y="364" width="64" height="64"/>
+        <rect x="200" y="364" width="32" height="64"/>
+        <rect x="280" y="364" width="32" height="64"/>
+        <rect x="360" y="364" width="64" height="64"/>
+      </svg></span>
+      <span class="cta-badge" title="Figma" aria-hidden="true"><svg viewBox="0 0 15 15" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M7.00005 2.04999H5.52505C4.71043 2.04999 4.05005 2.71037 4.05005 3.52499C4.05005 4.33961 4.71043 4.99999 5.52505 4.99999H7.00005V2.04999ZM7.00005 1.04999H8.00005H9.47505C10.842 1.04999 11.95 2.15808 11.95 3.52499C11.95 4.33163 11.5642 5.04815 10.9669 5.49999C11.5642 5.95184 11.95 6.66836 11.95 7.475C11.95 8.8419 10.842 9.95 9.47505 9.95C8.92236 9.95 8.41198 9.76884 8.00005 9.46266V9.95L8.00005 11.425C8.00005 12.7919 6.89195 13.9 5.52505 13.9C4.15814 13.9 3.05005 12.7919 3.05005 11.425C3.05005 10.6183 3.43593 9.90184 4.03317 9.44999C3.43593 8.99814 3.05005 8.28163 3.05005 7.475C3.05005 6.66836 3.43594 5.95184 4.03319 5.5C3.43594 5.04815 3.05005 4.33163 3.05005 3.52499C3.05005 2.15808 4.15814 1.04999 5.52505 1.04999H7.00005ZM8.00005 2.04999V4.99999H9.47505C10.2897 4.99999 10.95 4.33961 10.95 3.52499C10.95 2.71037 10.2897 2.04999 9.47505 2.04999H8.00005ZM5.52505 8.94998H7.00005L7.00005 7.4788L7.00005 7.475L7.00005 7.4712V6H5.52505C4.71043 6 4.05005 6.66038 4.05005 7.475C4.05005 8.28767 4.70727 8.94684 5.5192 8.94999L5.52505 8.94998ZM4.05005 11.425C4.05005 10.6123 4.70727 9.95315 5.5192 9.94999L5.52505 9.95H7.00005L7.00005 11.425C7.00005 12.2396 6.33967 12.9 5.52505 12.9C4.71043 12.9 4.05005 12.2396 4.05005 11.425ZM8.00005 7.47206C8.00164 6.65879 8.66141 6 9.47505 6C10.2897 6 10.95 6.66038 10.95 7.475C10.95 8.28962 10.2897 8.95 9.47505 8.95C8.66141 8.95 8.00164 8.29121 8.00005 7.47794V7.47206Z"/></svg></span>
+      <span class="cta-badge" title="Jira" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.53,2a4.37,4.37,0,0,0,4.35,4.35h1.78v1.7A4.35,4.35,0,0,0,22,12.4V2.84A.85.85,0,0,0,21.16,2H11.53M6.77,6.8a4.36,4.36,0,0,0,4.34,4.34h1.8v1.72a4.36,4.36,0,0,0,4.34,4.34V7.63a.84.84,0,0,0-.83-.83H6.77M2,11.6a4.34,4.34,0,0,0,4.35,4.34H8.13v1.72A4.36,4.36,0,0,0,12.47,22V12.43a.85.85,0,0,0-.84-.84H2Z"/></svg></span>
+      <span class="cta-badge cta-badge-text" title="Product Department" aria-hidden="true">PRDT<br>DEPT</span>
+    </div>
+    <div class="cta-clock"><span class="cta-time">--:--:--</span> <span class="cta-tz">CET</span></div>
+    </div>
+  </div>
+</footer>
+
+<script src="openbank.js?v=10"></script>
+<script src="arrive.js?v=1"></script>
+<script>
+/* image save deterrent: covers Android browsers that ignore the CSS guards */
+addEventListener('contextmenu', e => { if (e.target.tagName === 'IMG' || e.target.querySelector && e.target.querySelector('img') && e.target.closest('figure,.hero')) e.preventDefault(); }, true);
+addEventListener('dragstart', e => { if (e.target.tagName === 'IMG') e.preventDefault(); }, true);
+</script>
+</body>
+</html>

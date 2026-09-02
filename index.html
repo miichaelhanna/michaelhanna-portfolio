@@ -19,16 +19,29 @@
     if (!c) return;
     document.querySelector('meta[name="theme-color"]').setAttribute('content', c);
     document.documentElement.style.background = c;
+    // The page's contents stay unpainted until script.js has measured where
+    // the wordmark starts its move (see landOn there), so the name is never
+    // seen in its final spot before it travels. The page's own colour is
+    // what paints in the meantime.
+    if (!matchMedia('(prefers-reduced-motion:reduce)').matches) document.documentElement.classList.add('hm-landing');
   })();
 </script>
 <title>Michael Hanna · Product Manager</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="prefetch" href="/openbank">
+<link rel="prefetch" href="/zinia">
+<link rel="prefetch" href="/sixflags">
+<link rel="prefetch" href="arrive.js">
 <style>
   body{margin:0;background:#fff;color:#1a1a1a;font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;overflow:hidden}
   ::selection{background:#1D1AEA;color:#fff}
   a{color:#1a1a1a;text-decoration:none}
-  a:hover{color:#1D1AEA}
+  /* Every hover effect on the site is gated on a real pointer: a tap latches
+     :hover until the next tap elsewhere, and leaving the page (a new tab, the
+     mail client) never fires mouseleave — so on touch the element would come
+     back still wearing its hover state. */
+  @media (hover:hover){a:hover{color:#1D1AEA}}
   @keyframes mq{to{transform:translateX(-50%)}}
   @keyframes sway{from{transform:rotate(-1.6deg)}to{transform:rotate(1.6deg)}}
   .ph{display:flex;align-items:center;justify-content:center;text-align:center;background:rgba(0,0,0,.04);color:rgba(0,0,0,.32);font-family:'IBM Plex Mono',monospace;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;border:1px dashed rgba(0,0,0,.14);box-sizing:border-box}
@@ -49,6 +62,14 @@
   /* No scroll snapping — sections are shorter than the viewport, so snapping
      grabbed the gesture instead of letting it run. scroll-behavior only affects
      programmatic jumps (anchors, in-page links), never the wheel or trackpad. */
+  /* Landing straight on About / After Hours: the page's contents wait, on the
+     page's own colour, until the wordmark's move is ready to start. */
+  html.hm-landing #hm-about > *,html.hm-landing #hm-lab > *{visibility:hidden}
+  /* And home is never painted, not even for the first frame before the script
+     runs: the stage shows the page colour the head script put on the root. */
+  html.hm-landing #hm-intro{visibility:hidden !important;opacity:0 !important}
+  html.hm-landing #hm-stage,html.hm-landing #hm-head{background:transparent !important;transition:none !important}
+  html.hm-landing [data-ch="link"]{color:#fff !important;transition:none !important}
   #hm-intro{scroll-behavior:smooth}
   @media (prefers-reduced-motion:reduce){
     #hm-intro{scroll-behavior:auto}
@@ -86,13 +107,15 @@
               -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 7%,#000 93%,transparent 100%);
               mask-image:linear-gradient(90deg,transparent 0,#000 7%,#000 93%,transparent 100%)}
   .tb-track{display:flex;align-items:center;width:max-content;animation:mq 45s linear infinite}
-  .tb-marquee:hover .tb-track{animation-play-state:paused}
+  /* Ungated, a tap on the logos would park the marquee until you tapped
+     somewhere else. */
+  @media (hover:hover){.tb-marquee:hover .tb-track{animation-play-state:paused}}
   .tb-tile{flex:0 0 auto;width:clamp(118px,12vw,152px);margin-right:clamp(26px,3.4vw,54px);
            height:clamp(30px,3.4vw,44px);display:flex;align-items:center;justify-content:center}
   .tb-tile img{max-width:100%;max-height:100%;object-fit:contain}
   .tb-tile a{display:flex;align-items:center;justify-content:center;width:100%;height:100%;
              transition:opacity .2s}
-  .tb-tile a:hover{opacity:.55}
+  @media (hover:hover){.tb-tile a:hover{opacity:.55}}
 
   @media (max-width:900px){
     .tb-sec{padding:clamp(26px,4.5vh,48px) 0 clamp(34px,6vh,58px)}
@@ -200,6 +223,30 @@
              font-size:.62rem;letter-spacing:.14em;text-transform:lowercase;color:rgba(26,26,26,.5)}
   @media (prefers-reduced-motion:reduce){.wb-card{transform:none !important}}
 
+  /* The three cases. Each card is one link; the picture in it is the exact
+     hero of the page it opens, so a click doesn't leave for a new tab — the
+     picture stays put and the case study grows it into its own hero
+     (depart() in script.js, arrive.js on the case pages). The call to action
+     is ink, not the accent: the arrow and a drawn underline do the inviting. */
+  @media (hover:hover){.wk-card:hover{color:#1a1a1a}}
+  .wk-title{font-weight:700;font-size:clamp(1.9rem,4.4vw,3.6rem);letter-spacing:-.035em;line-height:1.08;text-wrap:balance}
+  .wk-sub{margin-top:12px;max-width:62ch;font-size:clamp(.95rem,1.3vw,1.1rem);color:#8a8a8a;text-wrap:pretty}
+  .wk-pic{width:min(620px,88vw);height:clamp(230px,36vh,350px);margin-top:clamp(24px,4.5vh,40px);
+          overflow:hidden;border-radius:18px;background:#ececec;transform:translateZ(0)}
+  .wk-pic img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .9s cubic-bezier(.22,1,.36,1)}
+  @media (hover:hover){.wk-card:hover .wk-pic img{transform:scale(1.03)}}
+  .wk-cta{display:inline-flex;align-items:baseline;gap:10px;margin-top:clamp(18px,3vh,26px);
+          font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:#1a1a1a}
+  .wk-cta .ln{position:relative}
+  .wk-cta .ln::after{content:'';position:absolute;left:0;right:0;bottom:-5px;height:1px;background:#1a1a1a;
+                     transform:scaleX(0);transform-origin:right;transition:transform .4s cubic-bezier(.22,1,.36,1)}
+  @media (hover:hover){.wk-card:hover .wk-cta .ln::after{transform:scaleX(1);transform-origin:left}}
+  .wk-cta .arr{display:inline-block;transition:transform .4s cubic-bezier(.22,1,.36,1)}
+  @media (hover:hover){.wk-card:hover .wk-cta .arr{transform:translateX(6px)}}
+  /* Leaving for a case: everything fades but the picture that was clicked. */
+  #hm-work.is-leaving > :not(.is-going),#hm-work.is-leaving .is-going > :not(.wk-pic){opacity:0;transition:opacity .26s ease}
+  @media (prefers-reduced-motion:reduce){.wk-pic img,.wk-cta .ln::after,.wk-cta .arr{transition:none}}
+
   /* After Hours anchors its wordmark on the right — the side the home page keeps
      it — so the name barely moves and the dark page wipes in from that side. */
   #hm-lab-hero{position:relative;box-sizing:border-box}
@@ -282,7 +329,10 @@
       text-transform:uppercase;color:#fff;text-decoration:none;background:none;
       border:1.5px solid rgba(245,245,247,.35);border-radius:999px;
       padding:14px 26px;transition:background .25s,color .25s,border-color .25s}
-  .cta-btn:hover{background:#fff;color:#0c0c0e;border-color:#fff}
+  /* Gated on a real pointer: a tap latches :hover until the next tap, so a
+     touch device (or a return from the mail client) would leave the button
+     stuck in its clicked-looking state. */
+  @media (hover:hover){.cta-btn:hover{background:#fff;color:#0c0c0e;border-color:#fff}}
 </style>
 <script type="importmap">
 {
@@ -347,24 +397,24 @@
       <h2 style="margin:14px 0 0;font-weight:700;font-size:clamp(2.4rem,5.6vw,4.6rem);letter-spacing:-.035em;line-height:1.02">Selected Products.</h2>
       <div style="margin-top:14px;font-size:clamp(.95rem,1.4vw,1.15rem);color:#8a8a8a">Three products. Three impossible timelines.</div>
     </div>
-    <a data-screen-label="Work — Openbank" href="case-study-openbank.html" target="_blank" rel="noopener noreferrer" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:clamp(44px,6.5vh,78px) clamp(22px,6vw,44px);box-sizing:border-box;color:inherit;text-decoration:none">
-      <div style="font-weight:700;font-size:clamp(1.9rem,4.4vw,3.6rem);letter-spacing:-.035em;line-height:1.08">Two billion dollars.<br>Ten weeks.</div>
-      <div style="margin-top:12px;font-size:clamp(.95rem,1.3vw,1.1rem);color:#8a8a8a">Openbank USA. Fifty states, day one.</div>
-      <div style="width:min(620px,88vw);height:clamp(230px,36vh,350px);margin-top:clamp(24px,4.5vh,40px)"><img src="assets/openbank-billboards.jpg" alt="Openbank out-of-home campaign on two Manhattan billboards" style="width:100%;height:100%;object-fit:cover;border-radius:18px;display:block"></div>
-      <div style="margin-top:clamp(18px,3vh,26px);font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:#1D1AEA">Read the case →</div>
+    <a data-screen-label="Work — Openbank" class="wk-card" data-case="openbank" data-hero="assets/openbank-billboards.jpg" data-hero-bg="#222222" href="/openbank" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:clamp(44px,6.5vh,78px) clamp(22px,6vw,44px);box-sizing:border-box;color:inherit;text-decoration:none">
+      <div class="wk-title">A bank you can open<br>before the coffee’s cold.</div>
+      <div class="wk-sub">Openbank USA. Fifty states on day one, funded in under five minutes, two billion dollars in ten weeks.</div>
+      <div class="wk-pic"><img src="assets/openbank-billboards.jpg" alt="Openbank out-of-home campaign on two Manhattan billboards"></div>
+      <div class="wk-cta"><span class="ln">Read the case</span><span class="arr">→</span></div>
     </a>
-    <div data-screen-label="Work — Zinia" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:clamp(44px,6.5vh,78px) clamp(22px,6vw,44px);box-sizing:border-box">
-      <div style="font-weight:700;font-size:clamp(1.9rem,4.4vw,3.6rem);letter-spacing:-.035em;line-height:1.08">Two million users.<br>Before the name.</div>
-      <div style="margin-top:12px;font-size:clamp(.95rem,1.3vw,1.1rem);color:#8a8a8a">Zinia. Chosen by Apple and Amazon at checkout.</div>
-      <div style="width:min(620px,88vw);height:clamp(230px,36vh,350px);margin-top:clamp(24px,4.5vh,40px)"><img src="assets/zinia-amazon-visa.jpg" alt="Amazon Visa card issued with Zinia by Santander" style="width:100%;height:100%;object-fit:cover;border-radius:18px;display:block"></div>
-      <div style="margin-top:clamp(18px,3vh,26px);font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:#b5b5b5">case study · soon</div>
-    </div>
-    <div data-screen-label="Work — Qiddiya" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:clamp(44px,6.5vh,78px) clamp(22px,6vw,44px);box-sizing:border-box">
-      <div style="font-weight:700;font-size:clamp(1.9rem,4.4vw,3.6rem);letter-spacing:-.035em;line-height:1.08">A city on paper.<br>An OS in a pocket.</div>
-      <div style="margin-top:12px;font-size:clamp(.95rem,1.3vw,1.1rem);color:#8a8a8a">Six Flags Qiddiya. 330 km², shipped for gate-open.</div>
-      <div style="width:min(620px,88vw);height:clamp(230px,36vh,350px);margin-top:clamp(24px,4.5vh,40px)"><img src="assets/qiddiya-park.jpg" alt="Six Flags Qiddiya City park at dusk" style="width:100%;height:100%;object-fit:cover;border-radius:18px;display:block"></div>
-      <div style="margin-top:clamp(18px,3vh,26px);font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:#b5b5b5">case study · soon</div>
-    </div>
+    <a data-screen-label="Work — Zinia" class="wk-card" data-case="zinia" data-hero="assets/zinia-amazon-flexible.jpg" data-hero-bg="#C0F0F0" href="/zinia" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:clamp(44px,6.5vh,78px) clamp(22px,6vw,44px);box-sizing:border-box;color:inherit;text-decoration:none">
+      <div class="wk-title">Pay later.<br>Trust from the first tap.</div>
+      <div class="wk-sub">Zinia by Santander. Two million users before it had a name, chosen by Apple and Amazon at checkout.</div>
+      <div class="wk-pic"><img src="assets/zinia-amazon-flexible.jpg" alt="Buy today, pay flexibly — Zinia by Santander on Amazon.es"></div>
+      <div class="wk-cta"><span class="ln">Read the case</span><span class="arr">→</span></div>
+    </a>
+    <a data-screen-label="Work — Qiddiya" class="wk-card" data-case="sixflags" data-hero="assets/sixflags-open-dusk.jpg" data-hero-bg="#2a2320" href="/sixflags" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:clamp(44px,6.5vh,78px) clamp(22px,6vw,44px);box-sizing:border-box;color:inherit;text-decoration:none">
+      <div class="wk-title">A whole park in a pocket,<br>before the park had a guest.</div>
+      <div class="wk-sub">Six Flags Qiddiya City. Tickets, live map, ride booking and an AI concierge, shipped for gate-open.</div>
+      <div class="wk-pic"><img src="assets/sixflags-open-dusk.jpg" alt="Six Flags Qiddiya City lit up at dusk beneath the Tuwaiq cliffs"></div>
+      <div class="wk-cta"><span class="ln">Read the case</span><span class="arr">→</span></div>
+    </a>
     <div data-screen-label="Work — Trusted by" class="tb-sec">
       <div class="tb-wrap">
         <div class="lanyard-stage">
@@ -537,7 +587,7 @@
   </div>
 
 </div>
-<script src="script.js?v=76"></script>
+<script src="script.js?v=81"></script>
 <script>
   // Lanyard is web-only: it's a heavy WebGL scene (three.js + rapier physics
   // + a 2.4MB card model) built around a pointer drag that touch can't
@@ -551,6 +601,11 @@
     s.src = 'lanyard/lanyard.js?v=40';
     document.body.appendChild(s);
   }
+</script>
+<script>
+/* image save deterrent: covers Android browsers that ignore the CSS guards */
+addEventListener('contextmenu', e => { if (e.target.tagName === 'IMG' || e.target.querySelector && e.target.querySelector('img') && e.target.closest('figure,.photo-stage,.mstack')) e.preventDefault(); }, true);
+addEventListener('dragstart', e => { if (e.target.tagName === 'IMG') e.preventDefault(); }, true);
 </script>
 </body>
 </html>

@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Six Flags Qiddiya City · Case Study · Michael Hanna</title>
+<meta name="theme-color" content="#ffffff">
+<meta name="description" content="How the guest app for the first Six Flags outside North America was built for a park that had never run a single day, for guests nobody could meet, against a gate-open date the whole world knew.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The park existed. Its guests didn't.">
+<meta property="og:description" content="A product case study: ticketing, live map, beacons, ride booking and AI concierge for Six Flags Qiddiya City, shipped for gate-open.">
+<meta property="og:image" content="https://www.michaelhanna.info/assets/sixflags-open-dusk.jpg">
+<meta property="og:url" content="https://www.michaelhanna.info/sixflags">
+<meta name="twitter:card" content="summary_large_image">
+<script>
+  // Arriving from the home page: the picture that was clicked there is this
+  // page's hero, and it is still on screen at a known spot. Flag the document
+  // before first paint so the page starts hidden behind a stand-in placed in
+  // that spot (top of body), which arrive.js then grows into the real hero.
+  (function () {
+    try {
+      var raw = sessionStorage.getItem('hm-arrive');
+      if (!raw) return;
+      sessionStorage.removeItem('hm-arrive');
+      var a = JSON.parse(raw);
+      if (a.key !== 'sixflags' || Date.now() - a.t > 4000) return;
+      if (matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+      window.__hmArrive = a;
+      document.documentElement.classList.add('hm-arriving');
+    } catch (e) {}
+  })();
+</script>
+<style>
+  html.hm-arriving body > :not(nav):not(#hm-safe-top):not(#hm-safe-bot):not(#pg):not(#hm-arrive){opacity:0}
+  #hm-arrive{position:fixed;z-index:40;overflow:hidden;pointer-events:none;background:#ececec;transform:translateZ(0)}
+  #hm-arrive img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+  /* The way back to the section this case was opened from: one arrow, in
+     the nav's own type, that leans the way it points on hover. */
+  a.hm-back{display:inline-block;font-size:.95rem;line-height:1;margin-right:2px;transition:transform .35s cubic-bezier(.22,1,.36,1)}
+  @media (hover:hover){a.hm-back:hover{transform:translateX(-4px)}}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* Clean and in colour from the first frame. White page, warm sand panels
+   (the desert at dusk), Six Flags red as the single accent, soft white cards. */
+:root{--ink:#161616;--graphite:#5F625F;--soft:#8C8F8C;--sand:#F5F1EA;--sand-line:#E6E1D8;--sand-ink:#8A7A62;--red:#E02020;--red-ink:#B81818;--card-line:#ECE9E3}
+html{scroll-behavior:smooth;overflow-x:clip}
+body{margin:0;background:#fff;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,'Helvetica Neue',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+::selection{background:var(--red);color:#fff}
+a{color:var(--ink);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px;text-decoration-color:var(--red)}
+/* Hover effects are gated on a real pointer: a tap latches :hover until the
+   next tap elsewhere, and leaving the page never fires mouseleave. */
+@media (hover:hover){a:hover{text-decoration-thickness:2px}}
+a.plain,a.plain:hover{text-decoration:none}
+a.hm-nav-link{color:#1a1a1a;text-decoration:none}
+@media (hover:hover){a.hm-nav-link:hover{color:#666;text-decoration:none}}
+@media (max-width:700px){nav a.hm-nav-link{padding:13px 6px;margin:-13px -6px}}
+img{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-user-drag:none;pointer-events:none}
+.mono{font-family:'IBM Plex Mono',monospace}
+.kick{font-family:'IBM Plex Mono',monospace;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--soft)}
+.band{margin-left:-24px;margin-right:-24px}
+.hand{font-family:'Caveat',cursive}
+
+/* ————— Hero: the park at dusk, in colour, with the headline over it ————— */
+.hero{max-width:1080px;margin:clamp(10px,2vh,24px) auto 0;border-radius:clamp(16px,3vw,28px);position:relative;overflow:hidden;min-height:clamp(420px,62vh,640px);display:flex;align-items:flex-end;color:#fff;background:#2a2320}
+.hero .bg{position:absolute;inset:0;background:url(assets/sixflags-open-dusk.jpg) center/cover no-repeat;transform:scale(1.04)}
+.hero .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,14,10,0) 0%,rgba(20,14,10,.2) 40%,rgba(20,14,10,.8) 100%)}
+.hero .inner{position:relative;padding:clamp(40px,7vh,80px) clamp(24px,6vw,72px);width:100%;box-sizing:border-box}
+.hero h1{margin:0;font-weight:700;font-size:clamp(2.5rem,6.4vw,4.8rem);line-height:1.02;letter-spacing:-.036em;text-wrap:balance;max-width:14ch;text-shadow:0 2px 24px rgba(0,0,0,.25)}
+.hero p{margin:18px 0 0;max-width:600px;font-size:clamp(1.04rem,1.55vw,1.24rem);line-height:1.56;color:rgba(255,255,255,.88);text-wrap:pretty}
+.attrib{max-width:1080px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:20px;padding:clamp(18px,3vh,28px) clamp(4px,1vw,12px) 0}
+.attrib .who{display:flex;align-items:center;gap:14px;font-family:'IBM Plex Mono',monospace;font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--graphite);text-align:left}
+.attrib .who img{height:34px;width:auto;display:block}
+.attrib .span{display:flex;align-items:center;gap:12px;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.8rem;letter-spacing:.1em;color:var(--ink)}
+.attrib .span .rule{position:relative;width:clamp(56px,9vw,120px);height:2px;background:var(--sand-line);overflow:hidden}
+.attrib .span .rule i{position:absolute;inset:0;background:var(--red);transform:scaleX(0);transform-origin:left;transition:transform 1.4s cubic-bezier(.22,1,.36,1) .4s}
+.attrib.in .span .rule i{transform:scaleX(1)}
+@media (max-width:640px){.attrib{flex-direction:column;gap:16px}.attrib .who{flex-direction:column;gap:10px;text-align:center}}
+
+/* ————— Body copy ————— */
+.prose{max-width:660px;margin:0 auto;font-size:clamp(1.04rem,1.35vw,1.16rem);line-height:1.72;color:#1b1f20}
+.prose p{margin:0 0 1.35em}
+.prose b{font-weight:650}
+h2.sec{max-width:660px;margin:clamp(52px,9vh,100px) auto 22px;font-weight:700;font-size:clamp(1.45rem,2.5vw,1.95rem);line-height:1.22;letter-spacing:-.022em}
+h2.sec .no{font-family:'IBM Plex Mono',monospace;display:block;font-weight:500;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;margin-bottom:12px;color:var(--red-ink)}
+.dropcap::first-letter{float:left;font-size:5em;line-height:.8;padding:.05em .12em 0 0;font-weight:800;color:var(--red)}
+.decision{max-width:660px;margin:clamp(30px,5vh,52px) auto;font-weight:700;font-size:clamp(1.5rem,3.2vw,2.4rem);line-height:1.18;letter-spacing:-.028em;color:var(--ink);text-wrap:balance}
+.decision .lbl{display:block;font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--red-ink);margin-bottom:14px}
+
+/* ————— The three guests: his personas, as cards on a sand band.
+   Desktop: 3-up with hover lift. Mobile: a swipeable snap carousel. ————— */
+.guest-band{background:var(--sand);padding:clamp(40px,6.5vh,72px) 0;margin-top:clamp(28px,4.5vh,48px)}
+.guest-head{max-width:660px;margin:0 auto clamp(22px,3.5vh,34px);padding:0 24px;text-align:center}
+.guest-head .kick{color:var(--sand-ink)}
+.guest-head h3{margin:10px 0 0;color:var(--ink);font-weight:700;font-size:clamp(1.3rem,2.4vw,1.8rem);letter-spacing:-.02em;line-height:1.25;text-wrap:balance}
+.guests{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:1000px;margin:0 auto;padding:0 24px;box-sizing:border-box}
+.guest{background:#fff;border-radius:16px;padding:24px 22px;box-shadow:0 8px 24px rgba(60,40,20,.07);transition:transform .35s cubic-bezier(.22,1,.36,1),box-shadow .35s}
+.guest .gt{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--red-ink)}
+.guest h4{margin:10px 0 0;font-weight:700;font-size:1.12rem;letter-spacing:-.016em;line-height:1.25}
+.guest p{margin:10px 0 0;font-size:.95rem;line-height:1.62;color:#3c3c3c}
+@media (hover:hover){.guest:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(60,40,20,.14)}}
+.swipe-hint{display:none}
+@media (max-width:700px){
+  .guests{display:grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:86%;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:6px}
+  .guests::-webkit-scrollbar{display:none}
+  .guest{scroll-snap-align:center}
+  .swipe-hint{display:block;margin-top:14px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--sand-ink)}
+}
+
+/* ————— Scroll-driven stages on soft white cards ————— */
+.stage-track{position:relative}
+/* The pinned block carries the section's heading and intro together with the
+   stage, so the reader sees they belong together; when the animation ends the
+   pin releases and the page scrolls on. --stick is set by script so the block
+   never runs past the bottom of the viewport. */
+.stage{position:sticky;top:var(--stick,80px);display:block;padding:0 0 16px}
+.stage .pinned h2.sec{margin-top:0}
+.stage .pinned .prose p:last-child{margin-bottom:clamp(18px,3vh,28px)}
+.stage-in{margin:0 auto}
+.stage-in{width:min(560px,100%)}
+.stage-in.wide{width:min(860px,100%)}
+.stage-in.full{width:min(1080px,100%)}
+.stage-tag{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink);text-align:center;margin-bottom:10px;font-weight:600}
+/* A thin bar that fills with the reader's scroll: the stage's only instruction. */
+.sprog{display:block;width:min(200px,50%);height:2px;margin:0 auto 16px;background:var(--sand-line);border-radius:2px;overflow:hidden}
+.sprog i{display:block;height:100%;width:0;background:var(--red)}
+.photo-sprog{position:absolute;left:clamp(20px,3.5vw,40px);top:clamp(18px,3vw,28px);margin:0;width:120px;background:rgba(255,255,255,.28);z-index:2}
+.photo-sprog i{background:#fff}
+.card{position:relative;background:#fff;border:1px solid var(--card-line);border-radius:18px;padding:clamp(20px,3.5vw,30px);box-sizing:border-box;box-shadow:0 18px 50px rgba(40,30,20,.09)}
+
+/* Stage · what we designed from */
+.ref-frame{position:relative;width:100%;aspect-ratio:16/10;background:var(--sand);border-radius:12px;overflow:hidden}
+.ref-frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s}
+.ref-frame img.on{opacity:1}
+.ref-cap{margin-top:16px;display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:baseline}
+.ref-cap .no{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--red-ink);white-space:nowrap}
+.ref-cap .txt{font-size:clamp(.98rem,1.4vw,1.1rem);line-height:1.55;color:#333;min-height:3.2em}
+.ref-cap .txt b{font-weight:650}
+
+/* Stage · the missing inputs */
+.inp .counter{font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--soft)}
+.inp .name{margin-top:10px;font-weight:700;font-size:clamp(1.8rem,4.6vw,3rem);letter-spacing:-.03em;line-height:1.05;color:var(--ink)}
+.inp .rows{margin-top:22px;display:grid;gap:14px}
+.inp .r{display:grid;grid-template-columns:clamp(74px,12vw,96px) 1fr;gap:14px;align-items:baseline}
+.inp .r .k{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);padding-top:4px}
+.inp .r .v{display:inline;font-size:clamp(1rem,1.5vw,1.15rem);line-height:1.5}
+/* The strike is a real line-through on a transparent copy of the text,
+   revealed by a clip, so it follows every wrapped line and never runs
+   past the words. --w is set by scroll. */
+.inp .vwrap{position:relative;display:block}
+.inp .r.norm .v{color:var(--soft)}
+.inp .r.norm .ov{position:absolute;inset:0;color:transparent;text-decoration:line-through;text-decoration-color:var(--red);text-decoration-thickness:2px;clip-path:inset(0 calc(100% - var(--w,0%)) 0 0);pointer-events:none}
+.inp .r.here .v{font-weight:650;color:var(--ink);opacity:0;transform:translateY(8px);transition:opacity .4s,transform .45s}
+.inp .r.here .v.on{opacity:1;transform:none}
+
+/* ————— The day: one sticky stage. A time line across the top advances
+   with the reader's scroll; the sketch and the moment swap in step.
+   On phones the time line pins to the top and the moments flow beneath. ————— */
+.day-track{position:relative}
+.day-stage{position:sticky;top:clamp(68px,10vh,120px)}
+.day-panel{background:var(--sand);border-radius:clamp(16px,3vw,28px);padding:clamp(22px,3.5vw,36px) clamp(22px,4vw,44px);box-sizing:border-box;max-width:1080px;margin:0 auto}
+.day-head .kick{color:var(--sand-ink);text-align:center}
+.dayline{position:relative;margin:18px auto 0;max-width:820px;padding:0 6px 26px}
+.dayline .rail{position:relative;height:2px;background:var(--sand-line);border-radius:2px}
+.dayline .rail i{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--red);border-radius:2px}
+.dayline .dots{position:absolute;left:6px;right:6px;top:0;display:flex;justify-content:space-between}
+.dl-dot{position:relative;width:0}
+.dl-dot b{position:absolute;left:-6px;top:-5px;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid var(--sand-line);box-sizing:border-box;transition:border-color .3s,background .3s,transform .3s}
+.dl-dot span{position:absolute;left:0;top:12px;transform:translateX(-50%);font-family:'IBM Plex Mono',monospace;font-size:.6rem;letter-spacing:.1em;color:var(--sand-ink);white-space:nowrap;transition:color .3s}
+.dl-dot.on b{border-color:var(--red);background:var(--red)}
+.dl-dot.now b{transform:scale(1.35)}
+.dl-dot.now span{color:var(--red-ink);font-weight:600}
+.day-body{display:grid;grid-template-columns:300px minmax(0,1fr);gap:clamp(24px,4vw,56px);align-items:center;margin-top:clamp(22px,3.5vh,34px)}
+.day-text{transition:opacity .22s}
+.day-text .mt{font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:#fff;background:var(--red);border-radius:999px;padding:6px 13px;display:inline-block}
+.day-text h3{margin:16px 0 0;font-weight:700;font-size:clamp(1.3rem,2.3vw,1.8rem);line-height:1.2;letter-spacing:-.022em}
+.day-text .does{margin:12px 0 0;font-size:clamp(1rem,1.35vw,1.12rem);line-height:1.68;color:#1b1f20}
+.day-text .call{margin:16px 0 0}
+.day-text .call b{display:block;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--red-ink);margin-bottom:5px}
+.day-text .call span{font-size:.95rem;line-height:1.6;color:#444;display:block}
+.dsheet{position:relative;width:100%;aspect-ratio:3/4.05;background:#fff;border:1px solid var(--card-line);border-radius:10px;box-shadow:0 18px 44px rgba(40,30,20,.12)}
+.dsheet:before{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;background-image:linear-gradient(rgba(17,17,17,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(17,17,17,.04) 1px,transparent 1px);background-size:22px 22px}
+.sketch{position:absolute;inset:0;opacity:0;transition:opacity .4s ease;padding:16px 16px 12px;box-sizing:border-box;display:flex;flex-direction:column;pointer-events:none}
+.sketch.is-on{opacity:1}
+.sketch svg{width:100%;flex:1;min-height:0}
+.sketch .tb{margin-top:auto;border-top:1px solid #DAD6CC;padding-top:6px;display:flex;justify-content:space-between;gap:10px;font-family:'IBM Plex Mono',monospace;font-size:7.5px;letter-spacing:.08em;text-transform:uppercase;color:#8C8A82}
+.sketch .tb b{font-weight:500;color:#3A3831}
+.moments{display:none}
+@media (max-width:860px){
+  .day-stage{position:static}
+  .day-panel{padding:18px 18px 8px}
+  .day-head{position:sticky;top:calc(64px + env(safe-area-inset-top,0px));z-index:5;background:var(--sand);margin:-18px -18px 0;padding:14px 18px 0;border-radius:inherit}
+  .dayline{padding-bottom:22px}
+  .day-body{display:none}
+  .moments{display:block;padding:8px 0 10px}
+  .moment{padding:clamp(30px,6vh,48px) 0 0}
+  .moment .mt{font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:#fff;background:var(--red);border-radius:999px;padding:6px 13px;display:inline-block}
+  .moment h3{margin:16px 0 0;font-weight:700;font-size:1.3rem;line-height:1.24;letter-spacing:-.02em}
+  .moment .does{margin:10px 0 0;font-size:1rem;line-height:1.68;color:#1b1f20}
+  .moment .call{margin:14px 0 0}
+  .moment .call b{display:block;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--red-ink);margin-bottom:5px}
+  .moment .call span{font-size:.95rem;line-height:1.6;color:#444;display:block}
+  .dsheet.inline{width:min(280px,80vw);margin:0 auto 18px}
+}
+
+/* ————— The countdown, on a sand panel. T−47 to T−0 with the reader's
+   scroll; the three public dates light at their day; zero turns red. ————— */
+.count-panel{background:var(--sand);border-radius:clamp(16px,3vw,28px);padding:clamp(30px,5vh,52px) clamp(22px,5vw,56px);box-sizing:border-box;max-width:1080px;margin:0 auto}
+.tminus{display:flex;align-items:baseline;justify-content:center;gap:.08em;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.05em;line-height:.9;color:var(--ink);transition:color .35s}
+.tminus .t{font-size:clamp(2rem,6vw,4.4rem);color:var(--sand-ink)}
+.tminus .n{font-size:clamp(5rem,20vw,13rem)}
+.tminus .u{font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:clamp(.7rem,1.4vw,.9rem);letter-spacing:.18em;text-transform:uppercase;color:var(--sand-ink);margin-left:.4em}
+.tminus.zero{color:var(--red)}
+.cdates{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:clamp(22px,4vh,40px);border-top:1px solid var(--sand-line);padding-top:18px}
+.cdate{opacity:.3;transition:opacity .4s}
+.cdate.on{opacity:1}
+.cdate .cd{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--sand-ink)}
+.cdate .cv{margin-top:6px;font-weight:650;font-size:clamp(.95rem,1.5vw,1.15rem);line-height:1.3;letter-spacing:-.012em}
+.cdate.on.red .cd,.cdate.on.red .cv{color:var(--red-ink)}
+#count-line{margin:clamp(18px,3vh,28px) auto 0;max-width:46ch;text-align:center;font-size:clamp(1rem,1.5vw,1.2rem);line-height:1.55;color:#444;opacity:0;transform:translateY(8px);transition:opacity .5s,transform .5s}
+#count-line.on{opacity:1;transform:none}
+@media (max-width:560px){.cdates{grid-template-columns:1fr;gap:12px}}
+
+/* ————— The park, real at last: three photographs, and the records
+   stamped on one by one ————— */
+.photo{max-width:1080px;margin:0 auto;border-radius:clamp(16px,3vw,28px);overflow:hidden;background:#2a2320;color:#fff}
+.photo .frame{position:relative;width:100%;aspect-ratio:16/9.4;background:#2a2320}
+.photo .frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s}
+.photo .frame img.on{opacity:1}
+.photo .frame .grade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 45%,rgba(0,0,0,.8) 100%)}
+.photo .over{position:absolute;left:0;right:0;bottom:0;padding:clamp(18px,3vw,34px) clamp(20px,3.5vw,40px);display:flex;flex-direction:column;gap:14px}
+.photo .pcap{font-family:'IBM Plex Mono',monospace;font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.72)}
+.records{display:flex;flex-wrap:wrap;gap:8px 22px}
+.rec{opacity:0;transform:translateY(8px);transition:opacity .4s,transform .45s}
+.rec.on{opacity:1;transform:none}
+.rec .rv{font-weight:700;font-size:clamp(1.15rem,2.4vw,1.8rem);letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+.rec .rk{margin-top:4px;font-family:'IBM Plex Mono',monospace;font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.62)}
+.rec .rv i{font-style:normal;color:#FF6B6B}
+@media (max-width:640px){.photo .frame{aspect-ratio:4/5}.records{gap:8px 16px}}
+
+figure.plain-shot{max-width:760px;margin:clamp(26px,4vh,44px) auto 0}
+figure.plain-shot img{width:100%;border-radius:16px;display:block}
+figure.plain-shot figcaption{margin-top:12px;text-align:center}
+
+/* ————— More work: the other two cases, as cards on the page. Desktop
+   two-up with hover lift, mobile a swipe row. ————— */
+.legal{max-width:1080px;margin:clamp(18px,3vh,28px) auto 0;padding-top:10px;border-top:1px solid #ECE9E3;font-family:'IBM Plex Mono',monospace;font-size:.54rem;letter-spacing:.02em;line-height:1.55;color:#B4B4B8}
+.more{max-width:1080px;margin:clamp(40px,7vh,72px) auto 0;padding-bottom:clamp(48px,8vh,96px)}
+.more .mk{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:#8a8f8c}
+.more-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+.mcard{display:block;text-decoration:none;color:inherit;border-radius:18px;overflow:hidden;background:#fff;border:1px solid #ECE9E3;box-shadow:0 8px 24px rgba(20,20,20,.06);transition:transform .35s cubic-bezier(.22,1,.36,1),box-shadow .35s}
+.mcard img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
+.mcard .mb{padding:18px 20px 22px}
+.mcard .mn{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--red-ink)}
+.mcard h3{margin:6px 0 0;font-weight:700;font-size:clamp(1.15rem,1.9vw,1.4rem);letter-spacing:-.02em;line-height:1.2}
+.mcard h3 span{display:inline-block;margin-left:.3em;color:var(--red-ink);transition:transform .4s cubic-bezier(.22,1,.36,1)}
+.mcard p{margin:6px 0 0;font-size:.95rem;line-height:1.5;color:#666}
+@media (hover:hover){.mcard:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(20,20,20,.12)}.mcard:hover h3 span{transform:translateX(6px)}}
+@media (max-width:700px){
+  .more-grid{display:grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:86%;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:6px}
+  .more-grid::-webkit-scrollbar{display:none}
+  .mcard{scroll-snap-align:center}
+}
+
+/* shared footer chrome, kept in sync with the rest of the site by hand */
+#hm-cta-head{margin:0;font-weight:700;letter-spacing:-.035em;line-height:1.04;
+    font-size:clamp(2.1rem,5.6vw,4.4rem);color:#fff;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,'Helvetica Neue',Helvetica,Arial,sans-serif}
+#hm-cta-head .cta-arrow{display:inline-block;padding:0 .12em;color:rgba(245,245,247,.45)}
+#hm-cta-head .cta-word{display:inline-block;min-width:5ch;text-align:left;transition:opacity .25s ease}
+#hm-cta-head .cta-word.is-swap{opacity:0}
+#hm-cta-actions{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin:clamp(28px,4.5vh,44px) 0 0}
+.cta-btn{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.1em;
+    text-transform:uppercase;color:#fff;text-decoration:none;background:none;
+    border:1.5px solid rgba(245,245,247,.35);border-radius:999px;
+    padding:14px 26px;transition:background .25s,color .25s,border-color .25s;display:inline-block}
+/* Gated on a real pointer: a tap latches :hover until the next tap, so a touch
+   device (or a return from the mail client) would leave the button stuck in
+   its clicked-looking state. */
+@media (hover:hover){.cta-btn:hover{background:#fff;color:#0c0c0e;border-color:#fff;text-decoration:none}}
+.cta-id{margin:0;text-align:center;font-size:.92rem;font-weight:500;color:rgba(245,245,247,.6);line-height:1.5}
+.cta-name{font-weight:500;color:rgba(245,245,247,.6)}
+.cta-badges{display:flex;justify-content:center;align-items:center;gap:9px;margin:clamp(8px,1.2vh,12px) 0 0}
+.cta-badge{display:flex;align-items:center;justify-content:center;color:rgba(245,245,247,.6)}
+.cta-badge svg{display:block;width:20px;height:20px}
+.cta-badge-text{font-size:.5rem;font-weight:700;letter-spacing:.03em;line-height:1.15;text-align:left;white-space:nowrap;color:rgba(245,245,247,.6)}
+.cta-clock{margin-top:clamp(22px,3.5vh,34px);font-weight:700;letter-spacing:.06em;font-variant-numeric:tabular-nums;color:rgba(245,245,247,.85)}
+</style>
+</head>
+<body>
+
+<script>
+  // The stand-in for the picture handed over from the home page — built
+  // here, before any content, so it is on screen from the very first paint.
+  (function () {
+    var a = window.__hmArrive; if (!a) return;
+    var c = document.createElement('div'); c.id = 'hm-arrive';
+    c.style.cssText = 'left:' + a.x + 'px;top:' + a.y + 'px;width:' + a.w + 'px;height:' + a.h + 'px;border-radius:' + a.radius + ';background:' + a.bg;
+    if (a.img) {
+      var i = document.createElement('img'); i.src = a.img; i.alt = '';
+      i.style.transform = 'translate3d(0,' + (a.ty || 0) + '%,0) scale(' + (a.sc || 1) + ')';
+      c.appendChild(i);
+    }
+    document.body.appendChild(c);
+  })();
+</script>
+
+<div id="hm-safe-top" aria-hidden="true" style="position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:#fff;z-index:90;pointer-events:none"></div>
+<div id="hm-safe-bot" aria-hidden="true" style="position:fixed;bottom:0;left:0;right:0;height:env(safe-area-inset-bottom,0px);background:#fff;z-index:90;pointer-events:none"></div>
+
+<div id="pg" style="position:fixed;top:0;left:0;height:2px;width:0;background:var(--red);z-index:60"></div>
+
+<nav style="position:sticky;top:0;z-index:50;background:#fff;display:flex;justify-content:space-between;align-items:center;gap:18px;padding:calc(20px + env(safe-area-inset-top,0px)) clamp(22px,6vw,96px) 20px;font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:lowercase">
+  <span style="display:flex;gap:clamp(16px,3vw,30px)">
+    <a href="/#work" class="hm-nav-link hm-back" aria-label="Back to selected products" title="Back to selected products">←</a>
+    <a href="/#about" class="hm-nav-link" style="white-space:nowrap">About</a>
+    <a href="/#work" class="hm-nav-link" style="text-decoration:underline;text-underline-offset:5px;white-space:nowrap">Work</a>
+  </span>
+  <a href="/#lab" class="hm-nav-link" style="margin-left:auto;white-space:nowrap">After hours</a>
+</nav>
+
+<article style="position:relative;background:#fff;padding:0 24px">
+
+  <header class="hero" id="hero">
+    <div class="bg" aria-hidden="true"></div>
+    <div class="shade" aria-hidden="true"></div>
+    <div class="inner">
+      <h1>The park existed.<br>Its guests didn't.</h1>
+      <p>How the guest app for the first Six Flags outside North America was built for a park that had never run a single day, for guests nobody could meet, against a gate-open date the whole world knew.</p>
+    </div>
+  </header>
+  <div class="attrib" id="attrib">
+    <div class="who"><img src="lanyard/logos/sixflags-lockup.png" alt="Six Flags Qiddiya City"><span>Qiddiya Investment Company · Riyadh</span></div>
+    <div class="span" aria-label="2024 to gate-open on December 31, 2025"><span>2024</span><span class="rule"><i></i></span><span>31 Dec 2025</span></div>
+  </div>
+
+  <div class="prose" style="margin-top:clamp(44px,7.5vh,80px)">
+    <p data-fx="" class="dropcap">For almost the entire time I worked on it, I was not allowed to see the park. It was real by then: forty minutes outside Riyadh, six themed lands and the tallest, fastest and longest roller coaster ever built stood against a cliff face, the flagship of Qiddiya, the 360 square kilometre entertainment city at the centre of Saudi Arabia's Vision 2030. But the site was sealed for physical commissioning. The only people through the gates were the ride engineers and safety testers, stress-testing coasters that ran, over and over, with nobody in the seats. No queue had ever formed, no family had ever crossed the park in the noon heat, and no guest had ever asked it a question. I worked on the guest's day from three thousand kilometres away, through plans, models and the pictures you are about to scroll through.</p>
+    <p data-fx="">My job was the phone in the guest's hand. Tickets, the live map, the beacons in the ground, ride booking, the AI concierge: the entire day as a guest would carry it, for the first Six Flags ever built outside North America. And over all of it, one constraint that outranked every other: the gates would open on December 31, 2025, ready or not.</p>
+    <p data-fx="">A product normally meets its users long before the day that matters, through betas, soft launches and quiet first weeks. This one would meet its first real guest and its finished park on the same morning.</p>
+  </div>
+
+  <h2 class="sec" data-fx=""><span class="no">01</span>Three guests, written hour by hour</h2>
+  <div class="prose">
+    <p data-fx="">The park had no guests to observe and there was no comparable product in the country to learn from. So I did what I do best when the answers aren't in any document: I went and found ground truth somewhere else. I downloaded every park app on both stores, the Disney and Universal giants down to the smallest regional water park, and lived in them until I knew exactly where each one made a day easier and where it quietly gave up on its guest. Then I got on planes. I walked theme parks across European cities with my phone out and a notebook: timing entry queues, watching where families stopped dead in the middle of a path, waiting to see what people actually did the moment a ride went down. (Not one ride failed on any of my visits, which somehow only added to the pressure.)</p>
+    <p data-fx="">The park I was designing for had never held a crowd. But other parks held one every day, and guests are guests everywhere: heat, hunger, tired children, dropped connections and changed plans are universal. The patterns I carried home became the standard every drawing had to be checked against. With that in the notebook, we wrote complete days, hour by hour, for the guests we knew were coming, and every feature had to earn a minute inside one of those days before it earned a place on the plan.</p>
+  </div>
+
+  <div class="band guest-band" data-fx="">
+    <div class="guest-head">
+      <div class="kick">The guests we knew were coming</div>
+      <h3>Three days, written down</h3>
+    </div>
+    <div class="guests">
+      <div class="guest">
+        <div class="gt">Guest 01</div>
+        <h4>The first-time family</h4>
+        <p>Two kids, a stroller, forty degrees by noon. They will not learn an app today. Their day needs every ticket on one parent's phone, shade and short waits found for them, and a plan that survives a meltdown at two in the afternoon.</p>
+      </div>
+      <div class="guest">
+        <div class="gt">Guest 02</div>
+        <h4>The coaster hunter</h4>
+        <p>Flew in for one ride. Falcons Flight drops 195 metres off a cliff edge and reaches 250 kilometres per hour, and this guest has been watching construction videos of it for two years. Their day is a single booked slot, the best hour to ride it, and absolute certainty that the booking holds.</p>
+      </div>
+      <div class="guest">
+        <div class="gt">Guest 03</div>
+        <h4>The evening local</h4>
+        <p>Riyadh is forty minutes away. Comes after work with four hours, not fourteen. Their day is a realistic short plan, live waits that make the drive worth it, and an exit that doesn't feel like giving up.</p>
+      </div>
+    </div>
+    <div class="swipe-hint">swipe →</div>
+  </div>
+
+  <div class="prose" style="margin-top:clamp(28px,4.5vh,48px)">
+    <p data-fx="">Three days, written down, became the test every roadmap argument had to pass. It is much harder to fight about feature priority when the question is which minute of whose day it serves.</p>
+  </div>
+
+  <div class="stage-track" id="ref-track">
+    <div class="stage">
+      <div class="pinned">
+  <h2 class="sec" data-fx=""><span class="no">02</span>What we had instead of a park</h2>
+  <div class="prose">
+    <p data-fx="">Products like this are normally designed from observation. You walk the space, time the queues, watch where people get lost and where they linger. We had a park nobody could observe: 320,000 square metres standing ready behind closed gates, with no crowd to watch, no queue to time, and late construction still moving pieces of it week by week.</p>
+  </div>
+      </div>
+<div class="stage-in wide">
+      <div class="stage-tag">What we designed from</div>
+      <span class="sprog" aria-hidden="true"><i id="ref-prog"></i></span>
+      <div class="card">
+        <div class="ref-frame">
+          <img data-ri="0" class="on" src="assets/sixflags-render.jpg" alt="Marketing render of Six Flags Qiddiya City: six themed lands beneath a cliff, tented Citadel at the centre" onerror="this.style.display='none'">
+          <img data-ri="1" loading="lazy" src="assets/sixflags-construction-aerial.jpg" alt="Aerial photo of the park under construction: bare earth, cranes, unfinished ride track" onerror="this.style.display='none'">
+          <img data-ri="2" loading="lazy" src="assets/sixflags-falcons-steel.jpg" alt="Falcons Flight's spike mid-assembly, surrounded by cranes and site cabins" onerror="this.style.display='none'">
+        </div>
+        <div class="ref-cap"><div class="no" id="ref-no">01 / 03</div><div class="txt" id="ref-txt"><b>The render.</b> Six lands, a tented Citadel, a coaster diving off a cliff. For most of the project, this was the ground truth.</div></div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="stage-track" id="inp-track">
+    <div class="stage">
+      <div class="pinned">
+  <div class="prose" style="margin-top:clamp(16px,3vh,28px)">
+    <p data-fx="">Those pictures are the park's whole life before opening day: a promise, a construction site, a headline ride waiting for its first rider. An operating park appears in none of them, and that absence is what it did to the inputs.</p>
+  </div>
+      </div>
+<div class="stage-in">
+      <div class="stage-tag">Every input a park product runs on</div>
+      <span class="sprog" aria-hidden="true"><i id="inp-prog"></i></span>
+      <div class="card inp">
+        <div class="counter" id="inp-count">Input 1 of 6</div>
+        <div class="name" id="inp-name">Walking distances</div>
+        <div class="rows">
+          <div class="r norm"><span class="k">Normally</span><span class="vwrap"><span class="v" id="inp-norm">Walked and timed on the ground</span><span class="v ov" id="inp-over" aria-hidden="true">Walked and timed on the ground</span></span></div>
+          <div class="r here"><span class="k">Here</span><span class="v" id="inp-here">Read off plans and models, three thousand kilometres away</span></div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="prose" style="margin-top:clamp(16px,3vh,28px)">
+    <p data-fx="">Losing your inputs does not excuse you from deciding. It changes what a decision has to look like. The park's physical facts were solid; its operational ones did not exist. Every behavioural number we ran on, queue times, crowd flow, demand, dwell, was a model with a date attached, so the product was built to survive its own models: everything physical lived as server-side data rather than code. Names, positions, thresholds, hours, whole rides. When a late construction change moved an entrance or a model missed reality, the correction was a data edit that reached every phone in minutes, not an app release that took weeks.</p>
+  </div>
+
+  <p class="decision" data-fx=""><span class="lbl">The way the work was set up</span>We couldn't observe the place or the people. So we designed the day instead, and made every assumption cheap to change.</p>
+
+  <h2 class="sec" data-fx=""><span class="no">03</span>The day is the spec</h2>
+  <div class="prose">
+    <p data-fx="">We didn't run the roadmap as a feature list. We ran it as a timeline of one guest's day, from the sofa to the last ride, and shipped in the order the day happens. Scroll through the family's opening day. The drawings follow, exactly as they were sketched: on paper, before the park had ever run a day.</p>
+  </div>
+  <div class="day-track" id="day-track">
+    <div class="day-stage">
+
+      <div class="day-panel">
+        <div class="day-head">
+          <div class="kick">One family's opening day</div>
+          <div class="dayline" aria-hidden="true">
+            <div class="rail"><i id="dl-fill"></i></div>
+            <div class="dots"><span class="dl-dot"><b></b><span>07:30</span></span><span class="dl-dot"><b></b><span>09:02</span></span><span class="dl-dot"><b></b><span>09:40</span></span><span class="dl-dot"><b></b><span>12:30</span></span><span class="dl-dot"><b></b><span>15:00</span></span><span class="dl-dot"><b></b><span>20:35</span></span></div>
+          </div>
+        </div>
+        <div class="day-body">
+          <div class="day-sheet"><div class="dsheet" aria-hidden="true">
+
+          <div class="sketch is-on" data-idx="0">
+            <div class="hand" style="font-size:20px;color:#26241E;transform:rotate(-.6deg)">07:30 · buy the day from the sofa</div>
+            <svg viewBox="0 0 300 208" fill="none" stroke="#26241E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="96" y="10" width="108" height="188" rx="18" transform="rotate(-1.1 150 104)"/>
+              <rect x="96" y="10" width="108" height="188" rx="18" transform="rotate(.7 150 104)" opacity=".22"/>
+              <g transform="rotate(-1 150 104)">
+                <rect x="108" y="34" width="84" height="34" rx="5"/>
+                <path d="M176 34 v34" stroke-dasharray="3 5"/>
+                <rect x="108" y="78" width="84" height="34" rx="5"/>
+                <path d="M176 78 v34" stroke-dasharray="3 5"/>
+                <rect x="108" y="122" width="84" height="34" rx="5"/>
+                <path d="M176 122 v34" stroke-dasharray="3 5"/>
+                <text x="114" y="56" style="font-family:Caveat,cursive;font-size:16px" fill="#26241E" stroke="none">omar</text>
+                <text x="114" y="100" style="font-family:Caveat,cursive;font-size:16px" fill="#26241E" stroke="none">lina</text>
+                <text x="114" y="144" style="font-family:Caveat,cursive;font-size:16px" fill="#26241E" stroke="none">yousef</text>
+                <path d="M112 172 q38 10 76 0" opacity=".55"/>
+              </g>
+              <path d="M60 96 q18 -26 34 -10" opacity=".7"/>
+              <path d="M90 82 l4 8 M90 82 l-8 3" opacity=".7"/>
+            </svg>
+            <div class="hand" style="font-size:18px;color:#55524A;transform:rotate(-1.3deg)">one wallet for the whole family, portable across phones</div>
+            <div class="tb"><span><b>SFQC guest app</b> · wireframe</span><span>Sheet 01/06 · MH</span></div>
+          </div>
+
+          <div class="sketch" data-idx="1">
+            <div class="hand" style="font-size:20px;color:#26241E;transform:rotate(-.6deg)">09:02 · the gate scan</div>
+            <svg viewBox="0 0 300 208" fill="none" stroke="#26241E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="96" y="10" width="108" height="188" rx="18" transform="rotate(1 150 104)"/>
+              <rect x="96" y="10" width="108" height="188" rx="18" transform="rotate(-.8 150 104)" opacity=".22"/>
+              <g transform="rotate(.8 150 104)">
+                <rect x="116" y="44" width="68" height="68" rx="4"/>
+                <path d="M124 52 h12 M124 60 h20 M148 52 h10 M162 56 h12 M128 72 h30 M124 84 h14 M146 88 h28 M128 98 h40" opacity=".8"/>
+                <rect x="118" y="128" width="64" height="20" rx="10"/>
+                <text x="127" y="143" style="font-family:Caveat,cursive;font-size:15px" fill="#26241E" stroke="none">gate 3 · x3</text>
+              </g>
+              <path d="M52 60 q20 -18 40 -4" opacity=".7"/>
+              <path d="M88 54 l4 8 M88 54 l-9 2" opacity=".7"/>
+              <text x="14" y="48" style="font-family:Caveat,cursive;font-size:17px" fill="#55524A" stroke="none" transform="rotate(-4 14 48)">no signal? still works</text>
+            </svg>
+            <div class="hand" style="font-size:18px;color:#55524A;transform:rotate(-1.2deg)">must work offline !! day-one network = a guess</div>
+            <div class="tb"><span><b>SFQC guest app</b> · wireframe</span><span>Sheet 02/06 · MH</span></div>
+          </div>
+
+          <div class="sketch" data-idx="2">
+            <div class="hand" style="font-size:20px;color:#26241E;transform:rotate(-.6deg)">09:40 · the map opens on YOU</div>
+            <svg viewBox="0 0 300 208" fill="none" stroke="#26241E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M74 40 q60 -28 128 -6 q44 16 40 70 q-6 56 -70 66 q-70 10 -104 -28 q-28 -34 6 -102 z" stroke-dasharray="6 6" opacity=".75"/>
+              <path d="M142 118 l14 14 M156 118 l-14 14" stroke-width="2.6"/>
+              <circle cx="106" cy="74" r="11"/>
+              <circle cx="206" cy="66" r="11"/>
+              <circle cx="216" cy="140" r="11"/>
+              <circle cx="96" cy="150" r="11"/>
+              <path d="M140 116 q-14 -18 -26 -32" opacity=".6"/>
+              <path d="M158 116 q22 -22 38 -40" opacity=".6"/>
+              <path d="M160 132 q26 6 46 6" opacity=".6"/>
+              <path d="M138 132 q-20 10 -32 14" opacity=".6"/>
+              <text x="84" y="52" style="font-family:Caveat,cursive;font-size:15px" fill="#26241E" stroke="none">springs 3'</text>
+              <text x="188" y="44" style="font-family:Caveat,cursive;font-size:15px" fill="#26241E" stroke="none">gardens 6'</text>
+              <text x="196" y="170" style="font-family:Caveat,cursive;font-size:15px" fill="#26241E" stroke="none">thrills 9'</text>
+              <text x="52" y="180" style="font-family:Caveat,cursive;font-size:15px" fill="#26241E" stroke="none">falcons 11' · 70min!</text>
+              <text x="150" y="152" style="font-family:Caveat,cursive;font-size:15px" fill="#55524A" stroke="none">you</text>
+            </svg>
+            <div class="hand" style="font-size:18px;color:#55524A;transform:rotate(-1.2deg)">sort by walk time, not by alphabet</div>
+            <div class="tb"><span><b>SFQC guest app</b> · wireframe</span><span>Sheet 03/06 · MH</span></div>
+          </div>
+
+          <div class="sketch" data-idx="3">
+            <div class="hand" style="font-size:20px;color:#26241E;transform:rotate(-.6deg)">12:30 · ask, don't browse</div>
+            <svg viewBox="0 0 300 208" fill="none" stroke="#26241E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <g transform="rotate(-.8 150 104)">
+                <rect x="120" y="22" width="150" height="44" rx="14"/>
+                <path d="M136 34 h118 M136 44 h96 M136 54 h60" opacity=".45"/>
+                <path d="M140 66 l-8 12 l20 -6" fill="none"/>
+                <rect x="30" y="96" width="164" height="56" rx="14"/>
+                <path d="M44 110 h132 M44 122 h110 M44 134 h84" opacity=".45"/>
+                <path d="M176 152 l10 12 l-24 -6" fill="none"/>
+              </g>
+              <text x="212" y="120" style="font-family:Caveat,cursive;font-size:34px" fill="#26241E" stroke="none">?</text>
+              <path d="M232 138 q-2 10 -4 14" opacity=".7"/>
+            </svg>
+            <div class="hand" style="font-size:18px;color:#55524A;transform:rotate(-1.2deg)">one question box beats forty screens · reads live park data</div>
+            <div class="tb"><span><b>SFQC guest app</b> · wireframe</span><span>Sheet 04/06 · MH</span></div>
+          </div>
+
+          <div class="sketch" data-idx="4">
+            <div class="hand" style="font-size:20px;color:#26241E;transform:rotate(-.6deg)">15:00 · plans move, bookings follow</div>
+            <svg viewBox="0 0 300 208" fill="none" stroke="#26241E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <g transform="rotate(-.6 150 104)">
+                <rect x="30" y="60" width="70" height="44" rx="7"/>
+                <text x="42" y="88" style="font-family:Caveat,cursive;font-size:18px" fill="#26241E" stroke="none">15:30</text>
+                <path d="M44 66 l52 34 M96 66 l-52 34" opacity=".5"/>
+                <rect x="128" y="60" width="70" height="44" rx="7"/>
+                <text x="140" y="88" style="font-family:Caveat,cursive;font-size:18px" fill="#26241E" stroke="none">16:30</text>
+                <path d="M64 48 q66 -30 130 6" opacity=".75"/>
+                <path d="M192 50 l4 9 M192 50 l-10 1" opacity=".75"/>
+                <rect x="196" y="128" width="76" height="48" rx="8"/>
+                <rect x="191" y="123" width="86" height="58" rx="10" opacity=".45"/>
+                <text x="206" y="150" style="font-family:Caveat,cursive;font-size:17px" fill="#26241E" stroke="none">falcons</text>
+                <text x="206" y="168" style="font-family:Caveat,cursive;font-size:17px" fill="#26241E" stroke="none">20:40 held</text>
+              </g>
+              <text x="30" y="146" style="font-family:Caveat,cursive;font-size:17px" fill="#55524A" stroke="none" transform="rotate(-3 30 146)">slots from capacity math,</text>
+              <text x="30" y="166" style="font-family:Caveat,cursive;font-size:17px" fill="#55524A" stroke="none" transform="rotate(-3 30 166)">tunable from the server</text>
+            </svg>
+            <div class="hand" style="font-size:18px;color:#55524A;transform:rotate(-1.2deg)">changing your mind costs nothing</div>
+            <div class="tb"><span><b>SFQC guest app</b> · wireframe</span><span>Sheet 05/06 · MH</span></div>
+          </div>
+
+          <div class="sketch" data-idx="5">
+            <div class="hand" style="font-size:20px;color:#26241E;transform:rotate(-.6deg)">20:35 · the nudge, when you're near</div>
+            <svg viewBox="0 0 300 208" fill="none" stroke="#26241E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="96" y="26" width="108" height="160" rx="18" transform="rotate(-1 150 106)"/>
+              <g transform="rotate(-1 150 106)">
+                <rect x="108" y="44" width="84" height="44" rx="8"/>
+                <path d="M116 56 h58 M116 66 h68 M116 76 h44" opacity=".5"/>
+              </g>
+              <circle cx="52" cy="150" r="5" fill="#26241E"/>
+              <path d="M64 138 a18 18 0 0 1 0 24 M74 128 a32 32 0 0 1 0 44 M84 118 a46 46 0 0 1 0 64" opacity=".65"/>
+              <text x="26" y="182" style="font-family:Caveat,cursive;font-size:16px" fill="#55524A" stroke="none">beacon</text>
+              <g transform="rotate(-7 236 168)">
+                <rect x="196" y="146" width="86" height="34" rx="4" stroke-width="2.4"/>
+                <text x="204" y="169" style="font-family:Caveat,cursive;font-size:16px;letter-spacing:.06em" fill="#26241E" stroke="none">GATE-OPEN OK</text>
+              </g>
+            </svg>
+            <div class="hand" style="font-size:18px;color:#55524A;transform:rotate(-1.2deg)">remind when NEAR, not just when due · 250 km/h in the dark</div>
+            <div class="tb"><span><b>SFQC guest app</b> · wireframe</span><span>Sheet 06/06 · MH</span></div>
+          </div>
+
+        </div>
+          </div>
+          <div class="day-text" id="day-text"></div>
+        </div>
+        <div class="moments" id="moments">
+
+        <div class="moment" data-scr="0">
+          <span class="mt">07:30 · At home</span>
+          <h3>The day starts on the sofa</h3>
+          <p class="does">Three day tickets bought in two taps, all living on one parent's phone, next to the annual passes and VIP options the park sells to very different guests. Prices, park hours and the plan in one place before the drive starts.</p>
+          <div class="call"><b>Why it worked</b><span>One guest profile owns tickets, bookings and payments for the whole family. The day stays portable across phones, and when something goes wrong there is one thread to pull, not five.</span></div>
+        </div>
+
+        <div class="moment" data-scr="1">
+          <span class="mt">09:02 · The gates</span>
+          <h3>Entry assumes nothing</h3>
+          <p class="does">The pass is ready before they park: brightness up, code on screen, gate number shown. It works with no signal at all.</p>
+          <div class="call"><b>Why it worked</b><span>Opening-day crowds on an opening-day network is not a risk you test your way out of. Entry runs fully offline, because the first thirty seconds set how the guest feels about the next twelve hours.</span></div>
+        </div>
+
+        <div class="moment" data-scr="2">
+          <span class="mt">09:40 · First choice</span>
+          <h3>The map answers "where first?"</h3>
+          <p class="does">The map opens centred on the family, not on the park. The six lands sort by walk time from where they stand, live waits beside each, with the 70 minute queue for Falcons Flight visible from the start.</p>
+          <div class="call"><b>Why it worked</b><span>Beacons through the park make the app location-aware, but proximity only ever enriches, it never gates. Placement was planned without ever watching a crowd move through the space, so a phone that never meets a beacon still gets a complete day.</span></div>
+        </div>
+
+        <div class="moment" data-scr="3">
+          <span class="mt">12:30 · The hot hour</span>
+          <h3>One question instead of forty screens</h3>
+          <p class="does">Nobody browses menus holding a melting child. The concierge takes the actual question and does the navigating: shade, water rides, short waits, and the booking moved before anyone asked twice.</p>
+          <div class="call"><b>Why it worked</b><span>Feature discovery fails on the best day of someone's year, so the whole app collapses into one question box that reads the same live data as every screen. In a park with no operating history, whatever guests can't find, they can ask.</span></div>
+        </div>
+
+        <div class="moment" data-scr="4">
+          <span class="mt">15:00 · The reshuffle</span>
+          <h3>Plans change. Bookings follow.</h3>
+          <p class="does">The afternoon slot moves back an hour in one tap, no penalty and no queue at guest services. The evening slot they came for stays held.</p>
+          <div class="call"><b>Why it worked</b><span>With zero operating days of demand history, slot logic came from engineered ride capacity instead, and every threshold that encoded a guess stayed tunable from the server. The first real crowds calibrated the system rather than breaking it.</span></div>
+        </div>
+
+        <div class="moment" data-scr="5">
+          <span class="mt">20:35 · The headline</span>
+          <h3>The ride they came for</h3>
+          <p class="does">The reminder fires because they are close, not just because it is time. Six minutes later the family is on a coaster doing 250 kilometres per hour, in the dark.</p>
+          <div class="call"><b>Why it worked</b><span>A ride can go down any day, and on opening day it goes down famously. The closure flow existed before the ride ever cycled: what the guest is told, where the slot goes, what the app offers next.</span></div>
+        </div>
+
+      </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stage-track" id="count-track">
+    <div class="stage">
+      <div class="pinned">
+  <h2 class="sec" data-fx=""><span class="no">04</span>Forty-seven days, in public</h2>
+  <div class="prose">
+    <p data-fx="">There was no soft launch and no beta cohort, because a park has no quiet way to open: the first day the gates work is the first day the crowds arrive. The sequence below is public record, and it is the whole risk profile of this product in three dates.</p>
+  </div>
+      </div>
+<div class="stage-in wide">
+      <div class="count-panel">
+        <div class="stage-tag">Days to gate-open</div>
+        <span class="sprog" aria-hidden="true"><i id="count-prog"></i></span>
+        <div class="tminus" id="tminus"><span class="t">T−</span><span class="n" id="tnum">47</span><span class="u">days</span></div>
+        <div class="cdates">
+          <div class="cdate" data-day="47"><div class="cd">November 14, 2025</div><div class="cv">The app goes live in the stores</div></div>
+          <div class="cdate" data-day="45"><div class="cd">November 16, 2025</div><div class="cv">The opening date goes public</div></div>
+          <div class="cdate red" data-day="0"><div class="cd">December 31, 2025</div><div class="cv">The gates open, on time</div></div>
+        </div>
+        <div id="count-line">Forty-seven days between the stores and the gates. The first real user test was the grand opening.</div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="stage-track" id="photo-track">
+    <div class="stage">
+      <div class="pinned">
+  <h2 class="sec" data-fx=""><span class="no">05</span>The park, real at last</h2>
+  <div class="prose">
+    <p data-fx="">The park the app met that morning was real at last: 28 rides across six themed lands radiating from the central Citadel, and three world records claimed by a single coaster. From that day, every modelled number started being replaced by an observed one, through the same server-side dials that were built for exactly this moment.</p>
+  </div>
+      </div>
+<div class="stage-in full">
+    <div class="photo">
+      <div class="frame">
+        <img data-pi="0" class="on" loading="lazy" src="assets/sixflags-open-dusk.jpg" alt="Six Flags Qiddiya City finished and lit at dusk, ringed by the cliff">
+        <img data-pi="1" loading="lazy" src="assets/sixflags-night-park.jpg" alt="The open park at night, six lit lands seen through the loops of a coaster" onerror="this.style.display='none'">
+        <img data-pi="2" loading="lazy" src="assets/sixflags-opening-night.jpg" alt="The opening ceremony: fireworks over the Citadel and a drone display spelling NOW OPEN" onerror="this.style.display='none'">
+        <div class="grade"></div>
+        <span class="sprog photo-sprog" aria-hidden="true"><i id="photo-prog"></i></span>
+        <div class="over">
+          <div class="pcap" id="photo-cap">December 31, 2025 · the park, real at last</div>
+          <div class="records" id="records">
+            <div class="rec"><div class="rv">28</div><div class="rk">rides</div></div>
+            <div class="rec"><div class="rv">6</div><div class="rk">lands</div></div>
+            <div class="rec"><div class="rv">320,000 m²</div><div class="rk">park</div></div>
+            <div class="rec"><div class="rv">250 km/h</div><div class="rk">Falcons Flight</div></div>
+            <div class="rec"><div class="rv"><i>3</i></div><div class="rk">world records</div></div>
+            <div class="rec"><div class="rv"><i>1st</i></div><div class="rk">Six Flags outside North America</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div></div>
+  </div>
+
+  <h2 class="sec" data-fx=""><span class="no">06</span>What the sand taught</h2>
+  <figure class="plain-shot" data-fx="">
+    <img id="mePhoto" loading="lazy" src="assets/sixflags-gate-selfie.jpg" alt="Michael Hanna at the entrance fountain of Six Flags Qiddiya City on opening day, the Six Flags sign behind him" onerror="this.parentElement.style.display='none'">
+    <figcaption class="kick">Opening day · at the gates the app was built for</figcaption>
+  </figure>
+  <div class="prose" style="margin-top:clamp(24px,4vh,40px);padding-bottom:clamp(48px,8vh,96px)">
+    <p data-fx="">Strip away the desert and the records, and this was a product problem most teams will eventually meet: shipping into a reality you cannot observe yet, on a date you do not control. What survived contact with opening day was not any single feature. It was the way the work was set up.</p>
+    <p data-fx="">The guest's written day settled arguments that job titles couldn't, and kept five systems pointed at one experience. Guesses were treated as inventory: labelled, priced, and kept cheap to change in production, so being wrong was a Tuesday, not a crisis. The failure states were designed before the happy paths were finished, because opening day is exactly when rides go down and networks fall over. And the date held, in public, because everything above existed to protect it.</p>
+  </div>
+  <p class="legal" data-fx="">Park photography and renders are the property of Qiddiya Investment Company and Six Flags Qiddiya City, shown editorially to illustrate work I contributed to. Opening-day photo: author's own. Figures from public reporting.</p>
+  <div class="more">
+    <div class="mk">More work</div>
+    <div class="more-grid">
+      <a class="mcard" href="/openbank"><img src="assets/openbank-billboards.jpg" alt="Openbank USA"><div class="mb"><div class="mn">Case 01</div><h3>Openbank USA<span>→</span></h3><p>The five minutes that decided whether a bank was real.</p></div></a>
+      <a class="mcard" href="/zinia"><img src="assets/zinia-amazon-visa.jpg" alt="Zinia by Santander"><div class="mb"><div class="mn">Case 02</div><h3>Zinia by Santander<span>→</span></h3><p>Building trust at checkout.</p></div></a>
+    </div>
+  </div>
+</article>
+
+
+<section data-dark="" style="background:#000;color:#fff;box-sizing:border-box;text-align:center;padding:clamp(54px,9vh,96px) clamp(22px,5vw,80px);overflow:hidden">
+  <h2 id="hm-cta-head">Let's discuss your next <span class="cta-arrow">→</span> <span id="hm-cta-word" class="cta-word">idea.</span></h2>
+  <div id="hm-cta-actions">
+    <a class="cta-btn" href="mailto:Michaelhannafarag@gmail.com" target="_blank" rel="noopener noreferrer">Email Me</a>
+    <a class="cta-btn" href="https://calendar.app.google/tHrhek8WerVMwURK9" target="_blank" rel="noopener noreferrer">Book a Call</a>
+  </div>
+</section>
+
+<footer data-dark="" style="background:#000;color:#fff;box-sizing:border-box;padding:clamp(28px,4.5vh,54px) 0 calc(clamp(40px,6vh,64px) + env(safe-area-inset-bottom,0px));overflow:hidden">
+  <div style="width:100%;max-width:1040px;margin:0 auto;padding:0 clamp(22px,6vw,44px);box-sizing:border-box">
+    <div class="cta-id" style="margin:0">
+    <div class="cta-name">Michael Hanna</div>
+    <div>Product Manager</div>
+    <div>Based in Madrid, Spain</div>
+    <div class="cta-badges">
+      <span class="cta-badge" title="Built with Claude Code" aria-hidden="true"><svg viewBox="0 0 512 512" fill="currentColor">
+        <rect x="64" y="108" width="384" height="64"/>
+        <rect x="64" y="172" width="64" height="64"/>
+        <rect x="160" y="172" width="192" height="64"/>
+        <rect x="384" y="172" width="64" height="64"/>
+        <rect x="0" y="236" width="512" height="64"/>
+        <rect x="64" y="300" width="384" height="64"/>
+        <rect x="88" y="364" width="64" height="64"/>
+        <rect x="200" y="364" width="32" height="64"/>
+        <rect x="280" y="364" width="32" height="64"/>
+        <rect x="360" y="364" width="64" height="64"/>
+      </svg></span>
+      <span class="cta-badge" title="Figma" aria-hidden="true"><svg viewBox="0 0 15 15" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M7.00005 2.04999H5.52505C4.71043 2.04999 4.05005 2.71037 4.05005 3.52499C4.05005 4.33961 4.71043 4.99999 5.52505 4.99999H7.00005V2.04999ZM7.00005 1.04999H8.00005H9.47505C10.842 1.04999 11.95 2.15808 11.95 3.52499C11.95 4.33163 11.5642 5.04815 10.9669 5.49999C11.5642 5.95184 11.95 6.66836 11.95 7.475C11.95 8.8419 10.842 9.95 9.47505 9.95C8.92236 9.95 8.41198 9.76884 8.00005 9.46266V9.95L8.00005 11.425C8.00005 12.7919 6.89195 13.9 5.52505 13.9C4.15814 13.9 3.05005 12.7919 3.05005 11.425C3.05005 10.6183 3.43593 9.90184 4.03317 9.44999C3.43593 8.99814 3.05005 8.28163 3.05005 7.475C3.05005 6.66836 3.43594 5.95184 4.03319 5.5C3.43594 5.04815 3.05005 4.33163 3.05005 3.52499C3.05005 2.15808 4.15814 1.04999 5.52505 1.04999H7.00005ZM8.00005 2.04999V4.99999H9.47505C10.2897 4.99999 10.95 4.33961 10.95 3.52499C10.95 2.71037 10.2897 2.04999 9.47505 2.04999H8.00005ZM5.52505 8.94998H7.00005L7.00005 7.4788L7.00005 7.475L7.00005 7.4712V6H5.52505C4.71043 6 4.05005 6.66038 4.05005 7.475C4.05005 8.28767 4.70727 8.94684 5.5192 8.94999L5.52505 8.94998ZM4.05005 11.425C4.05005 10.6123 4.70727 9.95315 5.5192 9.94999L5.52505 9.95H7.00005L7.00005 11.425C7.00005 12.2396 6.33967 12.9 5.52505 12.9C4.71043 12.9 4.05005 12.2396 4.05005 11.425ZM8.00005 7.47206C8.00164 6.65879 8.66141 6 9.47505 6C10.2897 6 10.95 6.66038 10.95 7.475C10.95 8.28962 10.2897 8.95 9.47505 8.95C8.66141 8.95 8.00164 8.29121 8.00005 7.47794V7.47206Z"/></svg></span>
+      <span class="cta-badge" title="Jira" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.53,2a4.37,4.37,0,0,0,4.35,4.35h1.78v1.7A4.35,4.35,0,0,0,22,12.4V2.84A.85.85,0,0,0,21.16,2H11.53M6.77,6.8a4.36,4.36,0,0,0,4.34,4.34h1.8v1.72a4.36,4.36,0,0,0,4.34,4.34V7.63a.84.84,0,0,0-.83-.83H6.77M2,11.6a4.34,4.34,0,0,0,4.35,4.34H8.13v1.72A4.36,4.36,0,0,0,12.47,22V12.43a.85.85,0,0,0-.84-.84H2Z"/></svg></span>
+      <span class="cta-badge cta-badge-text" title="Product Department" aria-hidden="true">PRDT<br>DEPT</span>
+    </div>
+    <div class="cta-clock"><span class="cta-time">--:--:--</span> <span class="cta-tz">CET</span></div>
+    </div>
+  </div>
+</footer>
+
+<script src="sixflags.js?v=36"></script>
+<script src="arrive.js?v=1"></script>
+<script>
+/* image save deterrent: covers Android browsers that ignore the CSS guards */
+addEventListener('contextmenu', e => { if (e.target.tagName === 'IMG' || e.target.querySelector && e.target.querySelector('img') && e.target.closest('figure,.photo,.mstack,.hero')) e.preventDefault(); }, true);
+addEventListener('dragstart', e => { if (e.target.tagName === 'IMG') e.preventDefault(); }, true);
+</script>
+</body>
+</html>

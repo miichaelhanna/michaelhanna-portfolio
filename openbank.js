@@ -1,0 +1,229 @@
+document.addEventListener('DOMContentLoaded', () => {
+  const $ = id => document.getElementById(id);
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const ease = t => 1 - Math.pow(1 - t, 3);
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // entrance for prose blocks
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (!e.isIntersecting) return;
+    e.target.style.opacity = 1; e.target.style.transform = 'none';
+    io.unobserve(e.target);
+  }), { threshold: .08 });
+  if (!reduced) document.querySelectorAll('[data-fx]').forEach(el => {
+    if (el.getBoundingClientRect().top > innerHeight * .95) {
+      el.style.opacity = 0;
+      el.style.transform = 'translateY(12px)';
+      el.style.transition = 'opacity .6s cubic-bezier(.22,1,.36,1),transform .6s cubic-bezier(.22,1,.36,1)';
+      io.observe(el);
+    }
+  });
+
+  // the attribution's date rule draws itself once the page is in
+  requestAnimationFrame(() => $('attrib').classList.add('in'));
+
+  // progress of a tall track through the viewport, 0 to 1
+  const trackProg = el => {
+    const r = el.getBoundingClientRect();
+    return clamp(-r.top / Math.max(1, r.height - innerHeight), 0, 1);
+  };
+  // each pinned block sticks below the nav, or anchors to the bottom of the
+  // viewport when it is taller than the space, so its stage is always visible
+  const stages = [...document.querySelectorAll('.stage-track .stage')];
+  const stick = () => stages.forEach(st => {
+    const nav = document.querySelector('nav').offsetHeight;
+    st.style.setProperty('--stick', Math.min(nav + 16, innerHeight - st.offsetHeight - 12) + 'px');
+  });
+
+  // 01 · the three forces take the room in turn, then the line lands
+  const forcesTrack = $('forces-track'), forcesProg = $('forces-prog');
+  const forces = [...document.querySelectorAll('.force')];
+  const forceLine = $('force-line');
+  const setForces = p => {
+    forcesProg.style.width = (p * 100) + '%';
+    const idx = p < .3 ? 0 : p < .58 ? 1 : 2;
+    forces.forEach((f, i) => f.classList.toggle('on', i === idx));
+    forceLine.classList.toggle('on', p > .84);
+  };
+
+  // 03 · the cut: eight products fade, one remains, then the payoff line
+  const cutTrack = $('cut-track'), cutProg = $('cut-prog');
+  const feats = [...document.querySelectorAll('[data-feat]')];
+  const keep = document.querySelector('[data-keep]');
+  const others = feats.filter(f => f !== keep);
+  const cutpay = $('cutpay'), cutgrid = $('cutgrid');
+  const cutN = $('cut-n'), cutKick = $('cut-kick');
+  const setCut = p => {
+    cutProg.style.width = (p * 100) + '%';
+    const gone = clamp((p - .06) / .6, 0, 1) * others.length;
+    others.forEach((el, i) => {
+      const g = ease(clamp(gone - i, 0, 1));
+      el.style.opacity = String(1 - .9 * g);
+      el.style.transform = 'translateY(' + (g * 6) + 'px) scale(' + (1 - .05 * g) + ')';
+    });
+    const hot = clamp((p - .58) / .14, 0, 1);
+    keep.style.color = hot > .45 ? '#FF0000' : '#222222';
+    keep.style.transform = 'scale(' + (1 + .14 * ease(hot)) + ')';
+    const remaining = Math.max(1, 9 - Math.floor(clamp((p - .06) / .6, 0, 1) * 8));
+    if (cutN.textContent !== String(remaining)) cutN.textContent = String(remaining);
+    cutN.classList.toggle('one', remaining === 1);
+    cutKick.textContent = remaining === 1 ? 'Products that shipped in the year' : 'Products in the plan';
+    // the grid leaves first, then the payoff line arrives: no overlap
+    cutgrid.style.opacity = String(1 - ease(clamp((p - .74) / .08, 0, 1)));
+    cutpay.style.opacity = String(ease(clamp((p - .84) / .12, 0, 1)));
+  };
+
+  // 05 · the rails: one promise, three ways of keeping it
+  const railsTrack = $('rails-track'), railsProg = $('rails-prog');
+  const route = $('route'), live = $('live'), rdot = $('rdot'), railcap = $('railcap');
+  const rlen = route.getTotalLength();
+  live.style.strokeDasharray = rlen;
+  const achpost = $('achpost'), rtppost = $('rtppost'), una = $('una'), unr = $('unr');
+  const railLabels = [$('t-ach'), $('t-rtp'), $('t-deb')];
+  const CAPS = [
+    '<b>A transfer leaves on ACH.</b> The default rail: cheap, proven, slow.',
+    '<b>ACH is unavailable.</b> A legacy bank shows an error here. We reroute to RTP, and the transfer keeps moving.',
+    '<b>RTP is unavailable too.</b> A debit top-up through Plaid carries it. Funded, and no wall in sight.'
+  ];
+  let capIdx = -1;
+  const setRail = raw => {
+    railsProg.style.width = (raw * 100) + '%';
+    const p = ease(clamp(raw / .92, 0, 1));
+    const d = rlen * p, pt = route.getPointAtLength(d);
+    rdot.setAttribute('cx', pt.x); rdot.setAttribute('cy', pt.y);
+    live.style.strokeDashoffset = rlen - d;
+    const aF = p > .40, rF = p > .63;
+    achpost.style.opacity = aF ? .06 : .16;
+    rtppost.style.opacity = rF ? .06 : .16;
+    una.style.opacity = aF ? 1 : 0;
+    unr.style.opacity = rF ? 1 : 0;
+    const i = p < .42 ? 0 : p < .65 ? 1 : 2;
+    if (i !== capIdx) {
+      capIdx = i;
+      railcap.innerHTML = CAPS[i];
+      railLabels.forEach((t, j) => t.style.fill = j === i ? '#FF0000' : '#8C877E');
+    }
+  };
+
+  // 06 · four cities light up, then the sentence that held them together
+  const cityBand = $('city-band');
+  const cities = [...document.querySelectorAll('#cities span')];
+  const cityLine = $('city-line');
+  new IntersectionObserver((es, obs) => es.forEach(e => {
+    if (!e.isIntersecting) return;
+    cities.forEach((c, i) => setTimeout(() => c.classList.add('on'), 200 + i * 220));
+    setTimeout(() => cityLine.classList.add('on'), 200 + cities.length * 220 + 200);
+    obs.disconnect();
+  }), { threshold: .45 }).observe(cityBand);
+
+  // 07 · the money: $0.00B to $2.00B with the reader's scroll
+  const moneyTrack = $('money-track');
+  const moneyN = $('money-n'), moneyFill = $('money-fill'), moneyLine = $('money-line'), moneyKick = $('money-kick'), resgrid = $('resgrid');
+  let moneyPhase = -1;
+  const setMoney = p => {
+    const v = 2 * ease(clamp(p / .84, 0, 1));
+    moneyN.textContent = v.toFixed(2);
+    moneyFill.style.width = (clamp(p / .84, 0, 1) * 100) + '%';
+    const phase = v < .5 ? 0 : v < 1.2 ? 1 : v < 1.95 ? 2 : 3;
+    if (phase !== moneyPhase) {
+      moneyPhase = phase;
+      moneyLine.textContent = [
+        'One product, in all fifty states, funded five minutes at a time.',
+        'Every dollar of it arrived through the same screen.',
+        'No customer met a wall, including when a rail did.',
+        'Two billion dollars, from the one thing we did not cut.'
+      ][phase];
+      moneyKick.textContent = phase === 3 ? 'Deposits · ten weeks after launch · fifty states' : 'Deposits · ten weeks after launch';
+    }
+    resgrid.style.opacity = String(clamp((p - .86) / .1, 0, 1));
+  };
+
+  // one scroll loop drives every stage
+  const bar = $('pg');
+  const onScroll = () => {
+    const total = document.documentElement.scrollHeight - innerHeight;
+    bar.style.width = clamp(scrollY / (total || 1), 0, 1) * 100 + '%';
+    setForces(trackProg(forcesTrack));
+    setCut(clamp(trackProg(cutTrack) / .94, 0, 1));
+    setRail(trackProg(railsTrack));
+    setMoney(trackProg(moneyTrack));
+  };
+  addEventListener('scroll', () => requestAnimationFrame(onScroll), { passive: true });
+
+  // track heights give each stage its scroll room
+  const tune = () => {
+    const m = innerWidth < 700;
+    forcesTrack.style.height = m ? '220vh' : '250vh';
+    cutTrack.style.height = m ? '260vh' : '300vh';
+    railsTrack.style.height = m ? '240vh' : '280vh';
+    moneyTrack.style.height = m ? '240vh' : '280vh';
+    stick();
+  };
+  tune();
+  addEventListener('resize', () => { tune(); onScroll(); });
+  addEventListener('load', tune);
+  onScroll();
+
+  // iOS bottom band follows whichever section sits at the bottom edge,
+  // same treatment as the home page.
+  const darkSecs = [...document.querySelectorAll('[data-dark]')];
+  const safeBot = $('hm-safe-bot');
+  let wasBotDark = null;
+  const paintChrome = () => {
+    const seen = window.visualViewport ? Math.min(window.visualViewport.height, innerHeight) : innerHeight;
+    const botDark = darkSecs.some(s => {
+      const r = s.getBoundingClientRect();
+      return r.top < seen - 8 && r.bottom > seen - 8;
+    });
+    if (botDark === wasBotDark) return;
+    wasBotDark = botDark;
+    const c = botDark ? '#000000' : '#ffffff';
+    document.documentElement.style.background = c;
+    document.body.style.background = c;
+    if (safeBot) safeBot.style.background = c;
+  };
+  addEventListener('scroll', paintChrome, { passive: true });
+  addEventListener('resize', () => { wasBotDark = null; paintChrome(); });
+  paintChrome();
+
+
+  // Footer headline word alternates between what someone might be reaching
+  // out for; the ID card's clock reads Madrid local time (CET/CEST derived
+  // from the actual offset, not hard-coded, so it keeps up with DST).
+  const ctaWord = $('hm-cta-word');
+  if (ctaWord) {
+    const words = ['idea.', 'product.', 'launch.', 'bet.', 'hire.'];
+    let wi = 0;
+    setInterval(() => {
+      ctaWord.classList.add('is-swap');
+      setTimeout(() => {
+        wi = (wi + 1) % words.length;
+        ctaWord.textContent = words[wi];
+        ctaWord.classList.remove('is-swap');
+      }, 250);
+    }, 2200);
+  }
+
+  const ctaTimes = document.querySelectorAll('.cta-time'), ctaTzs = document.querySelectorAll('.cta-tz');
+  if (ctaTimes.length) {
+    const MADRID = 'Europe/Madrid';
+    const offsetHours = date => {
+      const p = new Intl.DateTimeFormat('en-US', {
+        timeZone: MADRID, hour12: false,
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit'
+      }).formatToParts(date).reduce((a, x) => (a[x.type] = x.value, a), {});
+      const asUTC = Date.UTC(p.year, p.month - 1, p.day, p.hour === '24' ? 0 : p.hour, p.minute, p.second);
+      return Math.round((asUTC - date.getTime()) / 3600000);
+    };
+    const tick = () => {
+      const now = new Date();
+      const time = now.toLocaleTimeString('en-GB', { timeZone: MADRID, hour12: false });
+      const tz = offsetHours(now) === 2 ? 'CEST' : 'CET';
+      ctaTimes.forEach(el => { el.textContent = time; });
+      ctaTzs.forEach(el => { el.textContent = tz; });
+    };
+    tick();
+    setInterval(tick, 1000);
+  }
+});

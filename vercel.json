@@ -1,5 +1,12 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    { "source": "/case-study-openbank.html", "destination": "/openbank", "permanent": true },
+    { "source": "/case-study-zinia.html", "destination": "/zinia", "permanent": true },
+    { "source": "/case-study-sixflags.html", "destination": "/sixflags", "permanent": true }
+  ],
   "headers": [
     {
       "source": "/assets/(.*)",
