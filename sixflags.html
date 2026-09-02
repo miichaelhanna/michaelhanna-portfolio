@@ -25,6 +25,11 @@
       var a = JSON.parse(raw);
       if (a.key !== 'sixflags' || Date.now() - a.t > 4000) return;
       if (matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+      // On touch the hand-off reads as a leftover picture sitting on the case
+      // study for a beat, so the page opens clean instead. Guarded here rather
+      // than in arrive.js: hm-arriving hides the body, and only arrive.js
+      // lifts it — refusing later would leave the page blank.
+      if (matchMedia('(hover:none)').matches) return;
       window.__hmArrive = a;
       document.documentElement.classList.add('hm-arriving');
     } catch (e) {}

@@ -601,9 +601,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // grows it into place (arrive.js). Modifier clicks keep their browser
   // meaning — a cmd-click still opens a tab.
   const cards = [...work.querySelectorAll('.wk-card')];
+  // Not on touch: a phone scrolls the card away under the thumb and paints the
+  // new page on its own schedule, so the handed-over picture reads as a leftover
+  // sitting on top of the case study rather than as one picture changing rooms.
+  // The case opens clean instead (the case pages refuse the hand-off too).
   const depart = (card, url) => {
     const pic = card.querySelector('.wk-pic'), img = pic && pic.querySelector('img');
-    if (still.matches || !pic) { location.href = url; return; }
+    if (still.matches || touch || !pic) { location.href = url; return; }
     const r = pic.getBoundingClientRect();
     let sc = 1;
     if (img) { const m = /matrix\(([\d.]+)/.exec(getComputedStyle(img).transform); if (m) sc = +m[1]; }
