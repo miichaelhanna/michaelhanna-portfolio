@@ -401,7 +401,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const botDark = inDark(Math.min(intro.scrollTop + seen - 8, intro.scrollHeight - 1));
     if (botDark !== wasBotDark) {
       wasBotDark = botDark;
-      setChromeBottom(botDark ? '#000000' : '#ffffff');
+      const c = botDark ? '#000000' : '#ffffff';
+      setChromeBottom(c);
+      // The body never scrolls here — #hm-intro does — so a rubber-band past
+      // the end bounces the SCROLLER's own background into view, not the
+      // document's. Painting only html/body left the black footer pulling
+      // away from a white gap. The layer follows the same bottom edge.
+      intro.style.background = c;
     }
     if (onDark === wasDark) return;
     wasDark = onDark;
