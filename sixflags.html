@@ -50,7 +50,13 @@
 /* Clean and in colour from the first frame. White page, warm sand panels
    (the desert at dusk), Six Flags red as the single accent, soft white cards. */
 :root{--ink:#161616;--graphite:#5F625F;--soft:#8C8F8C;--sand:#F5F1EA;--sand-line:#E6E1D8;--sand-ink:#8A7A62;--red:#E02020;--red-ink:#B81818;--card-line:#ECE9E3}
-html{scroll-behavior:smooth;overflow-x:clip}
+/* No rubber-band past the ends. The chrome script repaints the canvas from
+   whatever sits at the bottom edge, and that part works — but a browser that
+   captured its overscroll backdrop at first paint keeps showing the colour the
+   page loaded with, so the black footer pulled away from a white gap until you
+   reloaded while already at the bottom. With no bounce there is no gap left to
+   mis-paint, at either end. */
+html{scroll-behavior:smooth;overflow-x:clip;overscroll-behavior-y:none}
 body{margin:0;background:#fff;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,'Helvetica Neue',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
 ::selection{background:var(--red);color:#fff}
 a{color:var(--ink);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px;text-decoration-color:var(--red)}

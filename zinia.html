@@ -53,7 +53,13 @@
    exactly where the text says the name did (04). The one early flash of
    teal is the moment the fine print becomes clear: that insight became the brand. */
 :root{--zinia:#00B7AD;--zinia-ink:#007D7A;--deep:#003840;--mist:#C0F0F0;--mist-soft:#E2F8F7;--slate:#66777B;--slate-ink:#43555A;--ink:#101314;--paperline:#C9CCC5}
-html{scroll-behavior:smooth;overflow-x:clip}
+/* No rubber-band past the ends. The chrome script repaints the canvas from
+   whatever sits at the bottom edge, and that part works — but a browser that
+   captured its overscroll backdrop at first paint keeps showing the colour the
+   page loaded with, so the black footer pulled away from a white gap until you
+   reloaded while already at the bottom. With no bounce there is no gap left to
+   mis-paint, at either end. */
+html{scroll-behavior:smooth;overflow-x:clip;overscroll-behavior-y:none}
 body{margin:0;background:#fff;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,'Helvetica Neue',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
 ::selection{background:var(--mist);color:var(--deep)}
 a{color:var(--ink);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px;text-decoration-color:var(--zinia-ink)}
