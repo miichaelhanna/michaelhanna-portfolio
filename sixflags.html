@@ -70,6 +70,9 @@ img{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit
 /* ————— Hero: the park at dusk, in colour, with the headline over it ————— */
 .hero{max-width:1080px;margin:clamp(10px,2vh,24px) auto 0;border-radius:clamp(16px,3vw,28px);position:relative;overflow:hidden;min-height:clamp(420px,62vh,640px);display:flex;align-items:flex-end;color:#fff;background:#2a2320}
 .hero .bg{position:absolute;inset:0;background:url(assets/sixflags-open-dusk.jpg) center/cover no-repeat;transform:scale(1.04)}
+@supports (background-image: image-set(url("a.webp") type("image/webp"))){
+  .hero .bg{background-image:image-set(url(assets/sixflags-open-dusk.webp) type("image/webp"),url(assets/sixflags-open-dusk.jpg) type("image/jpeg"))}
+}
 .hero .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,14,10,0) 0%,rgba(20,14,10,.2) 40%,rgba(20,14,10,.8) 100%)}
 .hero .inner{position:relative;padding:clamp(40px,7vh,80px) clamp(24px,6vw,72px);width:100%;box-sizing:border-box}
 .hero h1{margin:0;font-weight:700;font-size:clamp(2.5rem,6.4vw,4.8rem);line-height:1.02;letter-spacing:-.036em;text-wrap:balance;max-width:14ch;text-shadow:0 2px 24px rgba(0,0,0,.25)}
@@ -420,9 +423,9 @@ footer[data-dark]{box-shadow:0 50vh 0 #000}
       <span class="sprog" aria-hidden="true"><i id="ref-prog"></i></span>
       <div class="card">
         <div class="ref-frame">
-          <img data-ri="0" class="on" src="assets/sixflags-render.jpg" alt="Marketing render of Six Flags Qiddiya City: six themed lands beneath a cliff, tented Citadel at the centre" onerror="this.style.display='none'">
-          <img data-ri="1" loading="lazy" src="assets/sixflags-construction-aerial.jpg" alt="Aerial photo of the park under construction: bare earth, cranes, unfinished ride track" onerror="this.style.display='none'">
-          <img data-ri="2" loading="lazy" src="assets/sixflags-falcons-steel.jpg" alt="Falcons Flight's spike mid-assembly, surrounded by cranes and site cabins" onerror="this.style.display='none'">
+          <picture><source type="image/webp" srcset="assets/sixflags-render.webp"><img data-ri="0" class="on" src="assets/sixflags-render.jpg" alt="Marketing render of Six Flags Qiddiya City: six themed lands beneath a cliff, tented Citadel at the centre" onerror="this.style.display='none'"></picture>
+          <picture><source type="image/webp" srcset="assets/sixflags-construction-aerial.webp"><img data-ri="1" loading="lazy" src="assets/sixflags-construction-aerial.jpg" alt="Aerial photo of the park under construction: bare earth, cranes, unfinished ride track" onerror="this.style.display='none'"></picture>
+          <picture><source type="image/webp" srcset="assets/sixflags-falcons-steel.webp"><img data-ri="2" loading="lazy" src="assets/sixflags-falcons-steel.jpg" alt="Falcons Flight's spike mid-assembly, surrounded by cranes and site cabins" onerror="this.style.display='none'"></picture>
         </div>
         <div class="ref-cap"><div class="no" id="ref-no">01 / 03</div><div class="txt" id="ref-txt"><b>The render.</b> Six lands, a tented Citadel, a coaster diving off a cliff. For most of the project, this was the ground truth.</div></div>
       </div>
@@ -688,9 +691,9 @@ footer[data-dark]{box-shadow:0 50vh 0 #000}
 <div class="stage-in full">
     <div class="photo">
       <div class="frame">
-        <img data-pi="0" class="on" loading="lazy" src="assets/sixflags-open-dusk.jpg" alt="Six Flags Qiddiya City finished and lit at dusk, ringed by the cliff">
-        <img data-pi="1" loading="lazy" src="assets/sixflags-night-park.jpg" alt="The open park at night, six lit lands seen through the loops of a coaster" onerror="this.style.display='none'">
-        <img data-pi="2" loading="lazy" src="assets/sixflags-opening-night.jpg" alt="The opening ceremony: fireworks over the Citadel and a drone display spelling NOW OPEN" onerror="this.style.display='none'">
+        <picture><source type="image/webp" srcset="assets/sixflags-open-dusk.webp"><img data-pi="0" class="on" loading="lazy" src="assets/sixflags-open-dusk.jpg" alt="Six Flags Qiddiya City finished and lit at dusk, ringed by the cliff"></picture>
+        <picture><source type="image/webp" srcset="assets/sixflags-night-park.webp"><img data-pi="1" loading="lazy" src="assets/sixflags-night-park.jpg" alt="The open park at night, six lit lands seen through the loops of a coaster" onerror="this.style.display='none'"></picture>
+        <picture><source type="image/webp" srcset="assets/sixflags-opening-night.webp"><img data-pi="2" loading="lazy" src="assets/sixflags-opening-night.jpg" alt="The opening ceremony: fireworks over the Citadel and a drone display spelling NOW OPEN" onerror="this.style.display='none'"></picture>
         <div class="grade"></div>
         <span class="sprog photo-sprog" aria-hidden="true"><i id="photo-prog"></i></span>
         <div class="over">
@@ -711,7 +714,7 @@ footer[data-dark]{box-shadow:0 50vh 0 #000}
 
   <h2 class="sec" data-fx=""><span class="no">06</span>What the sand taught</h2>
   <figure class="plain-shot" data-fx="">
-    <img id="mePhoto" loading="lazy" src="assets/sixflags-gate-selfie.jpg" alt="Michael Hanna at the entrance fountain of Six Flags Qiddiya City on opening day, the Six Flags sign behind him" onerror="this.parentElement.style.display='none'">
+    <picture><source type="image/webp" srcset="assets/sixflags-gate-selfie.webp"><img id="mePhoto" loading="lazy" src="assets/sixflags-gate-selfie.jpg" alt="Michael Hanna at the entrance fountain of Six Flags Qiddiya City on opening day, the Six Flags sign behind him" onerror="this.parentElement.style.display='none'"></picture>
     <figcaption class="kick">Opening day · at the gates the app was built for</figcaption>
   </figure>
   <div class="prose" style="margin-top:clamp(24px,4vh,40px);padding-bottom:clamp(48px,8vh,96px)">
@@ -722,8 +725,8 @@ footer[data-dark]{box-shadow:0 50vh 0 #000}
   <div class="more">
     <div class="mk">More work</div>
     <div class="more-grid">
-      <a class="mcard" href="/openbank"><img src="assets/openbank-billboards.jpg" alt="Openbank USA"><div class="mb"><div class="mn">Case 01</div><h3>Openbank USA<span>→</span></h3><p>The five minutes that decided whether a bank was real.</p></div></a>
-      <a class="mcard" href="/zinia"><img src="assets/zinia-amazon-visa.jpg" alt="Zinia by Santander"><div class="mb"><div class="mn">Case 02</div><h3>Zinia by Santander<span>→</span></h3><p>Building trust at checkout.</p></div></a>
+      <a class="mcard" href="/openbank"><picture><source type="image/webp" srcset="assets/openbank-billboards.webp"><img src="assets/openbank-billboards.jpg" alt="Openbank USA"></picture><div class="mb"><div class="mn">Case 01</div><h3>Openbank USA<span>→</span></h3><p>The five minutes that decided whether a bank was real.</p></div></a>
+      <a class="mcard" href="/zinia"><picture><source type="image/webp" srcset="assets/zinia-amazon-visa.webp"><img src="assets/zinia-amazon-visa.jpg" alt="Zinia by Santander"></picture><div class="mb"><div class="mn">Case 02</div><h3>Zinia by Santander<span>→</span></h3><p>Building trust at checkout.</p></div></a>
     </div>
   </div>
 </article>

@@ -484,40 +484,6 @@ document.addEventListener('DOMContentLoaded', () => {
   addEventListener('resize', tune);
   tune();
 
-  // Footer wordmark: sized to span the full width and sit flush on the bottom
-  // edge. Both numbers are measured at runtime rather than hardcoded — the type
-  // is a system font, so its width-per-em and the gap under the letters differ
-  // between platforms.
-  const mark = document.querySelector('.wf-mark');
-  const fitMark = () => {
-    if (!mark || !mark.parentElement) return;
-    const avail = mark.parentElement.clientWidth;
-    if (!avail) return;
-
-    // width: measure the TEXT, not the box — the span is display:block, so its
-    // own width is just the container's and scaling against it does nothing.
-    // A Range around the text nodes gives the real inline width.
-    mark.style.fontSize = '100px';
-    const range = document.createRange();
-    range.selectNodeContents(mark);
-    const w = range.getBoundingClientRect().width;
-    if (!w) return;
-    mark.style.fontSize = (100 * avail / w) + 'px';
-
-    // bottom: pull the box down by the gap between the letters and its lower edge
-    const cs = getComputedStyle(mark);
-    const ctx = document.createElement('canvas').getContext('2d');
-    ctx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
-    const m = ctx.measureText(mark.textContent);
-    const F = parseFloat(cs.fontSize);
-    const halfLead = (F - (m.fontBoundingBoxAscent + m.fontBoundingBoxDescent)) / 2;
-    const gap = F - (halfLead + m.fontBoundingBoxAscent) - m.actualBoundingBoxDescent;
-    mark.style.marginBottom = (-gap / F).toFixed(4) + 'em';
-  };
-  fitMark();
-  addEventListener('resize', fitMark);
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitMark);
-
   // Reach band. The figure is fitted to the column off its FINAL string, so the
   // type size is settled before a single digit is drawn — otherwise the number
   // would resize itself on the way up. Tabular figures keep the digits from
