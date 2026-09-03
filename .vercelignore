@@ -3,3 +3,5 @@
 # local env / Vercel OIDC token
 .env*.local
 .env
+# local dev-server config for the preview tooling — nothing the site serves
+.claude/

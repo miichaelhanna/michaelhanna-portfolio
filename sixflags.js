@@ -26,12 +26,62 @@ document.addEventListener('DOMContentLoaded', () => {
     const r = el.getBoundingClientRect();
     return clamp(-r.top / Math.max(1, r.height - innerHeight), 0, 1);
   };
-  // each pinned block sticks below the nav, or anchors to the bottom of the
-  // viewport when it is taller than the space, so its stage is always visible
+  // Each pinned block carries the section's heading and intro with its
+  // stage, so the words that set the stage up stay on screen while it plays.
+  // On a phone that whole block is usually taller than the screen, and the
+  // old answer — anchor the block's bottom to the viewport — jammed the
+  // stage against the bottom edge with the heading lost off the top. Now it
+  // is decided by what fits, in order of preference:
+  //   1. heading + intro + stage all fit under the nav: pin the lot there;
+  //   2. otherwise the heading and the earlier paragraphs are moved out to
+  //      scroll normally ahead of the block, and only the LAST paragraph
+  //      pins with the stage — the sentences that lead into it stay in
+  //      view, and the stage sits where it can be read;
+  //   3. and only if even that is too tall does the block anchor by its
+  //      bottom, with real breathing room, so the stage is whole and the
+  //      tail of the paragraph shows above it.
+  // The move is undone before every measure, so a resize re-decides.
   const stages = [...document.querySelectorAll('.stage-track .stage')];
+  const viewH = () => window.visualViewport ? Math.min(window.visualViewport.height, innerHeight) : innerHeight;
+  const unsplit = st => {
+    const lead = st.parentElement.querySelector(':scope > .stage-lead');
+    if (!lead) return;
+    const pinned = st.querySelector('.pinned'), prose = pinned.querySelector('.prose');
+    const h2 = lead.querySelector('h2');
+    if (h2) pinned.insertBefore(h2, pinned.firstChild);
+    const leadProse = lead.querySelector('.prose');
+    if (leadProse && prose) {
+      const last = prose.firstElementChild;
+      [...leadProse.children].forEach(p => prose.insertBefore(p, last));
+    }
+    lead.remove();
+  };
+  const split = st => {
+    const pinned = st.querySelector('.pinned'), prose = pinned && pinned.querySelector('.prose');
+    if (!pinned || !prose) return false;
+    const ps = [...prose.querySelectorAll(':scope > p')];
+    const h2 = pinned.querySelector(':scope > h2');
+    if (!h2 && ps.length < 2) return false;
+    const lead = document.createElement('div');
+    lead.className = 'stage-lead';
+    if (h2) lead.appendChild(h2);
+    if (ps.length > 1) {
+      const lp = document.createElement('div');
+      lp.className = 'prose';
+      ps.slice(0, -1).forEach(p => lp.appendChild(p));
+      lead.appendChild(lp);
+    }
+    st.parentElement.insertBefore(lead, st);
+    return true;
+  };
   const stick = () => stages.forEach(st => {
     const nav = document.querySelector('nav').offsetHeight;
-    st.style.setProperty('--stick', Math.min(nav + 16, innerHeight - st.offsetHeight - 12) + 'px');
+    const ih = viewH(), top = nav + 16, room = ih - top - 24;
+    unsplit(st);
+    if (st.offsetHeight <= room) { st.style.setProperty('--stick', top + 'px'); return; }
+    if (split(st) && st.offsetHeight <= room) { st.style.setProperty('--stick', top + 'px'); return; }
+    const pad = Math.max(24, Math.round(ih * .05));
+    st.style.setProperty('--stick', Math.min(top, ih - st.offsetHeight - pad) + 'px');
   });
 
   // Stage · what we designed from: render, site, steel
@@ -92,63 +142,56 @@ document.addEventListener('DOMContentLoaded', () => {
     inpProg.style.width = (p * 100) + '%';
   };
 
-  // 03 · the day. One sticky stage on desktop: the time line advances with
-  // scroll, the sketch and the moment swap in step. On phones the time line
-  // pins to the top and the moments flow beneath, each with its sketch.
+  // 03 · the day. One sticky stage, on every screen: the time line advances
+  // with the reader's scroll, and the sketch and the moment swap in step. The
+  // phone used to stack all six moments instead, which made one section six
+  // screens long; scrolling is the only input either way, so the stage simply
+  // gets a shorter track there (see tune) and lays itself out in one column.
   const dayTrack = $('day-track');
   const dlFill = $('dl-fill');
   const dots = [...document.querySelectorAll('.dl-dot')];
   const moments = [...document.querySelectorAll('.moment')];
   const sketches = [...document.querySelectorAll('.sketch')];
-  const dayMobile = matchMedia('(max-width:860px)').matches;
+  const dayStage = document.querySelector('.day-stage');
+  const dayPanel = document.querySelector('.day-panel');
   const setDots = (idx, fill) => {
     dlFill.style.width = (fill * 100) + '%';
     dots.forEach((d, i) => { d.classList.toggle('on', i <= idx); d.classList.toggle('now', i === idx); });
   };
-  let setDay;
-  if (dayMobile) {
-    // pin the time line flush under the real nav, whatever its height
-    const head = document.querySelector('.day-head');
-    const pinHead = () => { head.style.top = (document.querySelector('nav').offsetHeight - 1) + 'px'; };
-    pinHead();
-    addEventListener('resize', pinHead);
-    moments.forEach(m => {
-      const sk = sketches[+m.dataset.scr];
-      if (!sk) return;
-      const card = document.createElement('div');
-      card.className = 'dsheet inline';
-      card.setAttribute('aria-hidden', 'true');
-      sk.classList.add('is-on');
-      card.appendChild(sk);
-      m.insertBefore(card, m.firstChild);
-    });
-    setDay = () => {
-      const line = innerHeight * .5;
-      let idx = 0;
-      moments.forEach((m, i) => { if (m.getBoundingClientRect().top < line) idx = i; });
-      const n = moments.length;
-      const m = moments[idx], r = m.getBoundingClientRect();
-      const local = clamp((line - r.top) / Math.max(1, r.height), 0, 1);
-      setDots(idx, (idx + local) / n);
-    };
-  } else {
-    const dayText = $('day-text');
-    const html = moments.map(m => m.innerHTML);
-    let dIdx = -1;
-    setDay = p => {
-      const n = moments.length;
-      const idx = Math.min(n - 1, Math.floor(clamp(p, 0, .999) * n));
-      setDots(idx, p);
-      if (idx === dIdx) return;
-      const first = dIdx === -1;
-      dIdx = idx;
-      sketches.forEach(s => s.classList.toggle('is-on', +s.dataset.idx === idx));
-      if (first) { dayText.innerHTML = html[idx]; return; }
-      dayText.style.opacity = 0;
-      setTimeout(() => { dayText.innerHTML = html[dIdx]; dayText.style.opacity = 1; }, 200);
-    };
-    setDay(0);
-  }
+  const dayText = $('day-text');
+  const html = moments.map(m => m.innerHTML);
+  let dIdx = -1, dSwap = 0;
+  const setDay = p => {
+    const n = moments.length;
+    const idx = Math.min(n - 1, Math.floor(clamp(p, 0, .999) * n));
+    setDots(idx, p);
+    if (idx === dIdx) return;
+    const first = dIdx === -1;
+    dIdx = idx;
+    sketches.forEach(s => s.classList.toggle('is-on', +s.dataset.idx === idx));
+    if (first) { dayText.innerHTML = html[idx]; return; }
+    // A fast scroll crosses several moments before the fade finishes. Without
+    // dropping the pending swap, the one that lands last wins and the panel
+    // settles on a moment the time line has already left behind.
+    clearTimeout(dSwap);
+    dayText.style.opacity = 0;
+    dSwap = setTimeout(() => { dayText.innerHTML = html[dIdx]; dayText.style.opacity = 1; }, 200);
+  };
+  setDay(0);
+
+  // One column on a phone stands taller than the room under the nav. Where it
+  // does, the stage anchors by its bottom instead, so the whole of it is on
+  // screen rather than trailing off the end. The pin is measured against the
+  // LONGEST moment, once, so it does not shift as the moments swap under it.
+  const dayPin = () => {
+    const keep = dayText.innerHTML;
+    let tallest = 0;
+    html.forEach(h => { dayText.innerHTML = h; tallest = Math.max(tallest, dayPanel.offsetHeight); });
+    dayText.innerHTML = keep;
+    const ih = viewH(), top = document.querySelector('nav').offsetHeight + 12;
+    if (tallest <= ih - top - 12) { dayStage.style.removeProperty('--day-stick'); return; }
+    dayStage.style.setProperty('--day-stick', Math.max(4, Math.min(top, ih - tallest - 12)) + 'px');
+  };
 
   // 04 · the countdown: T−47 to T−0 with the reader's scroll; each public
   // date lights at its day; zero is the first colour on the page.
@@ -201,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setInp(trackProg(inpTrack));
     setCount(trackProg(countTrack));
     setPhoto(trackProg(photoTrack));
-    setDay(dayMobile ? 0 : trackProg(dayTrack));
+    setDay(trackProg(dayTrack));
   };
   addEventListener('scroll', () => requestAnimationFrame(onScroll), { passive: true });
 
@@ -212,8 +255,9 @@ document.addEventListener('DOMContentLoaded', () => {
     inpTrack.style.height = m ? '320vh' : '360vh';
     countTrack.style.height = m ? '220vh' : '250vh';
     photoTrack.style.height = m ? '240vh' : '280vh';
-    dayTrack.style.height = dayMobile ? '' : '520vh';
+    dayTrack.style.height = m ? '420vh' : '520vh';
     stick();
+    dayPin();
   };
   tune();
   addEventListener('resize', () => { tune(); onScroll(); });
@@ -227,9 +271,15 @@ document.addEventListener('DOMContentLoaded', () => {
   let wasBotDark = null;
   const paintChrome = () => {
     const seen = window.visualViewport ? Math.min(window.visualViewport.height, innerHeight) : innerHeight;
+    // Sample just inside the page's last pixel when the bottom edge has run
+    // past it: iOS rubber-bands beyond the end of the document, the footer's
+    // bottom lifts above the edge for that moment, and the last scroll event
+    // of the bounce could leave the band painted white under a black footer.
+    const docBottom = document.documentElement.getBoundingClientRect().bottom;
+    const y = Math.min(seen - 8, docBottom - 1);
     const botDark = darkSecs.some(s => {
       const r = s.getBoundingClientRect();
-      return r.top < seen - 8 && r.bottom > seen - 8;
+      return r.top <= y && r.bottom >= y;
     });
     if (botDark === wasBotDark) return;
     wasBotDark = botDark;
@@ -238,7 +288,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.style.background = c;
     if (safeBot) safeBot.style.background = c;
   };
-  addEventListener('scroll', paintChrome, { passive: true });
+  // Re-read once the scroll has settled too, so the band always ends on
+  // what is actually under the bottom edge, whatever the last event saw.
+  let settle = 0;
+  addEventListener('scroll', () => { paintChrome(); clearTimeout(settle); settle = setTimeout(paintChrome, 140); }, { passive: true });
   addEventListener('resize', () => { wasBotDark = null; paintChrome(); });
   paintChrome();
 

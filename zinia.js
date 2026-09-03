@@ -26,12 +26,62 @@ document.addEventListener('DOMContentLoaded', () => {
     const r = el.getBoundingClientRect();
     return clamp(-r.top / Math.max(1, r.height - innerHeight), 0, 1);
   };
-  // each pinned block sticks below the nav, or anchors to the bottom of the
-  // viewport when it is taller than the space, so its stage is always visible
+  // Each pinned block carries the section's heading and intro with its
+  // stage, so the words that set the stage up stay on screen while it plays.
+  // On a phone that whole block is usually taller than the screen, and the
+  // old answer — anchor the block's bottom to the viewport — jammed the
+  // stage against the bottom edge with the heading lost off the top. Now it
+  // is decided by what fits, in order of preference:
+  //   1. heading + intro + stage all fit under the nav: pin the lot there;
+  //   2. otherwise the heading and the earlier paragraphs are moved out to
+  //      scroll normally ahead of the block, and only the LAST paragraph
+  //      pins with the stage — the sentences that lead into it stay in
+  //      view, and the stage sits where it can be read;
+  //   3. and only if even that is too tall does the block anchor by its
+  //      bottom, with real breathing room, so the stage is whole and the
+  //      tail of the paragraph shows above it.
+  // The move is undone before every measure, so a resize re-decides.
   const stages = [...document.querySelectorAll('.stage-track .stage')];
+  const viewH = () => window.visualViewport ? Math.min(window.visualViewport.height, innerHeight) : innerHeight;
+  const unsplit = st => {
+    const lead = st.parentElement.querySelector(':scope > .stage-lead');
+    if (!lead) return;
+    const pinned = st.querySelector('.pinned'), prose = pinned.querySelector('.prose');
+    const h2 = lead.querySelector('h2');
+    if (h2) pinned.insertBefore(h2, pinned.firstChild);
+    const leadProse = lead.querySelector('.prose');
+    if (leadProse && prose) {
+      const last = prose.firstElementChild;
+      [...leadProse.children].forEach(p => prose.insertBefore(p, last));
+    }
+    lead.remove();
+  };
+  const split = st => {
+    const pinned = st.querySelector('.pinned'), prose = pinned && pinned.querySelector('.prose');
+    if (!pinned || !prose) return false;
+    const ps = [...prose.querySelectorAll(':scope > p')];
+    const h2 = pinned.querySelector(':scope > h2');
+    if (!h2 && ps.length < 2) return false;
+    const lead = document.createElement('div');
+    lead.className = 'stage-lead';
+    if (h2) lead.appendChild(h2);
+    if (ps.length > 1) {
+      const lp = document.createElement('div');
+      lp.className = 'prose';
+      ps.slice(0, -1).forEach(p => lp.appendChild(p));
+      lead.appendChild(lp);
+    }
+    st.parentElement.insertBefore(lead, st);
+    return true;
+  };
   const stick = () => stages.forEach(st => {
     const nav = document.querySelector('nav').offsetHeight;
-    st.style.setProperty('--stick', Math.min(nav + 16, innerHeight - st.offsetHeight - 12) + 'px');
+    const ih = viewH(), top = nav + 16, room = ih - top - 24;
+    unsplit(st);
+    if (st.offsetHeight <= room) { st.style.setProperty('--stick', top + 'px'); return; }
+    if (split(st) && st.offsetHeight <= room) { st.style.setProperty('--stick', top + 'px'); return; }
+    const pad = Math.max(24, Math.round(ih * .05));
+    st.style.setProperty('--stick', Math.min(top, ih - st.offsetHeight - pad) + 'px');
   });
   const ease = t => 1 - Math.pow(1 - t, 3);
 
@@ -166,9 +216,15 @@ document.addEventListener('DOMContentLoaded', () => {
   let wasBotDark = null;
   const paintChrome = () => {
     const seen = window.visualViewport ? Math.min(window.visualViewport.height, innerHeight) : innerHeight;
+    // Sample just inside the page's last pixel when the bottom edge has run
+    // past it: iOS rubber-bands beyond the end of the document, the footer's
+    // bottom lifts above the edge for that moment, and the last scroll event
+    // of the bounce could leave the band painted white under a black footer.
+    const docBottom = document.documentElement.getBoundingClientRect().bottom;
+    const y = Math.min(seen - 8, docBottom - 1);
     const botDark = darkSecs.some(s => {
       const r = s.getBoundingClientRect();
-      return r.top < seen - 8 && r.bottom > seen - 8;
+      return r.top <= y && r.bottom >= y;
     });
     if (botDark === wasBotDark) return;
     wasBotDark = botDark;
@@ -177,7 +233,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.style.background = c;
     if (safeBot) safeBot.style.background = c;
   };
-  addEventListener('scroll', paintChrome, { passive: true });
+  // Re-read once the scroll has settled too, so the band always ends on
+  // what is actually under the bottom edge, whatever the last event saw.
+  let settle = 0;
+  addEventListener('scroll', () => { paintChrome(); clearTimeout(settle); settle = setTimeout(paintChrome, 140); }, { passive: true });
   addEventListener('resize', () => { wasBotDark = null; paintChrome(); });
   paintChrome();
 

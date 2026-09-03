@@ -396,7 +396,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // one — 100dvh includes the area behind a collapsed toolbar, and reading
     // there flipped the bottom band a section early.
     const seen = window.visualViewport ? Math.min(window.visualViewport.height, intro.clientHeight) : intro.clientHeight;
-    const botDark = inDark(intro.scrollTop + seen - 8);
+    // Clamped to the scroller's last pixel: an iOS rubber-band past the end
+    // would otherwise sample below the footer and paint the band white.
+    const botDark = inDark(Math.min(intro.scrollTop + seen - 8, intro.scrollHeight - 1));
     if (botDark !== wasBotDark) {
       wasBotDark = botDark;
       setChromeBottom(botDark ? '#000000' : '#ffffff');
@@ -413,8 +415,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // Directly on scroll, not batched through rAF: the check early-outs when
   // nothing changed, and browsers throttle rAF in background/embedded views
   // while still delivering scroll events.
+  let chromeSettle = 0;
   intro.addEventListener('scroll', () => {
-    if (mode === 'intro') paintChrome();
+    if (mode !== 'intro') return;
+    paintChrome();
+    // And once more when the scroll has settled, so a rubber-band's last
+    // event can't leave the bands on the wrong colour.
+    clearTimeout(chromeSettle);
+    chromeSettle = setTimeout(() => { if (mode === 'intro') paintChrome(); }, 140);
   }, { passive: true });
 
   // The browser's own scrollTo({behavior:'smooth'}) is a short, near-linear
