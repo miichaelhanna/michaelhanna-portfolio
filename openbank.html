@@ -45,7 +45,6 @@
   @media (hover:hover){a.hm-back:hover{transform:translateX(-4px)}}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* Openbank US's own palette, sampled from openbank.us: warm cream panels,
    near-black type, pure red as the single accent. Clean and precise. */
@@ -68,8 +67,8 @@ a.hm-nav-link{color:#1a1a1a;text-decoration:none}
 @media (hover:hover){a.hm-nav-link:hover{color:#666;text-decoration:none}}
 @media (max-width:700px){nav a.hm-nav-link{padding:13px 6px;margin:-13px -6px}}
 img{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-user-drag:none;pointer-events:none}
-.mono{font-family:'IBM Plex Mono',monospace}
-.kick{font-family:'IBM Plex Mono',monospace;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--soft)}
+.mono{font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500}
+.kick{font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--soft)}
 .band{margin-left:-24px;margin-right:-24px}
 
 /* ————— Hero: the billboards, with the headline over them ————— */
@@ -83,9 +82,9 @@ img{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit
 .hero h1{margin:0;font-weight:700;font-size:clamp(2.3rem,5.8vw,4.4rem);line-height:1.04;letter-spacing:-.034em;text-wrap:balance;max-width:16ch;text-shadow:0 2px 24px rgba(0,0,0,.25)}
 .hero p{margin:18px 0 0;max-width:600px;font-size:clamp(1.04rem,1.55vw,1.24rem);line-height:1.56;color:rgba(255,255,255,.88);text-wrap:pretty}
 .attrib{max-width:1080px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:20px;padding:clamp(18px,3vh,28px) clamp(4px,1vw,12px) 0}
-.attrib .who{display:flex;align-items:center;gap:14px;font-family:'IBM Plex Mono',monospace;font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--grey-ink);text-align:left}
+.attrib .who{display:flex;align-items:center;gap:14px;font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--grey-ink);text-align:left}
 .attrib .who img{height:30px;width:auto;display:block}
-.attrib .span{display:flex;align-items:center;gap:12px;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.8rem;letter-spacing:.1em;color:var(--ink)}
+.attrib .span{display:flex;align-items:center;gap:12px;font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:600;font-size:.9rem;letter-spacing:.02em;color:var(--ink)}
 .attrib .span .rule{position:relative;width:clamp(56px,9vw,120px);height:2px;background:var(--grey-line);overflow:hidden}
 .attrib .span .rule i{position:absolute;inset:0;background:var(--red);transform:scaleX(0);transform-origin:left;transition:transform 1.4s cubic-bezier(.22,1,.36,1) .4s}
 .attrib.in .span .rule i{transform:scaleX(1)}
@@ -96,10 +95,10 @@ img{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit
 .prose p{margin:0 0 1.35em}
 .prose b{font-weight:650}
 h2.sec{max-width:660px;margin:clamp(52px,9vh,100px) auto 22px;font-weight:700;font-size:clamp(1.45rem,2.5vw,1.95rem);line-height:1.22;letter-spacing:-.022em}
-h2.sec .no{font-family:'IBM Plex Mono',monospace;display:block;font-weight:500;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;margin-bottom:12px;color:var(--red-ink)}
+h2.sec .no{font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;display:block;font-weight:500;font-size:.76rem;letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px;color:var(--red-ink)}
 .dropcap::first-letter{float:left;font-size:5em;line-height:.8;padding:.05em .12em 0 0;font-weight:800;color:var(--red)}
 .decision{max-width:660px;margin:clamp(30px,5vh,52px) auto;font-weight:700;font-size:clamp(1.5rem,3.2vw,2.4rem);line-height:1.18;letter-spacing:-.028em;color:var(--navy);text-wrap:balance}
-.decision .lbl{display:block;font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--red-ink);margin-bottom:14px}
+.decision .lbl{display:block;font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--red-ink);margin-bottom:14px}
 
 /* ————— Scroll-driven stages ————— */
 .stage-track{position:relative}
@@ -121,7 +120,7 @@ h2.sec .no{font-family:'IBM Plex Mono',monospace;display:block;font-weight:500;f
 .stage-in{margin:0 auto}
 .stage-in{width:min(600px,100%)}
 .stage-in.wide{width:min(900px,100%)}
-.stage-tag{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink);text-align:center;margin-bottom:10px;font-weight:600}
+.stage-tag{font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);text-align:center;margin-bottom:10px;font-weight:600}
 .sprog{display:block;width:min(200px,50%);height:2px;margin:0 auto 16px;background:var(--grey-line);border-radius:2px;overflow:hidden}
 .sprog i{display:block;height:100%;width:0;background:var(--red)}
 .card{position:relative;background:#fff;border:1px solid var(--card-line);border-radius:18px;padding:clamp(20px,3.5vw,30px);box-sizing:border-box;box-shadow:0 18px 50px rgba(34,34,34,.08)}
@@ -130,7 +129,7 @@ h2.sec .no{font-family:'IBM Plex Mono',monospace;display:block;font-weight:500;f
 /* 01 · the three forces: each takes the room in turn */
 .forces{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .force{background:#fff;border-radius:14px;padding:20px 18px;border-top:3px solid var(--grey-line);opacity:.42;transform:translateY(0);transition:opacity .35s,transform .45s cubic-bezier(.22,1,.36,1),border-color .35s,box-shadow .35s}
-.force .fk{font-family:'IBM Plex Mono',monospace;font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--grey-ink)}
+.force .fk{font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--grey-ink)}
 .force h4{margin:10px 0 0;font-weight:700;font-size:1.05rem;letter-spacing:-.014em;line-height:1.3;color:var(--navy)}
 .force p{margin:8px 0 0;font-size:.92rem;line-height:1.58;color:#3b444c}
 .force.on{opacity:1;transform:translateY(-6px);border-top-color:var(--red);box-shadow:0 16px 36px rgba(34,34,34,.12)}
@@ -141,7 +140,7 @@ h2.sec .no{font-family:'IBM Plex Mono',monospace;display:block;font-weight:500;f
 /* 03 · the cut: nine products in the plan, one that shipped */
 .cut-n{text-align:center;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.05em;line-height:.9;font-size:clamp(5rem,20vw,13rem);color:var(--navy);transition:color .35s}
 .cut-n.one{color:var(--red)}
-.cut-k{text-align:center;font-family:'IBM Plex Mono',monospace;font-size:.64rem;letter-spacing:.18em;text-transform:uppercase;color:var(--grey-ink);margin-top:8px}
+.cut-k{text-align:center;font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--grey-ink);margin-top:8px}
 .cutwrap{position:relative;margin-top:clamp(18px,3vh,30px);min-height:clamp(120px,18vh,170px);display:flex;align-items:center;justify-content:center}
 .cutgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(8px,1.6vh,16px) clamp(14px,3vw,40px);width:100%;text-align:center;transition:opacity .4s}
 .cutgrid span{font-weight:700;font-size:clamp(1.05rem,2.6vw,1.8rem);letter-spacing:-.024em;line-height:1.1;color:var(--navy);transition:opacity .35s,transform .35s,color .35s}
@@ -156,7 +155,7 @@ h2.sec .no{font-family:'IBM Plex Mono',monospace;display:block;font-weight:500;f
 .dec-head h3{margin:10px 0 0;color:var(--navy);font-weight:700;font-size:clamp(1.3rem,2.4vw,1.8rem);letter-spacing:-.02em;line-height:1.25;text-wrap:balance}
 .decs{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:1000px;margin:0 auto;padding:0 24px;box-sizing:border-box}
 .dec{background:#fff;border-radius:16px;padding:24px 22px;box-shadow:0 8px 24px rgba(34,34,34,.06);transition:transform .35s cubic-bezier(.22,1,.36,1),box-shadow .35s}
-.dec .dn{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--red-ink)}
+.dec .dn{font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--red-ink)}
 .dec h4{margin:10px 0 0;font-weight:700;font-size:1.1rem;letter-spacing:-.016em;line-height:1.28;color:var(--navy)}
 .dec p{margin:10px 0 0;font-size:.95rem;line-height:1.62;color:#3b444c}
 @media (hover:hover){.dec:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(34,34,34,.12)}}
@@ -165,7 +164,7 @@ h2.sec .no{font-family:'IBM Plex Mono',monospace;display:block;font-weight:500;f
   .decs{display:grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:86%;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:6px}
   .decs::-webkit-scrollbar{display:none}
   .dec{scroll-snap-align:center}
-  .swipe-hint{display:block;margin-top:14px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--grey-ink)}
+  .swipe-hint{display:block;margin-top:14px;text-align:center;font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--grey-ink)}
 }
 
 /* 05 · the rails: one promise, three ways of keeping it */
@@ -176,7 +175,7 @@ h2.sec .no{font-family:'IBM Plex Mono',monospace;display:block;font-weight:500;f
 
 /* 06 · four cities, one sentence: the navy band */
 .city-band{background:var(--navy);padding:clamp(56px,9vh,100px) 24px;margin-top:clamp(40px,6.5vh,72px);text-align:center;color:#fff}
-.cities{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px;font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.45)}
+.cities{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px;font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.45)}
 .cities span{opacity:.35;transition:opacity .4s,color .4s}
 .cities span.on{opacity:1;color:#fff}
 .city-line{margin:clamp(20px,3.5vh,30px) auto 0;max-width:18ch;font-weight:700;font-size:clamp(1.8rem,5vw,3.4rem);line-height:1.1;letter-spacing:-.03em;text-wrap:balance;opacity:0;transform:translateY(10px);transition:opacity .6s,transform .6s}
@@ -186,7 +185,7 @@ h2.sec .no{font-family:'IBM Plex Mono',monospace;display:block;font-weight:500;f
 /* 07 · what the numbers said: the counter, on a grey panel */
 .money-wrap{max-width:900px;margin:clamp(22px,3.5vh,34px) auto 0}
 .money{text-align:center}
-.money .mk{font-family:'IBM Plex Mono',monospace;font-size:.64rem;letter-spacing:.18em;text-transform:uppercase;color:var(--grey-ink)}
+.money .mk{font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--grey-ink)}
 .money .mn{display:flex;align-items:baseline;justify-content:center;gap:.04em;margin-top:8px;font-weight:700;letter-spacing:-.05em;line-height:.9;font-variant-numeric:tabular-nums;color:var(--red)}
 .money .mn .s{font-size:clamp(2.4rem,7vw,5.6rem)}
 .money .mn .n{font-size:clamp(4.4rem,17vw,12rem)}
@@ -195,19 +194,19 @@ h2.sec .no{font-family:'IBM Plex Mono',monospace;display:block;font-weight:500;f
 .money .ml{margin:clamp(12px,2vh,22px) auto 0;max-width:36ch;font-size:clamp(1rem,1.5vw,1.24rem);line-height:1.45;color:var(--navy);font-weight:600;min-height:2.9em}
 .resgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(14px,3vw,30px);max-width:min(720px,100%);margin:clamp(18px,3vh,32px) auto 0;padding-top:clamp(14px,2.2vh,22px);border-top:1px solid var(--grey-line);text-align:center;opacity:0;transition:opacity .5s}
 .resgrid .rv{font-weight:700;font-size:clamp(1.3rem,3vw,2.1rem);letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums;color:var(--navy);white-space:nowrap}
-.resgrid .rk{margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--grey-ink)}
+.resgrid .rk{margin-top:8px;font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--grey-ink)}
 @media (max-width:520px){.resgrid{grid-template-columns:1fr;gap:16px}}
 
 /* ————— More work: the other two cases, as cards on the page. Desktop
    two-up with hover lift, mobile a swipe row. ————— */
-.legal{max-width:1080px;margin:clamp(18px,3vh,28px) auto 0;padding-top:10px;border-top:1px solid #ECE9E2;font-family:'IBM Plex Mono',monospace;font-size:.54rem;letter-spacing:.02em;line-height:1.55;color:#B4B4B8}
+.legal{max-width:1080px;margin:clamp(18px,3vh,28px) auto 0;padding-top:10px;border-top:1px solid #ECE9E2;font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.64rem;letter-spacing:.02em;line-height:1.55;color:#B4B4B8}
 .more{max-width:1080px;margin:clamp(40px,7vh,72px) auto 0;padding-bottom:clamp(48px,8vh,96px)}
-.more .mk{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:#8a8f8c}
+.more .mk{font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:#8a8f8c}
 .more-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
 .mcard{display:block;text-decoration:none;color:inherit;border-radius:18px;overflow:hidden;background:#fff;border:1px solid #ECE9E2;box-shadow:0 8px 24px rgba(20,20,20,.06);transition:transform .35s cubic-bezier(.22,1,.36,1),box-shadow .35s}
 .mcard img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
 .mcard .mb{padding:18px 20px 22px}
-.mcard .mn{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--red-ink)}
+.mcard .mn{font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--red-ink)}
 .mcard h3{margin:6px 0 0;font-weight:700;font-size:clamp(1.15rem,1.9vw,1.4rem);letter-spacing:-.02em;line-height:1.2}
 .mcard h3 span{display:inline-block;margin-left:.3em;color:var(--red-ink);transition:transform .4s cubic-bezier(.22,1,.36,1)}
 .mcard p{margin:6px 0 0;font-size:.95rem;line-height:1.5;color:#666}
@@ -225,7 +224,7 @@ h2.sec .no{font-family:'IBM Plex Mono',monospace;display:block;font-weight:500;f
 #hm-cta-head .cta-word{display:inline-block;min-width:5ch;text-align:left;transition:opacity .25s ease}
 #hm-cta-head .cta-word.is-swap{opacity:0}
 #hm-cta-actions{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin:clamp(28px,4.5vh,44px) 0 0}
-.cta-btn{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.1em;
+.cta-btn{font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.82rem;letter-spacing:.06em;
     text-transform:uppercase;color:#fff;text-decoration:none;background:none;
     border:1.5px solid rgba(245,245,247,.35);border-radius:999px;
     padding:14px 26px;transition:background .25s,color .25s,border-color .25s;display:inline-block}
@@ -270,7 +269,7 @@ footer[data-dark]{box-shadow:0 50vh 0 #000}
 
 <div id="pg" style="position:fixed;top:0;left:0;height:2px;width:0;background:var(--red);z-index:60"></div>
 
-<nav style="position:sticky;top:0;z-index:50;background:#fff;display:flex;justify-content:space-between;align-items:center;gap:18px;padding:calc(20px + env(safe-area-inset-top,0px)) clamp(22px,6vw,96px) 20px;font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:lowercase">
+<nav style="position:sticky;top:0;z-index:50;background:#fff;display:flex;justify-content:space-between;align-items:center;gap:18px;padding:calc(20px + env(safe-area-inset-top,0px)) clamp(22px,6vw,96px) 20px;font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.76rem;letter-spacing:.02em;text-transform:lowercase">
   <span style="display:flex;gap:clamp(16px,3vw,30px)">
     <a href="/#work" class="hm-nav-link hm-back" aria-label="Back to selected products" title="Back to selected products">←</a>
     <a href="/#about" class="hm-nav-link" style="white-space:nowrap">About</a>
@@ -412,11 +411,11 @@ footer[data-dark]{box-shadow:0 50vh 0 #000}
       <span class="sprog" aria-hidden="true"><i id="rails-prog"></i></span>
       <div class="card rails">
         <svg viewBox="0 0 860 300" aria-label="Diagram: a transfer travels the ACH lane; when it becomes unavailable it drops to the RTP lane, then to a debit top-up lane, so the customer never hits a wall.">
-          <text x="60" y="30" style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;fill:#222222">CUSTOMER</text>
-          <text x="800" y="272" text-anchor="end" style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;fill:#222222">FUNDED</text>
-          <text x="60" y="58" id="t-ach" style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;fill:#8C877E;transition:fill .4s">ACH</text>
-          <text x="60" y="138" id="t-rtp" style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;fill:#8C877E;transition:fill .4s">RTP</text>
-          <text x="60" y="218" id="t-deb" style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;fill:#8C877E;transition:fill .4s">DEBIT TOP-UP · PLAID</text>
+          <text x="60" y="30" style="font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-size:12.5px;font-weight:600;letter-spacing:.5px;fill:#222222">CUSTOMER</text>
+          <text x="800" y="272" text-anchor="end" style="font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-size:12.5px;font-weight:600;letter-spacing:.5px;fill:#222222">FUNDED</text>
+          <text x="60" y="58" id="t-ach" style="font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-size:12.5px;font-weight:600;letter-spacing:.5px;fill:#8C877E;transition:fill .4s">ACH</text>
+          <text x="60" y="138" id="t-rtp" style="font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-size:12.5px;font-weight:600;letter-spacing:.5px;fill:#8C877E;transition:fill .4s">RTP</text>
+          <text x="60" y="218" id="t-deb" style="font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-size:12.5px;font-weight:600;letter-spacing:.5px;fill:#8C877E;transition:fill .4s">DEBIT TOP-UP · PLAID</text>
           <line x1="60" y1="70" x2="430" y2="70" stroke="#222222" stroke-width="1.5" opacity=".16"></line>
           <line id="achpost" x1="430" y1="70" x2="800" y2="70" stroke="#222222" stroke-width="1.5" opacity=".16" style="transition:opacity .5s"></line>
           <line x1="60" y1="150" x2="560" y2="150" stroke="#222222" stroke-width="1.5" opacity=".16"></line>
@@ -424,8 +423,8 @@ footer[data-dark]{box-shadow:0 50vh 0 #000}
           <line x1="60" y1="230" x2="800" y2="230" stroke="#222222" stroke-width="1.5" opacity=".16"></line>
           <line x1="430" y1="70" x2="430" y2="150" stroke="#222222" stroke-width="1.5" opacity=".12" stroke-dasharray="2 6"></line>
           <line x1="560" y1="150" x2="560" y2="230" stroke="#222222" stroke-width="1.5" opacity=".12" stroke-dasharray="2 6"></line>
-          <text id="una" x="444" y="58" opacity="0" style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1.5px;fill:#8C877E;transition:opacity .5s">UNAVAILABLE</text>
-          <text id="unr" x="574" y="138" opacity="0" style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1.5px;fill:#8C877E;transition:opacity .5s">UNAVAILABLE</text>
+          <text id="una" x="444" y="58" opacity="0" style="font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:11.5px;letter-spacing:.5px;fill:#8C877E;transition:opacity .5s">UNAVAILABLE</text>
+          <text id="unr" x="574" y="138" opacity="0" style="font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:11.5px;letter-spacing:.5px;fill:#8C877E;transition:opacity .5s">UNAVAILABLE</text>
           <path id="route" d="M60 70 H430 V150 H560 V230 H800" fill="none" stroke="none"></path>
           <path id="live" d="M60 70 H430 V150 H560 V230 H800" fill="none" stroke="#FF0000" stroke-width="3" stroke-linecap="round"></path>
           <circle cx="60" cy="70" r="5" fill="#222222"></circle>

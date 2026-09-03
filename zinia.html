@@ -45,7 +45,6 @@
   @media (hover:hover){a.hm-back:hover{transform:translateX(-4px)}}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* Zinia's real palette, sampled from the brand's own screens.
    The page performs the story's arc: sections 01 to 03 run in muted slate,
@@ -71,8 +70,8 @@ a.hm-nav-link{color:#1a1a1a;text-decoration:none}
 @media (hover:hover){a.hm-nav-link:hover{color:#666;text-decoration:none}}
 @media (max-width:700px){nav a.hm-nav-link{padding:13px 6px;margin:-13px -6px}}
 img{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-user-drag:none;pointer-events:none}
-.mono{font-family:'IBM Plex Mono',monospace}
-.kick{font-family:'IBM Plex Mono',monospace;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:#8a8f8c}
+.mono{font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500}
+.kick{font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:#8a8f8c}
 .band{margin-left:-24px;margin-right:-24px}
 
 /* ————— Hero: Zinia's own design language. A rounded mist panel, deep teal
@@ -87,9 +86,9 @@ img{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit
 .zdots.tl{left:clamp(18px,3.5vw,40px);top:clamp(18px,3.5vw,40px)}
 .zdots.br{right:clamp(18px,3.5vw,40px);bottom:clamp(18px,3.5vw,40px);transform:rotate(180deg)}
 .attrib{display:flex;justify-content:space-between;align-items:center;gap:20px;margin:clamp(40px,7vh,72px) auto 0;padding-top:18px;border-top:1px solid rgba(0,56,64,.18)}
-.attrib .who{display:flex;align-items:center;gap:12px;font-family:'IBM Plex Mono',monospace;font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:#22666B;text-align:left}
+.attrib .who{display:flex;align-items:center;gap:12px;font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:#22666B;text-align:left}
 .attrib .who img{height:22px;width:auto;display:block}
-.attrib .span{display:flex;align-items:center;gap:12px;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.8rem;letter-spacing:.1em;color:var(--deep)}
+.attrib .span{display:flex;align-items:center;gap:12px;font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:600;font-size:.9rem;letter-spacing:.02em;color:var(--deep)}
 .attrib .span .rule{position:relative;width:clamp(56px,9vw,120px);height:2px;background:rgba(0,56,64,.18);overflow:hidden}
 .attrib .span .rule i{position:absolute;inset:0;background:var(--zinia);transform:scaleX(0);transform-origin:left;transition:transform 1.4s cubic-bezier(.22,1,.36,1) .4s}
 .hero.in .attrib .span .rule i{transform:scaleX(1)}
@@ -100,7 +99,7 @@ img{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit
 .prose p{margin:0 0 1.35em}
 .prose b{font-weight:650}
 h2.sec{max-width:660px;margin:clamp(52px,9vh,100px) auto 22px;font-weight:700;font-size:clamp(1.45rem,2.5vw,1.95rem);line-height:1.22;letter-spacing:-.022em}
-h2.sec .no{font-family:'IBM Plex Mono',monospace;display:block;font-weight:500;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;margin-bottom:12px;color:var(--zinia-ink)}
+h2.sec .no{font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;display:block;font-weight:500;font-size:.76rem;letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px;color:var(--zinia-ink)}
 h2.sec.pre .no{color:var(--slate)}
 
 /* The very big letter, in Zinia green. */
@@ -108,7 +107,7 @@ h2.sec.pre .no{color:var(--slate)}
 
 /* A decision, stated at the size it deserved. No box. */
 .decision{max-width:660px;margin:clamp(30px,5vh,52px) auto clamp(30px,5vh,52px);font-weight:700;font-size:clamp(1.5rem,3.2vw,2.4rem);line-height:1.18;letter-spacing:-.028em;color:var(--slate-ink);text-wrap:balance}
-.decision .lbl{display:block;font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--slate);margin-bottom:14px}
+.decision .lbl{display:block;font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--slate);margin-bottom:14px}
 
 /* ————— Scroll-driven stages. Each is a short sticky track: the reader's
    scroll is the only input, so it behaves identically under a thumb. ————— */
@@ -131,7 +130,7 @@ h2.sec.pre .no{color:var(--slate)}
 .stage-in{margin:0 auto}
 .stage-in{width:min(560px,100%)}
 .stage-in.wide{width:min(1080px,100%)}
-.stage-tag{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--slate-ink);text-align:center;margin-bottom:10px;font-weight:600}
+.stage-tag{font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--slate-ink);text-align:center;margin-bottom:10px;font-weight:600}
 /* A thin bar that fills with the reader's scroll: the stage's only instruction. */
 .sprog{display:block;width:min(200px,50%);height:2px;margin:0 auto 16px;background:#E4E7E5;border-radius:2px;overflow:hidden}
 .sprog i{display:block;height:100%;width:0;background:var(--slate-ink)}
@@ -140,7 +139,7 @@ h2.sec.pre .no{color:var(--slate)}
 /* 02 · the dial. Scroll sweeps the needle across the tension and settles it
    where the product had to live. Stealth-era slate; no brand color yet. */
 .dial{border:1px solid #E4E7E5;background:#FCFCFA;padding:clamp(22px,4vw,34px);border-radius:16px}
-.dial-labels{display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:#8a8f8c;margin-bottom:14px}
+.dial-labels{display:flex;justify-content:space-between;font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:#8a8f8c;margin-bottom:14px}
 .dial-track{position:relative;height:6px;border-radius:3px;background:#DDE1DE;margin:14px 0}
 .dial-track .zone{position:absolute;left:32%;right:32%;top:0;bottom:0;border-radius:3px;background:var(--slate-ink)}
 .dial-track .needle{position:absolute;top:50%;left:6%;width:28px;height:28px;border-radius:50%;background:#fff;border:3px solid var(--ink);box-sizing:border-box;transform:translate(-50%,-50%);box-shadow:0 2px 8px rgba(16,19,20,.2)}
@@ -151,27 +150,27 @@ h2.sec.pre .no{color:var(--slate)}
 /* 03 · the fine print becomes the headline. Scroll grows the asterisk's
    footnote into the plan itself, and the first teal on the page. */
 .terms{border:1px solid #E4E7E5;background:#FCFCFA;border-radius:16px;padding:clamp(22px,4vw,34px);box-sizing:border-box;overflow:hidden}
-.terms .t-head{display:flex;justify-content:space-between;align-items:baseline;font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.06em;color:#555;padding-bottom:14px;border-bottom:1px solid #E4E7E5}
+.terms .t-head{display:flex;justify-content:space-between;align-items:baseline;font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.82rem;letter-spacing:.02em;color:#555;padding-bottom:14px;border-bottom:1px solid #E4E7E5}
 .terms .t-head b{font-weight:600;font-size:1.1rem;color:var(--ink);letter-spacing:0}
 .terms .t-body{position:relative;min-height:190px;margin-top:18px}
 .t-vague{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:8px;transition:opacity .3s,transform .4s}
 .t-vague .big{font-weight:700;font-size:clamp(1.4rem,3vw,1.9rem);letter-spacing:-.02em;color:var(--ink)}
-.t-vague .fine{font-family:'IBM Plex Mono',monospace;font-size:.6rem;letter-spacing:.04em;color:#9aa09d;line-height:1.5;max-width:40ch}
+.t-vague .fine{font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.7rem;letter-spacing:.02em;color:#9aa09d;line-height:1.5;max-width:40ch}
 .t-vague .fine i{font-style:normal;color:var(--zinia);font-weight:600;font-size:1.3em}
 .t-vague.off{opacity:0;transform:translateY(-10px);pointer-events:none}
 .t-plan{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:10px}
 .t-plan .row{display:flex;justify-content:space-between;align-items:baseline;font-weight:650;font-size:clamp(1.05rem,1.7vw,1.3rem);letter-spacing:-.015em;color:var(--deep);opacity:0;transform:translateY(14px);transition:opacity .35s,transform .45s cubic-bezier(.22,1,.36,1)}
-.t-plan .row .d{font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--zinia-ink)}
+.t-plan .row .d{font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.82rem;letter-spacing:.06em;text-transform:uppercase;color:var(--zinia-ink)}
 .t-plan .row.on{opacity:1;transform:none}
 .t-plan .row.total{padding-top:10px;border-top:2px solid var(--zinia);margin-top:4px;font-size:clamp(1.2rem,2vw,1.5rem)}
-.t-line{margin-top:16px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:#9aa09d;transition:color .4s}
+.t-line{margin-top:16px;text-align:center;font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:#9aa09d;transition:color .4s}
 .t-line.on{color:var(--zinia-ink);font-weight:600}
 
 /* ————— 04 · the name arrives: the page gains the brand ————— */
 .name-band{background:var(--mist);padding:clamp(36px,6vh,64px) 24px;margin-top:clamp(28px,4.5vh,48px)}
 .name-band figure{max-width:760px;margin:0 auto}
 .name-band img{width:100%;border-radius:clamp(12px,2vw,20px);display:block;box-shadow:0 24px 60px rgba(0,56,64,.18)}
-.name-band figcaption{margin-top:14px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:#22666B}
+.name-band figcaption{margin-top:14px;text-align:center;font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.76rem;letter-spacing:.06em;text-transform:uppercase;color:#22666B}
 
 /* Scenario cards in the brand's card language. Desktop: 3-up with hover
    lift. Mobile: a swipeable snap carousel, the pattern a thumb expects. */
@@ -191,7 +190,7 @@ h2.sec.pre .no{color:var(--slate)}
   .scen-cards{display:grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:86%;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:6px}
   .scen-cards::-webkit-scrollbar{display:none}
   .scen-card{scroll-snap-align:center}
-  .scen-hint{display:block;margin-top:14px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:#22666B}
+  .scen-hint{display:block;margin-top:14px;text-align:center;font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:#22666B}
 }
 
 /* ————— 05 · the rollout as a ladder of type. Each rung draws its rule and
@@ -200,7 +199,7 @@ h2.sec.pre .no{color:var(--slate)}
 .rung{display:grid;grid-template-columns:clamp(84px,14vw,130px) 1fr;gap:18px;align-items:baseline;padding:clamp(16px,2.6vh,24px) 0;position:relative}
 .rung:after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:#E4E7E5}
 .rung .draw{position:absolute;left:0;bottom:0;height:2px;background:var(--zinia);width:0}
-.rung .yr{font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:#8a8f8c}
+.rung .yr{font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.76rem;letter-spacing:.06em;text-transform:uppercase;color:#8a8f8c}
 .rung .ttl{font-weight:700;font-size:clamp(1.35rem,3.2vw,2.3rem);letter-spacing:-.028em;line-height:1.12;color:#B9C0BE;transition:color .35s}
 .rung .sub{margin-top:5px;font-size:.92rem;line-height:1.5;color:#8a8f8c;opacity:0;transform:translateY(6px);transition:opacity .35s,transform .35s}
 .rung.on .ttl{color:var(--deep)}
@@ -234,26 +233,26 @@ figure.plain-shot figcaption{margin-top:12px;text-align:center}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(18px,3vw,40px)}
 .stat .n{font-weight:700;font-variant-numeric:tabular-nums;font-size:clamp(2.6rem,7vw,5.6rem);letter-spacing:-.05em;line-height:1;color:var(--deep)}
 .stat .n i{font-style:normal;color:var(--zinia-ink)}
-.stat .l{margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:#22666B}
+.stat .l{margin-top:10px;font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:#22666B}
 .markets{margin-top:clamp(28px,4.5vh,48px);padding-top:clamp(22px,3.5vh,34px);border-top:1px solid rgba(0,56,64,.18);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:18px}
 .mgrid{display:grid;grid-template-columns:repeat(16,minmax(0,1fr));gap:clamp(6px,1vw,10px);flex:1;min-width:min(100%,360px)}
 .mgrid i{aspect-ratio:1;border-radius:50%;border:2px solid rgba(0,56,64,.28);box-sizing:border-box;transition:background .3s,border-color .3s,transform .3s}
 .mgrid i.live{background:var(--deep);border-color:var(--deep)}
 .mgrid i.next{background:var(--zinia);border-color:var(--zinia)}
-.mlab{font-family:'IBM Plex Mono',monospace;font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:#22666B;line-height:1.9;white-space:nowrap}
+.mlab{font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:#22666B;line-height:1.9;white-space:nowrap}
 .mlab b{font-weight:600;color:var(--deep)}
 @media (max-width:640px){.stats{grid-template-columns:1fr;gap:22px}.stat .n{font-size:clamp(2.6rem,13vw,4rem)}.markets{flex-direction:column;align-items:stretch}.mlab{white-space:normal;text-align:center}}
 
 /* ————— More work: the other two cases, as cards on the page. Desktop
    two-up with hover lift, mobile a swipe row. ————— */
-.legal{max-width:1080px;margin:clamp(18px,3vh,28px) auto 0;padding-top:10px;border-top:1px solid #E4E7E5;font-family:'IBM Plex Mono',monospace;font-size:.54rem;letter-spacing:.02em;line-height:1.55;color:#B4B4B8}
+.legal{max-width:1080px;margin:clamp(18px,3vh,28px) auto 0;padding-top:10px;border-top:1px solid #E4E7E5;font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.64rem;letter-spacing:.02em;line-height:1.55;color:#B4B4B8}
 .more{max-width:1080px;margin:clamp(40px,7vh,72px) auto 0;padding-bottom:clamp(48px,8vh,96px)}
-.more .mk{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:#8a8f8c}
+.more .mk{font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:#8a8f8c}
 .more-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
 .mcard{display:block;text-decoration:none;color:inherit;border-radius:18px;overflow:hidden;background:#fff;border:1px solid #E4E7E5;box-shadow:0 8px 24px rgba(20,20,20,.06);transition:transform .35s cubic-bezier(.22,1,.36,1),box-shadow .35s}
 .mcard img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
 .mcard .mb{padding:18px 20px 22px}
-.mcard .mn{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--zinia-ink)}
+.mcard .mn{font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--zinia-ink)}
 .mcard h3{margin:6px 0 0;font-weight:700;font-size:clamp(1.15rem,1.9vw,1.4rem);letter-spacing:-.02em;line-height:1.2}
 .mcard h3 span{display:inline-block;margin-left:.3em;color:var(--zinia-ink);transition:transform .4s cubic-bezier(.22,1,.36,1)}
 .mcard p{margin:6px 0 0;font-size:.95rem;line-height:1.5;color:#666}
@@ -271,7 +270,7 @@ figure.plain-shot figcaption{margin-top:12px;text-align:center}
 #hm-cta-head .cta-word{display:inline-block;min-width:5ch;text-align:left;transition:opacity .25s ease}
 #hm-cta-head .cta-word.is-swap{opacity:0}
 #hm-cta-actions{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin:clamp(28px,4.5vh,44px) 0 0}
-.cta-btn{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.1em;
+.cta-btn{font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.82rem;letter-spacing:.06em;
     text-transform:uppercase;color:#fff;text-decoration:none;background:none;
     border:1.5px solid rgba(245,245,247,.35);border-radius:999px;
     padding:14px 26px;transition:background .25s,color .25s,border-color .25s;display:inline-block}
@@ -316,7 +315,7 @@ footer[data-dark]{box-shadow:0 50vh 0 #000}
 
 <div id="pg" style="position:fixed;top:0;left:0;height:2px;width:0;background:var(--zinia);z-index:60"></div>
 
-<nav style="position:sticky;top:0;z-index:50;background:#fff;display:flex;justify-content:space-between;align-items:center;gap:18px;padding:calc(20px + env(safe-area-inset-top,0px)) clamp(22px,6vw,96px) 20px;font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:lowercase">
+<nav style="position:sticky;top:0;z-index:50;background:#fff;display:flex;justify-content:space-between;align-items:center;gap:18px;padding:calc(20px + env(safe-area-inset-top,0px)) clamp(22px,6vw,96px) 20px;font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.76rem;letter-spacing:.02em;text-transform:lowercase">
   <span style="display:flex;gap:clamp(16px,3vw,30px)">
     <a href="/#work" class="hm-nav-link hm-back" aria-label="Back to selected products" title="Back to selected products">←</a>
     <a href="/#about" class="hm-nav-link" style="white-space:nowrap">About</a>

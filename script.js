@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const abtCopy = $('hm-abt-copy'), abtHero = $('hm-abt-hero');
   const statFig = document.querySelector('#hm-abt-stat .st-fig'), statNum = $('hm-stat-num');
   const navAbout = $('hm-navabout'), navWork = $('hm-navwork'), navLab = $('hm-navlab');
-  const labName = $('hm-labname'), labMark = $('hm-lab-mark'), labHero = $('hm-lab-hero');
+  const labName = $('hm-labname'), labMark = $('hm-lab-mark'), labHero = $('hm-lab-hero'), labSide = $('hm-lab-side');
   const hero = $('hm-hero');
   const touch = matchMedia('(hover:none)').matches;
   const layers = [intro, lab, abt];
@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const navInk = dark => document.querySelectorAll('[data-ch="link"]').forEach(el => {
     el.style.color = dark ? '#fff' : '#1a1a1a';
   });
-  const PAGE_BG = { about: ABOUT_BG, lab: '#3A5B85' };
+  const PAGE_BG = { about: ABOUT_BG, lab: '#0c0c0e' };
   const setChromeFor = m => {
     setTheme(PAGE_BG[m] || '#ffffff');
     // Landing back on home mid-scroll (the curtain-only return from deep in
@@ -165,6 +165,10 @@ document.addEventListener('DOMContentLoaded', () => {
     return Promise.all(anims.map(a => a.finished.catch(() => {}))).then(() => anims);
   };
 
+  // How far below the name's baseline the After Hours statement starts, as a
+  // share of the viewport height. Set by eye with a live slider.
+  const LAB_SIDE_VH = 12;
+
   // The About name hangs off the home name's height, so the travel is level.
   // hm-big's viewport top plus the intro's scroll is its y with the intro at 0.
   const syncAbout = () => {
@@ -192,7 +196,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // level too; the hero below it is only as tall as the name needs.
     if (labMark && labHero) {
       labMark.style.top = top + 'px';
-      labHero.style.minHeight = (top + labMark.offsetHeight + Math.round(innerHeight * .07)) + 'px';
+      // The statement starts just below the name's baseline, on the left —
+      // the band the name leaves empty; the hero grows to hold it.
+      const sideTop = top + labMark.offsetHeight + Math.round(innerHeight * (stacked ? .05 : LAB_SIDE_VH / 100));
+      if (labSide) labSide.style.top = sideTop + 'px';
+      const labBottom = Math.max(top + labMark.offsetHeight, labSide ? sideTop + labSide.offsetHeight : 0);
+      labHero.style.minHeight = (labBottom + Math.round(innerHeight * .07)) + 'px';
     }
   };
 
@@ -536,51 +545,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { root: abt, threshold: .8 }).observe(statFig);
   }
 
-  // The bench: cards tilt and sink with their distance from the middle of the
-  // rail, and straighten as one arrives. Driven off the rail's own scroll, so
-  // trackpad, swipe, drag and keyboard all feed the same thing.
-  const bench = $('hm-bench');
-  if (bench) {
-    const cards = [...bench.querySelectorAll('.wb-card')];
-    const lay = () => {
-      const r = bench.getBoundingClientRect();
-      if (!r.width) return;
-      const mid = r.left + r.width / 2;
-      cards.forEach((c, i) => {
-        const b = c.getBoundingClientRect();
-        const d = Math.max(-1, Math.min(1, (b.left + b.width / 2 - mid) / (r.width / 2)));
-        const a = Math.abs(d);
-        c.style.transform = 'translateY(' + (a * 16).toFixed(1) + 'px) rotate(' +
-                            ((i % 2 ? 1.9 : -2.4) * a).toFixed(2) + 'deg)';
-        c.style.opacity = (1 - a * .3).toFixed(3);
-      });
-    };
-    bench.addEventListener('scroll', () => requestAnimationFrame(lay), { passive: true });
-    addEventListener('resize', lay);
-    lay();
-
-    // A horizontal scrollbar is a poor handle on a desktop, so the rail drags.
-    // Touch is left alone: the browser already does this better than script can.
-    let down = false, sx = 0, sl = 0;
-    bench.addEventListener('pointerdown', e => {
-      if (e.pointerType === 'touch') return;
-      down = true; sx = e.clientX; sl = bench.scrollLeft;
-      bench.classList.add('is-drag');
-      bench.setPointerCapture(e.pointerId);
-    });
-    bench.addEventListener('pointermove', e => { if (down) bench.scrollLeft = sl - (e.clientX - sx); });
-    const release = () => { down = false; bench.classList.remove('is-drag'); };
-    bench.addEventListener('pointerup', release);
-    bench.addEventListener('pointercancel', release);
-  }
-
   // Leaving for a case study. Every picture in the Work section is the exact
   // hero of the page it opens, so instead of a new tab: everything but that
   // picture fades, its on-screen rectangle (and the hover scale it's at) is
   // handed over, and the case study starts with its hero in that spot and
   // grows it into place (arrive.js). Modifier clicks keep their browser
   // meaning — a cmd-click still opens a tab.
-  const cards = [...work.querySelectorAll('.wk-card')];
+  // Only the shipped cases are links; the one still cooking has no page to go to.
+  const cards = [...work.querySelectorAll('.wk-card[href]')];
   // Not on touch: a phone scrolls the card away under the thumb and paints the
   // new page on its own schedule, so the handed-over picture reads as a leftover
   // sitting on top of the case study rather than as one picture changing rooms.
@@ -613,9 +585,6 @@ document.addEventListener('DOMContentLoaded', () => {
     work.classList.remove('is-leaving');
     cards.forEach(c => c.classList.remove('is-going'));
   });
-
-  const mq = $('hm-mq');
-  if (mq) mq.style.animation = 'mq 10s linear infinite';
 
   const h = (location.hash || '').replace('#', '');
   if (h === 'lab' || h === 'about') {
@@ -656,7 +625,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // reaching out for.
   const ctaWord = $('hm-cta-word');
   if (ctaWord) {
-    const words = ['idea.', 'product.', 'launch.', 'bet.', 'hire.'];
+    const words = ['idea.', 'product.', 'launch.', 'feature.', 'prototype.', 'MVP.', 'roadmap.', 'release.', 'beta.', 'rollout.',
+      'milestone.', 'pilot.', 'redesign.', 'sprint.', 'pivot.', 'integration.', 'onboarding.', 'platform.', 'experiment.', 'hire.', 'market.', 'app.'];
     let wi = 0;
     setInterval(() => {
       ctaWord.classList.add('is-swap');

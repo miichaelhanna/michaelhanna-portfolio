@@ -15,7 +15,7 @@
   // the bars already in that page's colour — waiting for the main script at
   // the end of the body left them white for the whole load.
   (function () {
-    var c = { about: '#0c0c0e', lab: '#3A5B85' }[location.hash.slice(1)];
+    var c = { about: '#0c0c0e', lab: '#0c0c0e' }[location.hash.slice(1)];
     if (!c) return;
     document.querySelector('meta[name="theme-color"]').setAttribute('content', c);
     document.documentElement.style.background = c;
@@ -27,8 +27,6 @@
   })();
 </script>
 <title>Michael Hanna · Product Manager</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="prefetch" href="/openbank">
 <link rel="prefetch" href="/zinia">
 <link rel="prefetch" href="/sixflags">
@@ -44,7 +42,7 @@
   @media (hover:hover){a:hover{color:#1D1AEA}}
   @keyframes mq{to{transform:translateX(-50%)}}
   @keyframes sway{from{transform:rotate(-1.6deg)}to{transform:rotate(1.6deg)}}
-  .ph{display:flex;align-items:center;justify-content:center;text-align:center;background:rgba(0,0,0,.04);color:rgba(0,0,0,.32);font-family:'IBM Plex Mono',monospace;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;border:1px dashed rgba(0,0,0,.14);box-sizing:border-box}
+  .ph{display:flex;align-items:center;justify-content:center;text-align:center;background:rgba(0,0,0,.04);color:rgba(0,0,0,.32);font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;border:1px dashed rgba(0,0,0,.14);box-sizing:border-box}
   .ph.ph-dark{background:rgba(255,255,255,.06);color:rgba(255,255,255,.35);border-color:rgba(255,255,255,.16)}
   .lanyard-wrapper{position:relative;z-index:0;width:100%;height:100%;display:flex;justify-content:center;align-items:center;transform:scale(1);transform-origin:center}
   .lanyard-wrapper canvas{touch-action:pan-y !important}
@@ -92,14 +90,14 @@
   #hm-lanyard-root{position:absolute;inset:0;
       -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 clamp(38px,11%,72px));
       mask-image:linear-gradient(180deg,transparent 0,#000 clamp(38px,11%,72px))}
-  .tb-label{margin-top:clamp(2px,.6vh,10px);font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:#8a8a8a}
+  .tb-label{margin-top:clamp(2px,.6vh,10px);font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.76rem;letter-spacing:.06em;text-transform:uppercase;color:#8a8a8a}
   /* Sits right where the card hangs at rest, arrow pointing back at it, so
      the affordance reads as pointing at the thing to grab rather than
      floating in a corner. Fades out for good the first time it's dragged
      (see lanyard.js) — once found, it doesn't need to keep asking. */
   .lanyard-hint{position:absolute;left:calc(50% + clamp(70px,9vw,100px));top:63%;
-      transform:translateY(-50%);font-family:'IBM Plex Mono',monospace;font-size:.62rem;
-      letter-spacing:.16em;text-transform:lowercase;color:rgba(26,26,26,.42);
+      transform:translateY(-50%);font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.72rem;
+      letter-spacing:.02em;text-transform:lowercase;color:rgba(26,26,26,.42);
       pointer-events:none;z-index:1;transition:opacity .4s ease}
   .lanyard-hint.is-hidden{opacity:0}
   @media (max-width:900px){.lanyard-hint{display:none}}
@@ -182,76 +180,259 @@
     #hm-meta-bio{order:3;margin-top:clamp(18px,3vh,34px);text-align:left;max-width:none}
   }
 
-  /* The bench. Cards lie at an angle and straighten as you bring one to the
-     middle, so it reads as objects on a work surface rather than a slideshow.
-     It is a native horizontal scroller, so a phone swipes it and vertical page
-     scrolling is never intercepted. */
-  .wb{margin-top:clamp(30px,5.5vh,58px)}
-  .wb-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;
-           font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;
-           text-transform:lowercase;color:rgba(255,255,255,.7)}
-  .wb-rail{display:flex;gap:clamp(14px,1.8vw,24px);overflow-x:auto;overscroll-behavior-x:contain;
-           scroll-snap-type:x mandatory;-webkit-user-select:none;user-select:none;cursor:grab;
-           margin:clamp(16px,2.6vh,28px) calc(50% - 50vw) 0;
-           padding:clamp(10px,1.6vh,18px)
-                   max(clamp(22px,6vw,44px), calc(50vw - 420px + clamp(22px,6vw,44px)))
-                   clamp(20px,3.2vh,32px);
-           scrollbar-width:none}
-  .wb-rail::-webkit-scrollbar{display:none}
-  .wb-rail.is-drag{cursor:grabbing}
-  .wb-card{flex:0 0 auto;scroll-snap-align:center;box-sizing:border-box;
-           width:clamp(220px,24vw,296px);min-height:clamp(262px,29vh,330px);
-           display:flex;flex-direction:column;padding:clamp(16px,1.6vw,22px);
-           background:#F4F1EA;color:#1a1a1a}
-  .wb-card.is-open{background:none;color:#fff;border:1.5px dashed rgba(255,255,255,.55)}
-  /* Japanese-Americana palette: indigo cloth, ecru card stock, and the red of a
-     Toyo steel toolbox. Red carries almost no contrast against this blue
-     (1.26:1), so it never becomes type on it — it arrives as an object instead,
-     one painted card in the row, and as stamped numbering on the cream. */
-  .wb-card.is-live{background:#C0362C;color:#F4F1EA}
-  .wb-no{font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;color:#C0362C}
-  .wb-card.is-live .wb-no{color:rgba(244,241,234,.8)}
-  .wb-card.is-open .wb-no{color:rgba(255,255,255,.8)}
-  .wb-card.is-live .wb-desc{color:rgba(244,241,234,.82)}
-  .wb-card.is-live .wb-status{color:rgba(244,241,234,.78)}
-  .wb-card.is-open .wb-status{color:rgba(255,255,255,.55)}
-  .wb-title{margin:clamp(14px,2vh,22px) 0 0;font-weight:700;letter-spacing:-.03em;line-height:1.05;
-            font-size:clamp(1.3rem,2.1vw,1.75rem)}
-  .wb-desc{margin:10px 0 0;font-size:clamp(.86rem,1vw,.95rem);line-height:1.55;color:rgba(26,26,26,.72)}
-  .wb-card.is-open .wb-desc{color:rgba(255,255,255,.72)}
-  .wb-status{margin-top:auto;padding-top:16px;font-family:'IBM Plex Mono',monospace;
-             font-size:.62rem;letter-spacing:.14em;text-transform:lowercase;color:rgba(26,26,26,.5)}
-  @media (prefers-reduced-motion:reduce){.wb-card{transform:none !important}}
-
-  /* The three cases. Each card is one link; the picture in it is the exact
-     hero of the page it opens, so a click doesn't leave for a new tab — the
-     picture stays put and the case study grows it into its own hero
-     (depart() in script.js, arrive.js on the case pages). The call to action
-     is ink, not the accent: the arrow and a drawn underline do the inviting. */
+  /* The cases. Two columns on a desktop, one on a phone; the picture leads,
+     then a client line, a title, one sentence, and the ask. Each shipped
+     card is one link; its picture is the exact hero of the page it opens, so
+     a click grows it into place rather than leaving for a new tab (depart()
+     in script.js, arrive.js on the case pages). */
+  .wk-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(34px,5vh,56px) clamp(22px,2.8vw,40px);
+      max-width:1180px;margin:0 auto;padding:clamp(8px,1.5vh,18px) clamp(22px,5vw,80px) clamp(60px,9vh,100px);box-sizing:border-box}
+  .wk-card{display:flex;flex-direction:column;align-items:flex-start;text-align:left;min-width:0;color:inherit;text-decoration:none}
   @media (hover:hover){.wk-card:hover{color:#1a1a1a}}
-  .wk-title{font-weight:700;font-size:clamp(1.9rem,4.4vw,3.6rem);letter-spacing:-.035em;line-height:1.08;text-wrap:balance}
-  .wk-sub{margin-top:12px;max-width:62ch;font-size:clamp(.95rem,1.3vw,1.1rem);color:#8a8a8a;text-wrap:pretty}
-  .wk-pic{width:min(620px,88vw);height:clamp(230px,36vh,350px);margin-top:clamp(24px,4.5vh,40px);
-          overflow:hidden;border-radius:18px;background:#ececec;transform:translateZ(0)}
+  .wk-pic{position:relative;width:100%;aspect-ratio:16/11;overflow:hidden;border-radius:18px;background:#ececec;transform:translateZ(0)}
   .wk-pic img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .9s cubic-bezier(.22,1,.36,1)}
   @media (hover:hover){.wk-card:hover .wk-pic img{transform:scale(1.03)}}
-  .wk-cta{display:inline-flex;align-items:baseline;gap:10px;margin-top:clamp(18px,3vh,26px);
-          font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:#1a1a1a}
+  .wk-eyebrow{margin-top:clamp(16px,2.2vh,22px);font-size:.76rem;font-weight:500;letter-spacing:.02em;color:#8a8a8a}
+  .wk-title{margin-top:8px;font-weight:700;font-size:clamp(1.35rem,2vw,1.9rem);letter-spacing:-.03em;line-height:1.12;text-wrap:balance}
+  .wk-sub{margin-top:8px;max-width:46ch;font-size:clamp(.92rem,1.1vw,1rem);line-height:1.5;color:#8a8a8a;text-wrap:pretty}
+  .wk-cta{display:inline-flex;align-items:baseline;gap:10px;margin-top:clamp(14px,2.2vh,20px);
+          font-size:.82rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:#1a1a1a;text-decoration:none}
   .wk-cta .ln{position:relative}
   .wk-cta .ln::after{content:'';position:absolute;left:0;right:0;bottom:-5px;height:1px;background:#1a1a1a;
                      transform:scaleX(0);transform-origin:right;transition:transform .4s cubic-bezier(.22,1,.36,1)}
   @media (hover:hover){.wk-card:hover .wk-cta .ln::after{transform:scaleX(1);transform-origin:left}}
   .wk-cta .arr{display:inline-block;transition:transform .4s cubic-bezier(.22,1,.36,1)}
   @media (hover:hover){.wk-card:hover .wk-cta .arr{transform:translateX(6px)}}
+  /* The one being built right now: the client's own cream and orange (both
+     lifted from their site), its mark, and a stamp with a little steam. Not
+     a link — there is nowhere to go yet. */
+  .wk-pic-mab{background:#FEF5E2;display:flex;align-items:center;justify-content:center}
+  .wk-pic-mab img{width:min(56%,300px);height:auto;object-fit:contain;transition:none}
+  .wk-stamp{position:absolute;left:16px;bottom:14px;display:inline-flex;align-items:center;gap:9px;padding:8px 13px;border-radius:999px;
+      background:#F26A2C;color:#fff;font-size:.74rem;font-weight:500;letter-spacing:.02em}
+  .steam{display:inline-flex;gap:2px;align-items:flex-end;height:10px}
+  .steam b{display:block;width:2px;height:9px;border-radius:2px;background:#fff;opacity:.5;animation:steam 1.8s ease-in-out infinite}
+  .steam b:nth-child(2){animation-delay:.3s}.steam b:nth-child(3){animation-delay:.6s}
+  @keyframes steam{0%,100%{transform:translateY(0) scaleY(.7);opacity:.35}50%{transform:translateY(-3px) scaleY(1);opacity:.9}}
+  @media (max-width:800px){.wk-grid{grid-template-columns:minmax(0,1fr);gap:clamp(36px,6vh,56px)}}
+  @media (prefers-reduced-motion:reduce){.wk-pic img,.wk-cta .ln::after,.wk-cta .arr{transition:none}.steam b{animation:none}}
   /* Leaving for a case: everything fades but the picture that was clicked. */
   #hm-work.is-leaving > :not(.is-going),#hm-work.is-leaving .is-going > :not(.wk-pic){opacity:0;transition:opacity .26s ease}
   @media (prefers-reduced-motion:reduce){.wk-pic img,.wk-cta .ln::after,.wk-cta .arr{transition:none}}
 
-  /* After Hours anchors its wordmark on the right — the side the home page keeps
-     it — so the name barely moves and the dark page wipes in from that side. */
+  /* ─────────────────────────── After Hours ───────────────────────────
+     A night room. Nothing on this page is a description of a project: each
+     piece IS the thing, small and running, built with no data and no
+     libraries (lab.js). Midnight indigo ground, ecru ink; the site's acid
+     green and the Toyo red arrive only as objects — one painted tile, the
+     ticket stub, the radio needle — never as type on the ground.
+     The grid is built on square units one column wide (a container-query
+     unit), so a tile that spans rows keeps its proportion at every width. */
+  #hm-lab{--lab-bg:#0c0c0e;--lab-tile:#161619;--lab-line:rgba(244,241,234,.1);
+          --lab-ink:#F4F1EA;--lab-mute:rgba(244,241,234,.58);--lab-acid:#D7FF3F;
+          --lab-red:#C0362C;--lab-paper:#F4F1EA;--lab-gut:clamp(22px,5vw,80px);
+          --lab-ease:cubic-bezier(.22,1,.36,1);--mono:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500}
+  /* The wordmark anchors on the right — the side the home page keeps it — so
+     the name barely moves and the page wipes in from that side. Its top is
+     synced from the home hero at runtime (syncAbout in script.js), as is the
+     sign that sits opposite it. */
   #hm-lab-hero{position:relative;box-sizing:border-box}
-  #hm-lab-mark{position:absolute;right:clamp(22px,5vw,80px);top:0;z-index:2}
+  #hm-lab-mark{position:absolute;right:var(--lab-gut);top:0;z-index:2}
   #hm-labname{text-align:right}
+  /* The statement holds the left, on the name's own top line — the About
+     spread, mirrored. Its top (and, on a phone, its drop below the name) is
+     measured off the wordmark in syncAbout. */
+  #hm-lab-side{position:absolute;left:var(--lab-gut);top:0;z-index:2;width:min(40ch,44vw)}
+  @media (max-width:900px){#hm-lab-side{right:var(--lab-gut);width:auto}}
+  @media (prefers-reduced-motion:reduce){.lab-dot{animation:none}}
+
+  .lab-wrap{max-width:1180px;margin:0 auto;padding:0 var(--lab-gut) clamp(56px,9vh,96px);box-sizing:border-box}
+  .lab-kicker{display:flex;justify-content:space-between;align-items:baseline;gap:8px 24px;flex-wrap:wrap;
+      font-family:var(--label);font-weight:500;font-size:.76rem;letter-spacing:.02em;text-transform:lowercase;color:var(--lab-mute)}
+  .lab-kicker b{font-weight:400;color:var(--lab-ink)}
+  /* The clock lives in the sign beside the wordmark; where that sign is
+     hidden it moves down into the kicker instead. */
+  .lab-m{display:none}
+  @media (max-width:900px){.lab-m{display:inline}}
+  /* The page is a flex column: the hero holds the name and the statement,
+     and the ID card pins to the bottom of the viewport, scrolling only when
+     a phone runs out of room. */
+  #hm-lab{display:flex;flex-direction:column}
+  #hm-lab-hero{flex:0 0 auto;width:100%}
+  #hm-lab-side .lab-h2{margin:0;font-size:clamp(1.7rem,3.4vw,2.9rem)}
+  .lab-soon{margin:clamp(14px,2.4vh,24px) 0 0;font-family:var(--label);font-weight:500;font-size:.76rem;letter-spacing:.02em;text-transform:lowercase;color:var(--lab-mute)}
+  .lab-soon [data-go]{cursor:pointer;color:var(--lab-ink);text-decoration:underline;text-underline-offset:4px}
+  /* The ID card, as on About, closing the page. */
+  .lab-cta{margin-top:auto;box-sizing:border-box;text-align:center;padding:clamp(32px,5vh,64px) var(--lab-gut) calc(clamp(24px,4vh,40px) + env(safe-area-inset-bottom,0px))}
+  .lab-h2{margin:16px 0 0;font-weight:700;font-size:clamp(2.1rem,5.4vw,4.2rem);letter-spacing:-.035em;line-height:1.02;color:#fff}
+  .lab-lede{margin:clamp(22px,4vh,36px) 0 0;max-width:52ch;font-size:clamp(.98rem,1.3vw,1.1rem);line-height:1.6;
+      color:rgba(244,241,234,.75);text-wrap:pretty}
+
+  /* The bench itself. */
+  .lab-grid{--g:14px;container-type:inline-size;margin-top:clamp(34px,6vh,64px);
+      display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:var(--g);
+      grid-auto-rows:84px;grid-auto-rows:calc((100cqw - 11*var(--g))/12)}
+  .lp{position:relative;grid-column:var(--c);grid-row:var(--r);display:flex;flex-direction:column;
+      box-sizing:border-box;min-width:0;min-height:0;overflow:hidden;border-radius:18px;
+      background:var(--lab-tile);border:1px solid var(--lab-line);color:var(--lab-ink);
+      transition:transform .5s var(--lab-ease),border-color .5s var(--lab-ease)}
+  @media (hover:hover){
+    .lp:hover{transform:translateY(-3px);border-color:rgba(244,241,234,.24)}
+    .lp:hover .lp-hint{color:var(--lab-acid)}
+  }
+  .lp-stage{position:relative;flex:1;min-height:0;display:block;width:100%;margin:0;padding:0;border:0;
+      background:none;color:inherit;font:inherit;text-align:left;overflow:hidden;container-type:inline-size}
+  button.lp-stage{cursor:pointer;-webkit-tap-highlight-color:transparent;appearance:none;-webkit-appearance:none}
+  button.lp-stage:focus-visible{outline:2px solid var(--lab-acid);outline-offset:-4px;border-radius:18px 18px 0 0}
+  /* The label under each piece, set like a museum card: number in the
+     gutter, title and one line on why it exists, the way to touch it. */
+  .lp-cap{display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"no title hint" "no why why";
+      column-gap:12px;row-gap:3px;align-items:baseline;padding:12px 16px 14px;border-top:1px solid var(--lab-line)}
+  .lp-no{grid-area:no;align-self:start;padding-top:3px;font-family:var(--label);font-weight:500;font-size:.7rem;letter-spacing:.02em;color:var(--lab-mute)}
+  .lp-title{grid-area:title;margin:0;font-weight:700;font-size:clamp(.95rem,1.05vw,1.08rem);letter-spacing:-.02em;line-height:1.2;color:#fff}
+  .lp-why{grid-area:why;margin:0;font-size:.78rem;line-height:1.45;color:var(--lab-mute);text-wrap:pretty}
+  .lp-hint{grid-area:hint;align-self:start;padding-top:3px;font-family:var(--label);font-weight:500;font-size:.7rem;letter-spacing:.02em;
+      text-transform:lowercase;color:var(--lab-mute);white-space:nowrap;transition:color .3s}
+  /* One painted tile in the row — the acid the wordmark wears when the
+     header goes dark elsewhere on the site, here as a whole object. */
+  .lp.is-acid{background:var(--lab-acid);color:#111A36;border-color:transparent}
+  .lp.is-acid .lp-cap{border-top-color:rgba(17,26,54,.16)}
+  .lp.is-acid .lp-title{color:#111A36}
+  .lp.is-acid .lp-no,.lp.is-acid .lp-why,.lp.is-acid .lp-hint{color:rgba(17,26,54,.62)}
+  @media (hover:hover){.lp.is-acid:hover .lp-hint{color:#111A36}}
+
+  /* 01 · Tonight's poster */
+  .pz{position:absolute;inset:0;padding:clamp(16px,6%,30px);box-sizing:border-box;display:flex;align-items:center;justify-content:center}
+  .pz svg{display:block;height:100%;width:auto;max-width:100%;filter:drop-shadow(0 18px 34px rgba(0,0,0,.42));
+      transition:opacity .28s ease,transform .5s var(--lab-ease)}
+  .pz.is-swap svg{opacity:0;transform:translateY(8px) rotate(-.6deg)}
+
+  /* 02 · The moon */
+  .mn{position:absolute;inset:0;padding:10%;box-sizing:border-box;display:flex;align-items:center;justify-content:center}
+  .mn svg{display:block;width:100%;height:100%}
+
+  /* 03 · A number that only goes up */
+  .cnt-lab{position:absolute;left:16px;top:14px;font-family:var(--label);font-weight:500;font-size:.7rem;letter-spacing:.02em;color:rgba(17,26,54,.62)}
+  .cnt{position:absolute;left:16px;bottom:10px;font-weight:700;letter-spacing:-.045em;line-height:.9;color:#111A36;
+      font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;white-space:nowrap}
+
+  /* 04 · Field */
+  .fd{position:absolute;inset:0;display:block;width:100%;height:100%;touch-action:pan-y}
+
+  /* 05 · Ticket to nowhere — the boarding-pass motif, with a stub that tears */
+  .tk{position:absolute;inset:clamp(14px,6%,26px);display:flex;flex-direction:column;background:var(--lab-paper);color:#111A36;
+      border-radius:10px;overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.42);
+      transition:transform .45s var(--lab-ease),opacity .3s ease}
+  .tk.is-swap{opacity:0;transform:translateY(10px) rotate(-1deg)}
+  .tk-main{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-between;gap:10px;padding:14px 16px 12px}
+  .tk-row{display:flex;justify-content:space-between;gap:10px;font-family:var(--label);font-weight:500;font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;color:rgba(17,26,54,.6)}
+  .tk-route{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .tk-route b{display:block;font-size:clamp(1.6rem,11cqw,2.4rem);font-weight:700;letter-spacing:-.045em;line-height:1}
+  .tk-route i{display:block;margin-top:5px;font-style:normal;font-family:var(--label);font-weight:500;font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;color:rgba(17,26,54,.6);white-space:nowrap}
+  .tk-route > div:last-child{text-align:right}
+  .tk-arrow{font-weight:700;font-size:1.3rem;color:var(--lab-red)}
+  .tk-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px}
+  .tk-fields span{display:block;font-family:var(--label);font-weight:500;font-size:.63rem;letter-spacing:.06em;text-transform:uppercase;color:rgba(17,26,54,.55)}
+  .tk-fields b{display:block;margin-top:2px;font-weight:700;font-size:1rem;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .tk-fine{font-family:var(--label);font-weight:500;font-size:.6rem;letter-spacing:.06em;text-transform:uppercase;color:rgba(17,26,54,.45)}
+  .tk-tear{position:relative;height:0;border-top:2px dashed rgba(17,26,54,.22);flex:0 0 auto}
+  .tk-tear::before,.tk-tear::after{content:'';position:absolute;top:-10px;width:18px;height:18px;border-radius:50%;background:var(--lab-tile)}
+  .tk-tear::before{left:-9px}.tk-tear::after{right:-9px}
+  .tk-stub{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;background:var(--lab-red);color:#F4F1EA}
+  .tk-bars{display:flex;align-items:stretch;gap:2px;height:32px;flex:1;max-width:58%}
+  .tk-bars i{display:block;background:#F4F1EA;opacity:.92;flex:0 0 auto}
+  .tk-stubmeta{text-align:right}
+  .tk-stubmeta b{display:block;font-size:1.1rem;font-weight:700;letter-spacing:-.02em}
+  .tk-stubmeta span{font-family:var(--label);font-weight:500;font-size:.63rem;letter-spacing:.06em;text-transform:uppercase;opacity:.82}
+
+  /* 06 · 1AM radio */
+  .rd{position:absolute;inset:0;display:grid;grid-template-columns:minmax(140px,36%) minmax(0,1fr);gap:12px 22px;
+      padding:16px 18px 14px;box-sizing:border-box;align-items:end}
+  .rd-read{align-self:center;min-width:0}
+  .rd-freq{font-weight:700;font-size:clamp(2rem,10cqw,3.4rem);letter-spacing:-.045em;line-height:.95;color:#fff;
+      font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+  .rd-freq small{font-family:var(--label);font-weight:500;font-size:.7rem;letter-spacing:.02em;margin-left:6px;color:var(--lab-mute);vertical-align:.5em}
+  .rd-name{margin-top:8px;font-family:var(--label);font-weight:500;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lab-acid);transition:color .3s}
+  .rd-name.is-static{color:var(--lab-mute)}
+  .rd-prog{margin-top:4px;font-size:.78rem;line-height:1.4;color:var(--lab-mute);text-wrap:pretty}
+  .rd-set{display:flex;flex-direction:column;justify-content:flex-end;gap:14px;min-width:0}
+  .rd-dial{position:relative;height:54px;touch-action:pan-y;cursor:ew-resize;-webkit-user-select:none;user-select:none;border-radius:6px}
+  .rd-dial:focus-visible{outline:2px solid var(--lab-acid);outline-offset:6px}
+  .rd-tick{position:absolute;bottom:0;width:1px;height:10px;background:rgba(244,241,234,.32);transform:translateX(-.5px)}
+  .rd-tick.is-major{height:18px;background:rgba(244,241,234,.66)}
+  .rd-tick.is-major::after{content:attr(data-f);position:absolute;bottom:22px;left:50%;transform:translateX(-50%);
+      font-family:var(--label);font-weight:500;font-size:.65rem;letter-spacing:.06em;color:var(--lab-mute)}
+  .rd-station{position:absolute;bottom:0;width:2px;height:18px;background:var(--lab-acid);transform:translateX(-1px)}
+  .rd-needle{position:absolute;top:0;bottom:-6px;width:2px;background:var(--lab-red);transform:translateX(-1px);
+      box-shadow:0 0 12px rgba(192,54,44,.6);pointer-events:none}
+  .rd-needle::before{content:'';position:absolute;top:-1px;left:-4px;border:5px solid transparent;border-top:7px solid var(--lab-red);border-bottom:0}
+  .rd-vu{display:flex;align-items:flex-end;gap:3px;height:38px}
+  .rd-vu i{flex:1;display:block;height:12%;background:rgba(244,241,234,.26);border-radius:1px;transition:background .35s}
+  .rd-vu.is-tuned i{background:var(--lab-acid)}
+  .rd-snd{position:absolute;top:12px;right:14px;font-family:var(--label);font-weight:500;font-size:.68rem;letter-spacing:.02em;text-transform:lowercase;
+      color:var(--lab-mute);background:none;border:1px solid var(--lab-line);border-radius:999px;padding:7px 11px;cursor:pointer;
+      transition:color .25s,background .25s,border-color .25s}
+  .rd-snd[aria-pressed="true"]{color:#111A36;background:var(--lab-acid);border-color:transparent}
+  @media (hover:hover){.rd-snd:hover{color:var(--lab-ink);border-color:rgba(244,241,234,.4)}.rd-snd[aria-pressed="true"]:hover{color:#111A36}}
+  /* The two columns need room; in a narrow tile the readout sits above the
+     dial instead, and the scale keeps every other label. */
+  @container (max-width:520px){
+    .rd{grid-template-columns:minmax(0,1fr);align-items:start}
+    .rd-read{align-self:start;padding-right:88px}
+    .rd-tick.is-major:not(.is-big)::after{display:none}
+  }
+
+  /* 07 · Roadmap poetry */
+  .po{position:absolute;inset:0;padding:16px 20px;box-sizing:border-box;display:flex;align-items:center}
+  .po-q{margin:0;font-weight:700;font-size:clamp(1.05rem,3.3cqw,1.55rem);letter-spacing:-.025em;line-height:1.25;color:#fff;
+      text-wrap:balance;max-width:38ch;transition:opacity .22s ease,transform .4s var(--lab-ease)}
+  .po-q::before{content:'“';color:var(--lab-acid)}
+  .po-q.is-swap{opacity:0;transform:translateY(6px)}
+
+  /* 08 · Open slot */
+  .lp.is-open{flex-direction:row;align-items:center;gap:14px;padding:0 18px;background:none;border:1.5px dashed rgba(244,241,234,.32)}
+  .lp.is-open .lp-why{flex:1;min-width:0}
+  .lp.is-open .lp-hint{color:var(--lab-ink);text-decoration:underline;text-underline-offset:4px}
+  @media (hover:hover){.lp.is-open:hover{transform:none;border-color:rgba(244,241,234,.6)}}
+
+  .lab-foot{display:flex;justify-content:space-between;align-items:center;gap:12px 24px;flex-wrap:wrap;
+      margin-top:clamp(28px,5vh,48px);font-family:var(--label);font-weight:500;font-size:.76rem;letter-spacing:.02em;text-transform:lowercase}
+  .lab-foot [data-go]{cursor:pointer;color:var(--lab-ink)}
+
+  /* Where each piece sits, in units. Desktop is twelve across. */
+  .lp[data-piece="poster"]{--c:1/6;--r:1/7;--m:.8}
+  .lp[data-piece="moon"]{--c:6/9;--r:1/4;--m:1}
+  .lp[data-piece="count"]{--c:9/13;--r:1/4;--m:1.25}
+  .lp[data-piece="field"]{--c:6/13;--r:4/7;--m:1.3}
+  .lp[data-piece="ticket"]{--c:1/5;--r:7/12;--m:.72}
+  .lp[data-piece="radio"]{--c:5/13;--r:7/10;--m:1.15}
+  .lp[data-piece="poem"]{--c:5/13;--r:10/12;--m:1.7}
+  .lp[data-piece="slot"]{--c:1/13;--r:12/13}
+  /* Tablets: six units across, the same pieces re-laid. */
+  @media (max-width:900px){
+    .lab-grid{grid-template-columns:repeat(6,minmax(0,1fr));grid-auto-rows:calc((100cqw - 5*var(--g))/6)}
+    .lp[data-piece="poster"]{--c:1/5;--r:1/6}
+    .lp[data-piece="moon"]{--c:5/7;--r:1/3}
+    .lp[data-piece="count"]{--c:5/7;--r:3/6}
+    .lp[data-piece="field"]{--c:1/7;--r:6/9}
+    .lp[data-piece="ticket"]{--c:1/4;--r:9/14}
+    .lp[data-piece="radio"]{--c:4/7;--r:9/12}
+    .lp[data-piece="poem"]{--c:4/7;--r:12/14}
+    .lp[data-piece="slot"]{--c:1/7;--r:14/15}
+    .lp-cap{padding:10px 14px 12px}
+    .lp-why{font-size:.74rem}
+  }
+  /* Phones: one column, each piece at its own proportion. */
+  @media (max-width:700px){
+    .lab-grid{display:flex;flex-direction:column;gap:14px}
+    .lp{aspect-ratio:var(--m,1)}
+    .lp.is-open{aspect-ratio:auto;flex-wrap:wrap;padding:16px 18px;min-height:0}
+    .lp.is-open .lp-why{flex-basis:100%;order:3}
+    .lp.is-open .lp-hint{margin-left:auto}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .lp,.pz svg,.tk,.po-q,.lp-hint,.rd-vu i{transition:none}
+  }
 
   /* About. The name's top is synced from the home hero at runtime, so the move
      between the two pages stays level whatever the viewport does to the type. */
@@ -279,7 +460,7 @@
   #hm-abt-stat{position:relative;box-sizing:border-box;
                padding:clamp(44px,6.5vh,86px) clamp(22px,5vw,80px) clamp(64px,12vh,130px)}
   #hm-abt-stat .st-label{position:absolute;left:clamp(22px,5vw,80px);top:clamp(44px,6.5vh,86px);
-      font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;
+      font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.76rem;letter-spacing:.06em;
       text-transform:uppercase;color:#f5f5f7;white-space:nowrap}
   #hm-abt-stat .st-rule{display:block;width:20px;height:1.5px;background:#f5f5f7;margin-top:11px}
   #hm-abt-stat .st-fig{margin-left:clamp(112px,16vw,250px);text-align:right;white-space:nowrap;
@@ -289,7 +470,7 @@
      number ticks from one digit to two. */
   #hm-abt-stat .st-fig .num{display:inline-block;min-width:2ch;text-align:right}
   #hm-abt-stat .st-cap{margin-top:clamp(20px,3.2vh,36px);text-align:right;
-      font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.14em;
+      font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.76rem;letter-spacing:.06em;
       text-transform:uppercase;color:#f5f5f7}
   @media (max-width:900px){
     #hm-abt-stat .st-label{position:static}
@@ -325,7 +506,7 @@
   #hm-cta-head .cta-word.is-swap{opacity:0}
   #hm-cta-actions{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;
       margin:clamp(28px,4.5vh,44px) 0 0}
-  .cta-btn{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.1em;
+  .cta-btn{font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.82rem;letter-spacing:.06em;
       text-transform:uppercase;color:#fff;text-decoration:none;background:none;
       border:1.5px solid rgba(245,245,247,.35);border-radius:999px;
       padding:14px 26px;transition:background .25s,color .25s,border-color .25s}
@@ -369,11 +550,11 @@
   <div id="hm-head" data-screen-label="Header" style="position:absolute;top:0;left:0;right:0;z-index:5;background:#fff;transition:background .3s;display:flex;justify-content:space-between;align-items:center;gap:18px;padding:calc(20px + env(safe-area-inset-top,0px)) clamp(22px,6vw,96px) 20px">
     <!-- Ali's header, exactly: Work and About on the left, Contact on the right,
          the same on every page, no wordmark. Nothing here moves between pages. -->
-    <span id="hm-nav" style="display:flex;gap:clamp(16px,3vw,30px);font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:lowercase;transition:transform .3s cubic-bezier(.22,1,.36,1)">
+    <span id="hm-nav" style="display:flex;gap:clamp(16px,3vw,30px);font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.76rem;letter-spacing:.02em;text-transform:lowercase;transition:transform .3s cubic-bezier(.22,1,.36,1)">
       <span id="hm-navabout" data-go="about" data-ch="link" style="cursor:pointer;color:#1a1a1a;transition:color .3s;white-space:nowrap">About</span>
       <span id="hm-navwork" data-go="work" data-ch="link" style="cursor:pointer;color:#1a1a1a;transition:color .3s;white-space:nowrap">Work</span>
     </span>
-    <span id="hm-navlab" data-go="lab" data-ch="link" style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:lowercase;color:#1a1a1a;transition:color .3s;white-space:nowrap;cursor:pointer">After hours</span>
+    <span id="hm-navlab" data-go="lab" data-ch="link" style="margin-left:auto;font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.76rem;letter-spacing:.02em;text-transform:lowercase;color:#1a1a1a;transition:color .3s;white-space:nowrap;cursor:pointer">After hours</span>
   </div>
 
   <div id="hm-intro" data-screen-label="Intro" style="position:absolute;inset:0;z-index:2;background:#fff;overflow-y:auto;overflow-x:hidden;transition:opacity .35s,visibility .35s">
@@ -393,28 +574,43 @@
     </div>
   <div id="hm-work" data-screen-label="The Work" style="background:#fff">
     <div data-screen-label="Work — opener" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:clamp(44px,8vh,84px) clamp(22px,6vw,44px) clamp(26px,4.2vh,46px);box-sizing:border-box">
-      <div style="font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:#8a8a8a">01 · 03</div>
+      <div style="font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.76rem;letter-spacing:.06em;text-transform:uppercase;color:#8a8a8a">01 · 04</div>
       <h2 style="margin:14px 0 0;font-weight:700;font-size:clamp(2.4rem,5.6vw,4.6rem);letter-spacing:-.035em;line-height:1.02">Selected Products.</h2>
-      <div style="margin-top:14px;font-size:clamp(.95rem,1.4vw,1.15rem);color:#8a8a8a">Three products. Three impossible timelines.</div>
+      <div style="margin-top:14px;font-size:clamp(.95rem,1.4vw,1.15rem);color:#8a8a8a">Three shipped. One still cooking.</div>
     </div>
-    <a data-screen-label="Work — Openbank" class="wk-card" data-case="openbank" data-hero="assets/openbank-billboards.webp" data-hero-bg="#222222" href="/openbank" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:clamp(44px,6.5vh,78px) clamp(22px,6vw,44px);box-sizing:border-box;color:inherit;text-decoration:none">
-      <div class="wk-title">A bank you can open<br>before the coffee’s cold.</div>
-      <div class="wk-sub">Openbank USA. Fifty states on day one, funded in under five minutes, two billion dollars in ten weeks.</div>
-      <div class="wk-pic"><picture><source type="image/webp" srcset="assets/openbank-billboards.webp"><img src="assets/openbank-billboards.jpg" alt="Openbank out-of-home campaign on two Manhattan billboards"></picture></div>
-      <div class="wk-cta"><span class="ln">Read the case</span><span class="arr">→</span></div>
-    </a>
-    <a data-screen-label="Work — Zinia" class="wk-card" data-case="zinia" data-hero="assets/zinia-amazon-flexible.webp" data-hero-bg="#C0F0F0" href="/zinia" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:clamp(44px,6.5vh,78px) clamp(22px,6vw,44px);box-sizing:border-box;color:inherit;text-decoration:none">
-      <div class="wk-title">Pay later.<br>Trust from the first tap.</div>
-      <div class="wk-sub">Zinia by Santander. Two million users before it had a name, chosen by Apple and Amazon at checkout.</div>
-      <div class="wk-pic"><picture><source type="image/webp" srcset="assets/zinia-amazon-flexible.webp"><img src="assets/zinia-amazon-flexible.jpg" alt="Buy today, pay flexibly — Zinia by Santander on Amazon.es"></picture></div>
-      <div class="wk-cta"><span class="ln">Read the case</span><span class="arr">→</span></div>
-    </a>
-    <a data-screen-label="Work — Qiddiya" class="wk-card" data-case="sixflags" data-hero="assets/sixflags-open-dusk.webp" data-hero-bg="#2a2320" href="/sixflags" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:clamp(44px,6.5vh,78px) clamp(22px,6vw,44px);box-sizing:border-box;color:inherit;text-decoration:none">
-      <div class="wk-title">A whole park in a pocket,<br>before the park had a guest.</div>
-      <div class="wk-sub">Six Flags Qiddiya City. Tickets, live map, ride booking and an AI concierge, shipped for gate-open.</div>
-      <div class="wk-pic"><picture><source type="image/webp" srcset="assets/sixflags-open-dusk.webp"><img src="assets/sixflags-open-dusk.jpg" alt="Six Flags Qiddiya City lit up at dusk beneath the Tuwaiq cliffs"></picture></div>
-      <div class="wk-cta"><span class="ln">Read the case</span><span class="arr">→</span></div>
-    </a>
+    <!-- The cases, two up on a desktop and one up on a phone. Each shipped
+         card is one link whose picture is the exact hero of the page it opens
+         (depart() in script.js). The fourth is a placeholder for a case that
+         is being built right now, so it is not a link at all. -->
+    <div class="wk-grid">
+      <a data-screen-label="Work — openbank" class="wk-card" data-case="openbank" data-hero="assets/openbank-billboards.webp" data-hero-bg="#222222" href="/openbank">
+        <div class="wk-pic"><picture><source type="image/webp" srcset="assets/openbank-billboards.webp"><img src="assets/openbank-billboards.jpg" alt="Openbank out-of-home campaign on two Manhattan billboards"></picture></div>
+        <div class="wk-eyebrow">Openbank by Santander · U.S. launch</div>
+        <div class="wk-title">A bank that opens in five minutes.</div>
+        <div class="wk-sub">Fifty states on day one, and two billion dollars in deposits inside the first ten weeks.</div>
+        <div class="wk-cta"><span class="ln">Read the case</span><span class="arr">→</span></div>
+      </a>
+      <a data-screen-label="Work — zinia" class="wk-card" data-case="zinia" data-hero="assets/zinia-amazon-flexible.webp" data-hero-bg="#C0F0F0" href="/zinia">
+        <div class="wk-pic"><picture><source type="image/webp" srcset="assets/zinia-amazon-flexible.webp"><img src="assets/zinia-amazon-flexible.jpg" alt="Buy today, pay flexibly — Zinia by Santander on Amazon.es"></picture></div>
+        <div class="wk-eyebrow">Zinia by Santander · Buy now, pay later</div>
+        <div class="wk-title">Pay later, trusted from the first tap.</div>
+        <div class="wk-sub">Two million users before the brand had a name, chosen by Apple and Amazon at checkout.</div>
+        <div class="wk-cta"><span class="ln">Read the case</span><span class="arr">→</span></div>
+      </a>
+      <a data-screen-label="Work — sixflags" class="wk-card" data-case="sixflags" data-hero="assets/sixflags-open-dusk.webp" data-hero-bg="#2a2320" href="/sixflags">
+        <div class="wk-pic"><picture><source type="image/webp" srcset="assets/sixflags-open-dusk.webp"><img src="assets/sixflags-open-dusk.jpg" alt="Six Flags Qiddiya City lit up at dusk beneath the Tuwaiq cliffs"></picture></div>
+        <div class="wk-eyebrow">Six Flags Qiddiya City · Guest platform</div>
+        <div class="wk-title">The whole park, in a pocket.</div>
+        <div class="wk-sub">Tickets, live map, ride booking and an AI concierge, ready before the gates opened.</div>
+        <div class="wk-cta"><span class="ln">Read the case</span><span class="arr">→</span></div>
+      </a>
+      <article data-screen-label="Work — Mortgage Advice Bureau" class="wk-card is-cooking">
+        <div class="wk-pic wk-pic-mab"><img src="lanyard/logos/mab.svg" alt="Mortgage Advice Bureau"><span class="wk-stamp"><i class="steam" aria-hidden="true"><b></b><b></b><b></b></i>still cooking</span></div>
+        <div class="wk-eyebrow">Mortgage Advice Bureau · In progress</div>
+        <div class="wk-title">Still cooking.</div>
+        <div class="wk-sub">Being built right now, with me on the team. The case study lands once the product has.</div>
+      </article>
+    </div>
     <div data-screen-label="Work — Trusted by" class="tb-sec">
       <div class="tb-wrap">
         <div class="lanyard-stage">
@@ -451,6 +647,7 @@
       <div id="hm-cta-actions">
         <a class="cta-btn" href="mailto:Michaelhannafarag@gmail.com" target="_blank" rel="noopener noreferrer">Email Me</a>
         <a class="cta-btn" href="https://calendar.app.google/tHrhek8WerVMwURK9" target="_blank" rel="noopener noreferrer">Book a Call</a>
+        <a class="cta-btn" id="hm-linkedin" href="https://www.linkedin.com/in/miichaelhanna/" target="_blank" rel="noopener noreferrer">LinkedIn <span aria-hidden="true">↗</span></a>
       </div>
     </section>
 
@@ -536,58 +733,139 @@
     </section>
   </div>
 
-  <div id="hm-lab" data-screen-label="The Lab" style="position:absolute;inset:0;background-color:#3A5B85;color:#fff;opacity:0;visibility:hidden;pointer-events:none;overflow-y:auto;overflow-x:hidden;transition:opacity .35s,visibility .35s">
+  <!-- After Hours. The wordmark and its hero are what the page transition
+       needs (script.js: NODES.lab, syncAbout); everything under .lab-wrap is
+       the bench, and every piece on it is wired up in lab.js. -->
+  <div id="hm-lab" data-screen-label="After Hours" style="position:absolute;inset:0;background-color:#0c0c0e;color:#F4F1EA;opacity:0;visibility:hidden;pointer-events:none;overflow-y:auto;overflow-x:hidden;transition:opacity .35s,visibility .35s">
     <div id="hm-lab-hero">
+      <div id="hm-lab-side">
+        <h2 class="lab-h2">Same brain,<br>looser tie.</h2>
+        <div class="lab-soon">coming soon · <span data-go="intro">↩ back to the day job</span></div>
+      </div>
       <div id="hm-lab-mark"><h1 id="hm-labname" class="hm-wordmark" style="color:#fff">Michael <br><span class="wm-l2">Hanna</span></h1></div>
     </div>
-    <div style="max-width:840px;margin:0 auto;padding:0 clamp(22px,6vw,44px) clamp(84px,12vh,130px);box-sizing:border-box">
-      <div style="font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:lowercase;color:rgba(255,255,255,.72)">my virtual work bench</div>
-      <h2 style="margin:16px 0 0;font-weight:700;font-size:clamp(2.1rem,5.4vw,4.2rem);letter-spacing:-.035em;line-height:1.02">Same brain,<br>looser tie.</h2>
-      <p style="margin:clamp(22px,4vh,36px) 0 0;max-width:52ch;font-size:clamp(.98rem,1.3vw,1.1rem);color:rgba(255,255,255,.75)">Everything on it exists for exactly one reason: I wanted it to exist. No business case, no roadmap, nobody to convince. The same instincts that ship the day job, just pointed somewhere stranger, with a lot less distance between the idea and the thing actually running.</p>
-      <div style="overflow:hidden;margin:clamp(24px,4.4vh,40px) calc(-1*clamp(22px,6vw,44px)) 0;border-top:1.5px solid rgba(255,255,255,.55);border-bottom:1.5px solid rgba(255,255,255,.55)">
-        <div id="hm-mq" style="display:inline-flex;white-space:nowrap;font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:lowercase;color:#fff;padding:9px 0">
-          <span style="padding-right:28px">SHIPPED WEEKLY ✦ BUILT AT 1AM ✦ NO ROADMAP ✦ SHIPPED WEEKLY ✦ BUILT AT 1AM ✦ NO ROADMAP ✦&nbsp;</span>
-          <span style="padding-right:28px">SHIPPED WEEKLY ✦ BUILT AT 1AM ✦ NO ROADMAP ✦ SHIPPED WEEKLY ✦ BUILT AT 1AM ✦ NO ROADMAP ✦&nbsp;</span>
+    <!-- Holding page for now: the name, the line beside it, and the ID card.
+         The bench (seven running pieces, lab.js) is parked in the template
+         below — inert, so nothing renders or runs — and comes back by
+         unwrapping it. -->
+    <section id="hm-lab-cta" class="lab-cta" data-screen-label="After Hours — contact">
+      <div class="cta-id">
+        <div class="cta-name">Michael Hanna</div>
+        <div>Product Manager</div>
+        <div>Based in Madrid, Spain</div>
+        <div class="cta-badges">
+          <span class="cta-badge" title="Built with Claude Code" aria-hidden="true"><svg viewBox="0 0 512 512" fill="currentColor">
+            <rect x="64" y="108" width="384" height="64"/>
+            <rect x="64" y="172" width="64" height="64"/>
+            <rect x="160" y="172" width="192" height="64"/>
+            <rect x="384" y="172" width="64" height="64"/>
+            <rect x="0" y="236" width="512" height="64"/>
+            <rect x="64" y="300" width="384" height="64"/>
+            <rect x="88" y="364" width="64" height="64"/>
+            <rect x="200" y="364" width="32" height="64"/>
+            <rect x="280" y="364" width="32" height="64"/>
+            <rect x="360" y="364" width="64" height="64"/>
+          </svg></span>
+          <span class="cta-badge" title="Figma" aria-hidden="true"><svg viewBox="0 0 15 15" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M7.00005 2.04999H5.52505C4.71043 2.04999 4.05005 2.71037 4.05005 3.52499C4.05005 4.33961 4.71043 4.99999 5.52505 4.99999H7.00005V2.04999ZM7.00005 1.04999H8.00005H9.47505C10.842 1.04999 11.95 2.15808 11.95 3.52499C11.95 4.33163 11.5642 5.04815 10.9669 5.49999C11.5642 5.95184 11.95 6.66836 11.95 7.475C11.95 8.8419 10.842 9.95 9.47505 9.95C8.92236 9.95 8.41198 9.76884 8.00005 9.46266V9.95L8.00005 11.425C8.00005 12.7919 6.89195 13.9 5.52505 13.9C4.15814 13.9 3.05005 12.7919 3.05005 11.425C3.05005 10.6183 3.43593 9.90184 4.03317 9.44999C3.43593 8.99814 3.05005 8.28163 3.05005 7.475C3.05005 6.66836 3.43594 5.95184 4.03319 5.5C3.43594 5.04815 3.05005 4.33163 3.05005 3.52499C3.05005 2.15808 4.15814 1.04999 5.52505 1.04999H7.00005ZM8.00005 2.04999V4.99999H9.47505C10.2897 4.99999 10.95 4.33961 10.95 3.52499C10.95 2.71037 10.2897 2.04999 9.47505 2.04999H8.00005ZM5.52505 8.94998H7.00005L7.00005 7.4788L7.00005 7.475L7.00005 7.4712V6H5.52505C4.71043 6 4.05005 6.66038 4.05005 7.475C4.05005 8.28767 4.70727 8.94684 5.5192 8.94999L5.52505 8.94998ZM4.05005 11.425C4.05005 10.6123 4.70727 9.95315 5.5192 9.94999L5.52505 9.95H7.00005L7.00005 11.425C7.00005 12.2396 6.33967 12.9 5.52505 12.9C4.71043 12.9 4.05005 12.2396 4.05005 11.425ZM8.00005 7.47206C8.00164 6.65879 8.66141 6 9.47505 6C10.2897 6 10.95 6.66038 10.95 7.475C10.95 8.28962 10.2897 8.95 9.47505 8.95C8.66141 8.95 8.00164 8.29121 8.00005 7.47794V7.47206Z"/></svg></span>
+          <span class="cta-badge" title="Jira" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.53,2a4.37,4.37,0,0,0,4.35,4.35h1.78v1.7A4.35,4.35,0,0,0,22,12.4V2.84A.85.85,0,0,0,21.16,2H11.53M6.77,6.8a4.36,4.36,0,0,0,4.34,4.34h1.8v1.72a4.36,4.36,0,0,0,4.34,4.34V7.63a.84.84,0,0,0-.83-.83H6.77M2,11.6a4.34,4.34,0,0,0,4.35,4.34H8.13v1.72A4.36,4.36,0,0,0,12.47,22V12.43a.85.85,0,0,0-.84-.84H2Z"/></svg></span>
+          <span class="cta-badge cta-badge-text" title="Product Department" aria-hidden="true">PRDT<br>DEPT</span>
         </div>
+        <div class="cta-clock"><span class="cta-time">--:--:--</span> <span class="cta-tz">CET</span></div>
       </div>
-      <section class="wb" aria-label="On the bench">
-        <div class="wb-head"><span>on the bench</span><span aria-hidden="true">drag →</span></div>
-        <div class="wb-rail" id="hm-bench">
-          <article class="wb-card">
-            <span class="wb-no">01</span>
-            <h3 class="wb-title">Prompt toys</h3>
-            <p class="wb-desc">Single-purpose things that do one trick properly. Built in an evening, kept only if they still feel good a week later.</p>
-            <span class="wb-status">on the bench</span>
-          </article>
-          <article class="wb-card is-live">
-            <span class="wb-no">02</span>
-            <h3 class="wb-title">Agents</h3>
-            <p class="wb-desc">Software that goes and does the boring part. Most of them start as something I got tired of doing by hand.</p>
-            <span class="wb-status">in flight</span>
-          </article>
-          <article class="wb-card">
-            <span class="wb-no">03</span>
-            <h3 class="wb-title">Weird demos</h3>
-            <p class="wb-desc">Ideas that exist only to find out whether they can. No use case required, and none offered.</p>
-            <span class="wb-status">on the bench</span>
-          </article>
-          <article class="wb-card is-open">
-            <span class="wb-no">04</span>
-            <h3 class="wb-title">Slot open</h3>
-            <p class="wb-desc">Whatever I get curious about next. This one fills itself in.</p>
-            <span class="wb-status">empty</span>
-          </article>
-        </div>
-      </section>
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-top:clamp(28px,5vh,48px)">
-        <span style="font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.45)">Projects docking here soon. Currently in flight · <a href="mailto:Michaelhannafarag@gmail.com" target="_blank" rel="noopener noreferrer" style="color:#fff;text-decoration:underline;text-underline-offset:4px">want in early? →</a></span>
-        <span data-go="intro" style="cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:#fff">↩ back to the day job</span>
+    </section>
+    <template id="hm-bench-later">
+      <div id="hm-lab-side" aria-hidden="true">
+        <div><i class="lab-dot" id="hm-lab-dot"></i><span class="lab-clock">--:--</span> in madrid</div>
+        <div class="lab-mute" id="hm-lab-sign">lights on. bench open.</div>
       </div>
-    </div>
-  </div>
+      <div class="lab-kicker"><span>after hours<span class="lab-m"> · <b class="lab-clock">--:--</b> in madrid</span></span><span>seven pieces · none of them needed to exist</span></div>
+      <p class="lab-lede">Everything on it exists for exactly one reason: I wanted it to exist. No business case, no roadmap, nobody to convince. The same instincts that ship the day job, just pointed somewhere stranger, with a lot less distance between the idea and the thing actually running.</p>
 
+      <section class="lab-grid" aria-label="On the bench">
+
+        <article class="lp" data-piece="poster">
+          <button class="lp-stage" id="hm-poster" type="button" aria-label="Another poster"><div class="pz" id="hm-poster-art"></div></button>
+          <footer class="lp-cap"><span class="lp-no">01</span><h3 class="lp-title">Tonight’s poster</h3><p class="lp-why">A new composition every night, seeded by the date. Click for another.</p><span class="lp-hint">click</span></footer>
+        </article>
+
+        <article class="lp" data-piece="moon">
+          <div class="lp-stage"><div class="mn" id="hm-moon" role="img" aria-label="Tonight’s moon"></div></div>
+          <footer class="lp-cap"><span class="lp-no">02</span><h3 class="lp-title">The moon, right now</h3><p class="lp-why" id="hm-moon-why">From the date alone.</p></footer>
+        </article>
+
+        <article class="lp is-acid" data-piece="count">
+          <div class="lp-stage"><span class="cnt-lab">seconds since 01·01·2020, 00:00 utc</span><span class="cnt" id="hm-count">0</span></div>
+          <footer class="lp-cap"><span class="lp-no">03</span><h3 class="lp-title">A number that only goes up</h3><p class="lp-why">One per second since the first of January, 2020. It has never been smaller than it is right now.</p><span class="lp-hint">live</span></footer>
+        </article>
+
+        <article class="lp" data-piece="field">
+          <div class="lp-stage"><canvas class="fd" id="hm-field" aria-hidden="true"></canvas></div>
+          <footer class="lp-cap"><span class="lp-no">04</span><h3 class="lp-title">Field</h3><p class="lp-why">A few hundred short lines that turn to face the pointer. Nothing is stored, nothing is sent.</p><span class="lp-hint">move across it</span></footer>
+        </article>
+
+        <article class="lp" data-piece="ticket">
+          <button class="lp-stage" id="hm-ticket" type="button" aria-label="Reissue the ticket">
+            <div class="tk" id="hm-ticket-pass">
+              <div class="tk-main">
+                <div class="tk-row"><span>after hours air</span><span>boarding pass</span></div>
+                <div class="tk-route">
+                  <div><b>MAD</b><i>Madrid</i></div>
+                  <span class="tk-arrow">→</span>
+                  <div><b id="tk-to">KEF</b><i id="tk-city">Reykjavík</i></div>
+                </div>
+                <div class="tk-fields">
+                  <div><span>flight</span><b id="tk-flight">AH 142</b></div>
+                  <div><span>boards</span><b id="tk-time">01:40</b></div>
+                  <div><span>gate</span><b id="tk-gate">C7</b></div>
+                  <div><span>seat</span><b id="tk-seat">14A</b></div>
+                </div>
+                <div class="tk-fine">not valid for travel · valid for daydreaming</div>
+              </div>
+              <div class="tk-tear"></div>
+              <div class="tk-stub"><div class="tk-bars" id="tk-bars"></div><div class="tk-stubmeta"><b id="tk-seat2">14A</b><span id="tk-date">03 sep</span></div></div>
+            </div>
+          </button>
+          <footer class="lp-cap"><span class="lp-no">05</span><h3 class="lp-title">Ticket to nowhere</h3><p class="lp-why">A boarding pass for a flight that doesn’t exist, reissued every time you ask.</p><span class="lp-hint">click to reissue</span></footer>
+        </article>
+
+        <article class="lp" data-piece="radio">
+          <div class="lp-stage">
+            <div class="rd">
+              <div class="rd-read">
+                <div class="rd-freq"><span id="rd-f">94.7</span><small>fm</small></div>
+                <div class="rd-name" id="rd-name">The Bench</div>
+                <div class="rd-prog" id="rd-prog">Whatever is being built tonight, live.</div>
+              </div>
+              <div class="rd-set">
+                <div class="rd-dial" id="rd-dial" role="slider" tabindex="0" aria-label="Tuning" aria-valuemin="87.5" aria-valuemax="108" aria-valuenow="94.7"><div class="rd-needle" id="rd-needle"></div></div>
+                <div class="rd-vu" id="rd-vu" aria-hidden="true"></div>
+              </div>
+              <button class="rd-snd" id="rd-snd" type="button" aria-pressed="false">sound off</button>
+            </div>
+          </div>
+          <footer class="lp-cap"><span class="lp-no">06</span><h3 class="lp-title">1AM radio</h3><p class="lp-why">Six stations that only broadcast here. Sound stays off until you say otherwise.</p><span class="lp-hint">drag to tune</span></footer>
+        </article>
+
+        <article class="lp" data-piece="poem">
+          <button class="lp-stage" id="hm-poem" type="button" aria-label="Another line"><div class="po"><p class="po-q" id="hm-poem-q">Let’s double-click on the north star before we boil the ocean.</p></div></button>
+          <footer class="lp-cap"><span class="lp-no">07</span><h3 class="lp-title">Roadmap poetry</h3><p class="lp-why">Sentences I have actually heard in meetings, recombined. Every one is plausible, which is the problem.</p><span class="lp-hint">click</span></footer>
+        </article>
+
+        <article class="lp is-open" data-piece="slot">
+          <span class="lp-no">08</span><h3 class="lp-title">Open slot</h3><p class="lp-why">Whatever I get curious about next. This one fills itself in.</p><a class="lp-hint" href="mailto:Michaelhannafarag@gmail.com" target="_blank" rel="noopener noreferrer">want in early? →</a>
+        </article>
+
+      </section>
+
+      <div class="lab-foot">
+        <span data-go="intro">↩ back to the day job</span>
+        <span class="lab-mute">built at 1am · shipped when it feels right</span>
+      </div>
+    </template>
+  </div>
 </div>
-<script src="script.js?v=85"></script>
+<script src="script.js?v=95"></script>
+<script src="lab.js?v=6"></script>
 <script>
   // Lanyard is web-only: it's a heavy WebGL scene (three.js + rapier physics
   // + a 2.4MB card model) built around a pointer drag that touch can't
