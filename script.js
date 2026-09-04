@@ -448,13 +448,13 @@ document.addEventListener('DOMContentLoaded', () => {
       wasBotDark = true;
       // The floor of this page is always black, whatever is on screen — the
       // footer is black, so the band under it is too, even from the top of a
-      // white page. The body never scrolls here, #hm-intro does, and that one
-      // scroller's background shows at BOTH ends of a rubber-band; painted
-      // solid it would flash black above the white header on a pull-down. So
-      // it is white for the top half and black for the bottom: a bounce at
-      // the top shows white, a bounce past the footer shows black.
+      // white page. The scroller itself stays white: the hero has no
+      // background of its own and sits on the scroller's, so any black in
+      // it would show through the page (it did, once). The bounce past the
+      // footer that used to expose the scroller is switched off in CSS
+      // instead, as on the case pages, so there is no gap to paint.
       setChromeBottom('#000000');
-      intro.style.background = 'linear-gradient(#fff,#fff) top / 100% 50% no-repeat #000';
+      intro.style.background = '#ffffff';
     }
     if (onDark === wasDark) return;
     wasDark = onDark;

@@ -76,7 +76,10 @@
   html.hm-landing #hm-intro{visibility:hidden !important;opacity:0 !important}
   html.hm-landing #hm-stage,html.hm-landing #hm-head{background:transparent !important;transition:none !important}
   html.hm-landing [data-ch="link"]{color:#fff !important;transition:none !important}
-  #hm-intro{scroll-behavior:smooth}
+  /* No bounce past the ends: the scroller's background would show in the gap,
+     and it has to stay white for the hero, while the footer above the gap is
+     black. Same treatment as the case pages. */
+  #hm-intro{scroll-behavior:smooth;overscroll-behavior-y:none}
   @media (prefers-reduced-motion:reduce){
     #hm-intro{scroll-behavior:auto}
   }
@@ -1046,7 +1049,7 @@
     </section>
   </div>
 </div>
-<script src="script.js?v=101"></script>
+<script src="script.js?v=102"></script>
 <script src="lab.js?v=14"></script>
 <script>
   // Lanyard is web-only: it's a heavy WebGL scene (three.js + rapier physics
