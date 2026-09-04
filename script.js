@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // After Hours has its own light switch (lab.js): its ground goes from a
   // warm black to ecru and back. Which ink the nav needs there depends on
   // that state, so it is asked for rather than assumed dark.
-  let labDark = true;
+  let labDark = true, labSettle = 0;
   const inkFor = m => m === 'intro' ? false : m === 'lab' ? labDark : true;
   const setChromeFor = m => {
     if (m !== 'lab' && typeof labClock === 'function') labClock(false);
@@ -104,6 +104,11 @@ document.addEventListener('DOMContentLoaded', () => {
     setTheme(PAGE_BG.lab);
     if (head) head.style.background = PAGE_BG.lab;
     navInk(labDark);
+    // iOS samples the tint for its bottom toolbar on its own schedule, and a
+    // single change during a fade can be missed: the same colour is stated
+    // again once the fade has landed, which is when Safari looks next.
+    clearTimeout(labSettle);
+    labSettle = setTimeout(() => { setTheme(PAGE_BG.lab); if (head) head.style.background = PAGE_BG.lab; }, 850);
   });
 
   const resetHover = () => {
