@@ -144,9 +144,22 @@
       }
       return d + ' L ' + pts[SEG].x.toFixed(1) + ' ' + pts[SEG].y.toFixed(1);
     };
+    // The hand goes where the hand is. It used to be parked on the knob, so
+    // reaching for the middle of the rope drew a glove down at the ball
+    // instead of under the cursor — the cord looked like it could only be
+    // taken by its end. It rides the link being hovered, or the one held,
+    // and moves with that link as the rope swings.
+    const gloveEl = $('#hm-cord-glove');
+    let hoverI = SEG;
+    const placeGlove = () => {
+      if (!gloveEl) return;
+      const g = pts[dragging ? grabI : hoverI] || pts[SEG];
+      gloveEl.setAttribute('transform', 'translate(' + (g.x - 8 * PX).toFixed(2) + ' ' + (g.y - 10 * PX).toFixed(2) + ')');
+    };
     const render = () => {
       rope.setAttribute('d', path());
       knobG.setAttribute('transform', 'translate(' + (pts[SEG].x - AX).toFixed(2) + ' ' + (pts[SEG].y - restY).toFixed(2) + ')');
+      placeGlove();
     };
     let raf = 0, running = false, prevT = 0, prevDt = 0, dragging = false;
     const target = { x: AX, y: restY };
@@ -195,7 +208,6 @@
       cordEl.style.setProperty('--cord-h', restY + 'px');
       cordSvg.setAttribute('viewBox', '0 0 64 ' + (restY + 140));
       knob.setAttribute('cy', restY);
-      const glove = $('#hm-cord-glove'); if (glove) glove.setAttribute('transform', 'translate(' + (AX - 8 * PX) + ' ' + (restY - 10 * PX) + ')');
       hit.style.top = '0px'; hit.style.height = (restY + 23) + 'px';
       if (note) note.style.top = (restY - 11) + 'px';
       cancelAnimationFrame(raf); running = false;
@@ -265,7 +277,15 @@
       if (!didDrag && !clicked) scripted();
     };
     hit.addEventListener('pointerup', up); hit.addEventListener('pointercancel', up);
-    hit.addEventListener('pointerenter', () => cordEl.classList.add('is-hover'));
+    // Hovering: follow the pointer down the rope even when the physics loop is
+    // asleep, so the hand tracks without the cord having to be moving.
+    const trackHover = e => {
+      const gy = e.clientY - cordEl.getBoundingClientRect().top;
+      hoverI = clamp(Math.round(gy / restSeg), 1, SEG);
+      if (!dragging) placeGlove();
+    };
+    hit.addEventListener('pointermove', trackHover, { passive: true });
+    hit.addEventListener('pointerenter', e => { cordEl.classList.add('is-hover'); trackHover(e); });
     hit.addEventListener('pointerleave', () => cordEl.classList.remove('is-hover'));
     hit.addEventListener('mousedown', e => e.preventDefault());
     hit.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) { e.preventDefault(); scripted(); } });
