@@ -73,7 +73,10 @@
   arc(3520, 300, 5, 24, 130);                     // above spring 3
 
   // ---------------------------------------------------------------- state
-  var state = 'ready'; // ready | play | win
+  var state = 'ready'; // ready | play | win | done
+  // Lives. Spikes and water both cost one, and the level restarts from the
+  // beginning; the last one lost is game over.
+  var LIVES = 3, lives = LIVES;
   var player, cam, rings, loose, parts, time, timerOn, deaths;
   var shake = 0, fade = 0;
   var input = { left: false, right: false, jump: false, jumpHeld: false, jumpBuf: 0 };
@@ -131,7 +134,7 @@
     if (p.dead > 0) {
       p.dead -= dt;
       p.vy += GRAV * dt; p.y += p.vy * dt;
-      if (p.dead <= 0) { reset(true); fade = 1; }
+      if (p.dead <= 0) { if (lives <= 0) gameOver(); else { reset(false); fade = 1; if (RUN) timerOn = true; } }
       updateParts(dt);
       return;
     }
@@ -274,11 +277,10 @@
     }
   }
 
+  // A spike is as final as the water: the rings scatter and the run is over.
   function hurtPlayer() {
     var p = player;
-    p.inv = 1.6; p.hurt = 0.5; p.ctrl = 0.35;
-    p.vx = -p.face * 200; p.vy = -420; p.onGround = false;
-    shake = 1;
+    if (p.dead > 0) return;
     var n = Math.min(p.rings, 14);
     for (var i = 0; i < n; i++) {
       var a = -Math.PI / 2 + rand(-1.3, 1.3);
@@ -286,12 +288,14 @@
       loose.push({ x: p.x, y: p.y - 50, vx: Math.cos(a) * s, vy: Math.sin(a) * s, t: 0 });
     }
     p.rings = 0;
+    die();
   }
 
   function die() {
     var p = player;
     if (p.dead > 0) return;
     p.dead = 0.9; p.vy = -500; p.vx = 0; deaths++; shake = 1;
+    lives = Math.max(0, lives - 1);
   }
 
   // ---------------------------------------------------------------- draw
@@ -492,17 +496,22 @@
   var LAB = /(^|[?&])lab(=|&|$)/.test(location.search);
   function runs() { try { return parseInt(sessionStorage.getItem('hm-404-runs') || '0', 10) || 0; } catch (e) { return 0; } }
   function setRuns(n) { try { sessionStorage.setItem('hm-404-runs', String(n)); } catch (e) {} }
+  var hudLives = document.getElementById('hud-lives');
   function updateHud() {
+    if (hudLives) hudLives.textContent = lives;
     hudRingN.textContent = player.rings;
     hudRings.classList.toggle('zero', player.rings === 0 && state === 'play');
     hudTime.textContent = fmtTime(time);
   }
 
   function start() {
+    lives = LIVES;
     reset(false);
     state = 'play';
     if (RUN) timerOn = true;
     ovReady.classList.add('hide'); ovWin.classList.add('hide');
+    document.getElementById('ov-win-title').textContent = 'page found';
+    ovWinSub.textContent = "…just kidding. it's still a 404. but that was a good run.";
     canvas.focus({ preventScroll: true });
   }
   function win() {
@@ -517,6 +526,21 @@
       ovWinSub.textContent = "…just kidding. it's still a 404. one more run, then it's back to business.";
     }
     setTimeout(function () { if (state === 'win') ovWin.classList.remove('hide'); }, 900);
+  }
+
+  // Out of lives. From After Hours that spends a run, like finishing does.
+  function gameOver() {
+    state = 'over'; timerOn = false;
+    document.getElementById('ov-win-title').textContent = 'game over';
+    ovStats.innerHTML = 'rings ' + player.rings + '<br>time ' + fmtTime(time) + '<br>lives 0 / ' + LIVES;
+    if (LAB) {
+      var n = runs() + 1; setRuns(n);
+      if (n >= LAB_RUNS) { closing(); return; }
+      ovWinSub.textContent = 'three lives, all spent. one more run, then it is back to business.';
+    } else {
+      ovWinSub.textContent = 'three lives, all spent. the page is still out there.';
+    }
+    ovWin.classList.remove('hide');
   }
 
   // ---------------------------------------------------------------- after hours
@@ -551,7 +575,7 @@
     var dt = Math.min(0.033, (ts - last) / 1000 || 0);
     last = ts;
     if (state === 'play') update(dt);
-    else if (state === 'win' || state === 'done') { updateParts(dt); }
+    else if (state === 'win' || state === 'done' || state === 'over') { updateParts(dt); }
     else { updateParts(dt); }
     draw();
     updateHud();
@@ -564,7 +588,7 @@
   function press(k) {
     if (k === 'jump') {
       if (state === 'ready') { start(); return; }
-      if (state === 'win' || state === 'done') return;
+      if (state === 'win' || state === 'done' || state === 'over') return;
       input.jumpHeld = true; input.jumpBuf = BUFFER;
     } else input[k] = true;
     if (state === 'play' && !timerOn) timerOn = true;
@@ -615,7 +639,7 @@
   function touchEnd() { if (RUN) release('jump'); touchY = null; }
   canvas.addEventListener('pointerup', touchEnd); canvas.addEventListener('pointercancel', touchEnd);
   if (RUN) {
-    document.getElementById('ov-kbd').innerHTML = '<b>tap</b> or <b>swipe up</b> to jump &nbsp;·&nbsp; <b>hold</b> for higher &nbsp;·&nbsp; <b>swipe down</b> to drop';
+    document.getElementById('ov-kbd').innerHTML = '<b>tap</b> or <b>swipe up</b> to jump &nbsp;·&nbsp; <b>swipe down</b> to drop &nbsp;·&nbsp; three lives';
     document.getElementById('ov-ready-sub').textContent = (LAB ? 'i grew up playing sonic. so the 404 on this site is one you can play. two runs, then back to business. ' : 'this page ran off somewhere past the hills. ') + 'you run on your own. mind the spikes.';
   }
 

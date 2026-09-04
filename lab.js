@@ -4,8 +4,8 @@
 // the pointer while they are off and turns into a glove on the cord, type
 // that bends towards the hand, a television playing the 404 game's own
 // avatar, and a receipt that prints the Filed story out of a slot. On a
-// phone the switch is a wall rocker and the pieces sit in a deck that pins
-// and slides sideways.
+// phone the switch is a wall plate and the pieces follow each other down
+// the page.
 //
 // Anything that animates runs only while it can be seen: the page has to be
 // the one on screen (the layers are stacked and hidden with visibility, so
@@ -85,6 +85,16 @@
   };
   paintLights();
   if (sw) sw.addEventListener('click', toggleLights);
+  // The phone's wall plate: its own switch, mounted level with the top of
+  // the name in the empty room to the left of it.
+  const plate = $('#hm-lab-plate'), mark = $('#hm-lab-mark');
+  if (plate && touch) {
+    plate.addEventListener('click', toggleLights);
+    onLights.push(() => plate.setAttribute('aria-pressed', String(lit)));
+    const mount = () => { const t = parseFloat(mark && mark.style.top) || 0; if (t) plate.style.setProperty('--plate-top', Math.round(t + 6) + 'px'); };
+    if (mark) new MutationObserver(mount).observe(mark, { attributes: true, attributeFilter: ['style'] });
+    mount();
+  }
   onArrive.push(() => { lit = false; paintLights(); });
   // The browser's back button can restore this page from its back-forward
   // cache exactly as it was left, lights and all. That counts as an
@@ -325,46 +335,6 @@
     zone.addEventListener('pointerleave', () => { el.style.removeProperty('--ry'); el.style.removeProperty('--rx'); });
   };
 
-  // ── The deck (touch). The stage pins to the top of the screen and the
-  //    page's own scroll drives the track sideways: a third of a screen of
-  //    scroll per move, rounded, so it shows a whole piece or nothing and a
-  //    flick lands a project. The deck is exactly the stage plus that
-  //    travel, so once the move is done the stage scrolls away normally.
-  //    Nothing snaps and nothing scrolls inside anything.
-  const deck = $('#hm-deck'), pieces = $('#hm-pieces'), track = $('#hm-track'), dots = $('#hm-dots');
-  if (deck && pieces && track && touch) {
-    const slides = [...track.querySelectorAll(':scope > .lab-piece')], n = slides.length;
-    const marks = dots ? [...dots.querySelectorAll('i')] : [];
-    let vh = 0, top = 0, step = 260, at = -1;
-    const place = () => {
-      const y = lab.scrollTop - top;
-      const cur = clamp(Math.round(y / step), 0, n - 1);
-      if (cur === at) return;
-      at = cur;
-      track.style.transform = 'translate3d(' + (-cur * 100) + '%,0,0)';
-      marks.forEach((m, k) => m.classList.toggle('is-on', k === cur));
-    };
-    const size = () => {
-      vh = lab.clientHeight;
-      step = Math.max(150, Math.round(vh * 0.34));
-      deck.style.height = (pieces.offsetHeight + step * (n - 1)) + 'px';
-      top = deck.getBoundingClientRect().top - lab.getBoundingClientRect().top + lab.scrollTop;
-      at = -1; place();
-    };
-    // A frame loop while the deck is on screen, on top of the scroll event:
-    // inside an overflow scroller some phones only report a scroll once it
-    // has stopped, and the deck would jump instead of move.
-    let raf = 0, lastY = -1;
-    const loop = () => { if (lab.scrollTop !== lastY) { lastY = lab.scrollTop; place(); } raf = requestAnimationFrame(loop); };
-    watch(deck, () => { if (!raf) raf = requestAnimationFrame(loop); }, () => { cancelAnimationFrame(raf); raf = 0; });
-    lab.addEventListener('scroll', place, { passive: true });
-    addEventListener('resize', size);
-    onArrive.push(() => setTimeout(size, 50));
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(size);
-    setTimeout(size, 600); setTimeout(size, 2000);
-    size();
-  }
-
   // ── 01 · The television. The 404 game's avatar, drawn from the same
   //    sprite sheet the game cuts its parts from, running along a hill that
   //    never ends. Rings drift past and get picked up. Hover and it runs
@@ -492,17 +462,17 @@
     const LINES = 34;
     const print = () => {
       if (printed) return; printed = true;
-      if (still.matches) { rc.style.clipPath = ''; return; }
+      if (still.matches) { rc.style.clipPath = ''; rc.classList.add('is-printed'); return; }
       let q = 0;
       if (slot) slot.classList.add('is-printing');
       if (head) head.classList.add('is-on');
       const line = () => {
         q++;
         const p = q / LINES;
+        // The paper hangs from the slit and grows downward, header first,
+        // as each line is laid down at the head; a feed twitch each line.
         rc.style.clipPath = 'inset(0 0 ' + ((1 - p) * 100).toFixed(2) + '% 0)';
-        // the paper twitches as each line is laid down
-        rc.style.transform = 'translateY(' + ((Math.random() - .5) * 2.4).toFixed(2) + 'px) rotate(' + ((Math.random() - .5) * .5).toFixed(2) + 'deg)';
-        if (head) head.style.top = 'calc(' + (p * 100).toFixed(2) + '% - 2px)';
+        rc.style.transform = 'translateY(' + (Math.random() * 2.2).toFixed(2) + 'px) rotate(' + ((Math.random() - .5) * .5).toFixed(2) + 'deg)';
         if (q < LINES) {
           // a beat every few lines, as if it had to think about the next one
           const pause = q % 7 === 0 ? 260 + Math.random() * 220 : 0;
@@ -517,7 +487,9 @@
       setTimeout(line, 420);
     };
     rc.style.clipPath = 'inset(0 0 100% 0)';
-    watch(printer || rc, print, null, .45);
+    // Only once the reader has actually arrived: most of the printer on
+    // screen, not a corner of it peeking in from below.
+    watch(printer || rc, print, null, .6);
   }
 
 })();

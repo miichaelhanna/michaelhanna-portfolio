@@ -15,7 +15,7 @@
   // the bars already in that page's colour — waiting for the main script at
   // the end of the body left them white for the whole load.
   (function () {
-    // After Hours has a phone mode (touch layout, rocker switch, the deck).
+    // After Hours has a phone mode (touch layout, no torch, the deck).
     // It keys off this class rather than the media query directly so a
     // desktop browser can be put into it with ?touch for testing.
     if (matchMedia('(hover:none)').matches || /[?&]touch(=|&|$)/.test(location.search)) document.documentElement.classList.add('hm-touch');
@@ -237,7 +237,7 @@
      whose width and weight bend towards the pointer — nowhere else on the
      site does the type move. Everything runs in lab.js, no libraries. */
   #hm-lab{--lab-bg:#0f0d0b;--lab-ink:#F4F1EA;--lab-mute:rgba(244,241,234,.6);--lab-line:rgba(244,241,234,.12);
-          --lab-lamp:#FFB65C;--lab-acid:#D7FF3F;--lab-sky:#4fb4ff;--lab-filed:#9FE870;--lab-forest:#163300;
+          --lab-lamp:#FFB65C;--lab-acid:#D7FF3F;--lab-sky:#4fb4ff;--lab-filed:#9FE870;--lab-forest:#163300;--lab-green:#9FE870;
           --lab-paper:#EAF4FF;--lab-gut:clamp(22px,5vw,80px);--lab-ease:cubic-bezier(.22,1,.36,1);
           --lab-disp:'Bricolage Grotesque',-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;
           --lab-strong:#fff;--px:'Press Start 2P',ui-monospace,monospace;
@@ -245,7 +245,7 @@
   /* Lights on: the same room in daylight. Ecru ground, ink type; the
      objects (television, phone, receipt) keep their own colours. */
   #hm-lab.is-lit{--lab-bg:#FFFFFF;--lab-ink:#141210;--lab-strong:#0c0a08;--lab-mute:rgba(20,18,16,.62);--lab-line:rgba(20,18,16,.14);
-          --lab-lamp:#D97A12;--lab-paper:#EAF4FF}
+          --lab-lamp:#D97A12;--lab-paper:#EAF4FF;--lab-green:#2F5711}
   .lab-ground{position:fixed;inset:0;z-index:0;background:var(--lab-bg);transition:background .8s ease}
   #hm-lab{color:var(--lab-ink);transition:color .8s ease}
   #hm-labname{color:var(--lab-strong);transition:color .8s ease}
@@ -293,19 +293,6 @@
   #hm-lab.is-pulling .lab-cursor{opacity:0}
   html.hm-touch .lab-cursor{display:none}
   html.hm-touch #hm-lab:not(.is-lit),html.hm-touch #hm-lab:not(.is-lit) *,html.hm-touch .lab-cord,html.hm-touch .lab-cord *{cursor:auto !important}
-  /* On a phone there is no pointer to carry a torch and nowhere to hang a
-     cord, so the switch is a switch: a wall rocker in the sign. */
-  .rocker{display:none;position:relative;flex:none;width:44px;height:62px;border-radius:8px;background:linear-gradient(#f4f1ea,#d6d2c8);
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 8px 16px -6px rgba(0,0,0,.5);perspective:220px}
-  .rocker::before,.rocker::after{content:'';position:absolute;left:50%;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:rgba(20,18,16,.28)}
-  .rocker::before{top:4px}.rocker::after{bottom:4px}
-  .rocker i{position:absolute;left:8px;right:8px;top:11px;bottom:11px;border-radius:4px;background:linear-gradient(#fbfaf6,#e9e5dc);
-      box-shadow:0 2px 0 rgba(0,0,0,.14),0 5px 8px rgba(0,0,0,.22);transform:rotateX(22deg);transition:transform .16s ease,box-shadow .16s ease}
-  #hm-lab.is-lit .rocker i{transform:rotateX(-22deg);box-shadow:0 -2px 0 rgba(0,0,0,.14),0 -4px 8px rgba(0,0,0,.18)}
-  .rocker i::after{content:'';position:absolute;left:50%;bottom:6px;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:rgba(20,18,16,.18);transition:background .3s,box-shadow .3s}
-  #hm-lab.is-lit .rocker i::after{background:var(--lab-acid);box-shadow:0 0 8px var(--lab-acid)}
-  html.hm-touch .rocker{display:block}
-  html.hm-touch .lab-sign{gap:14px !important}
 
   .lab-meta .h-touch{display:none}
   html.hm-touch .lab-meta .h-mouse{display:none}
@@ -340,8 +327,27 @@
   .cord-note svg{width:30px;height:22px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
   .lab-cord.is-pulled .cord-note{opacity:0}
   @media (prefers-reduced-motion:reduce){.cord-inner.is-drop{animation:none}}
+  html.hm-touch .lab-cord{display:none}
   /* A pull that runs past the cord must not start a text selection. */
   #hm-lab.is-pulling,#hm-lab.is-pulling *{-webkit-user-select:none;user-select:none}
+
+  /* The wall switch, phones only. A plate on the wall to the left of the
+     name, in the room the name leaves empty, and nothing else near it: the
+     rocker's tilt and its little lamp are the whole status. */
+  .lab-plate{display:none}
+  html.hm-touch .lab-plate{display:block;position:absolute;left:var(--lab-gut);top:var(--plate-top,40%);z-index:3;width:56px;height:80px;padding:0;margin:0;border:0;
+      border-radius:9px;background:linear-gradient(#f4f1ea,#d6d2c8);cursor:pointer;-webkit-tap-highlight-color:transparent;appearance:none;-webkit-appearance:none;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 10px 20px -8px rgba(0,0,0,.55);perspective:240px}
+  html.hm-touch .lab-plate::before,html.hm-touch .lab-plate::after{content:'';position:absolute;left:50%;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:rgba(20,18,16,.28)}
+  html.hm-touch .lab-plate::before{top:5px}
+  html.hm-touch .lab-plate::after{bottom:5px}
+  html.hm-touch .lab-plate i{position:absolute;left:10px;right:10px;top:14px;bottom:14px;border-radius:5px;background:linear-gradient(#fbfaf6,#e9e5dc);
+      box-shadow:0 2px 0 rgba(0,0,0,.14),0 6px 10px rgba(0,0,0,.22);transform:rotateX(22deg);transition:transform .16s ease,box-shadow .16s ease}
+  html.hm-touch #hm-lab.is-lit .lab-plate i{transform:rotateX(-22deg);box-shadow:0 -2px 0 rgba(0,0,0,.14),0 -5px 10px rgba(0,0,0,.18)}
+  html.hm-touch .lab-plate i::after{content:'';position:absolute;left:50%;bottom:7px;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:rgba(20,18,16,.18);transition:background .3s,box-shadow .3s}
+  html.hm-touch #hm-lab.is-lit .lab-plate i::after{background:var(--lab-acid);box-shadow:0 0 8px var(--lab-acid)}
+  html.hm-touch .lab-plate:active i{transform:rotateX(0deg)}
+  html.hm-touch .lab-sign{display:none}
 
   /* The sign and the statement beside the name. */
   .lab-sign{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:.8rem;font-weight:500;letter-spacing:.02em;text-transform:lowercase;color:var(--lab-mute);
@@ -354,12 +360,13 @@
   .lab-h2 .ch{display:inline-block;white-space:pre;font-variation-settings:"wdth" var(--w,88),"wght" var(--g,700);transition:font-variation-settings .25s ease-out}
   .lab-lede{margin:clamp(16px,3vh,28px) 0 0;max-width:46ch;font-size:clamp(.98rem,1.25vw,1.1rem);line-height:1.55;color:var(--lab-ink);opacity:.82;text-wrap:pretty}
 
-  /* Said only where it is true. A pointer gets a torch to find its way
-     around this room in the dark (.lab-torch, hidden on touch), so a phone
-     is genuinely playing a different version — worth saying out loud rather
-     than leaving it to look like the phone got the lesser one. */
+  /* The last thing in the room, on a phone only. A pointer gets a torch to
+     search this dark with (.lab-torch, hidden on touch), so the phone really
+     is playing a different version — but stating that as a caveat under the
+     lede only made the phone look like the lesser build. At the end, and
+     withholding what the thing actually is, it reads as an invitation. */
   .lab-aside{display:none}
-  html.hm-touch .lab-aside{display:block;margin:clamp(14px,2.4vh,22px) 0 0;max-width:34ch;
+  html.hm-touch .lab-aside{display:block;margin:clamp(26px,5vh,44px) auto 0;max-width:30ch;text-align:center;
         font-size:.78rem;font-weight:500;letter-spacing:.02em;line-height:1.55;
         text-transform:lowercase;color:var(--lab-mute)}
 
@@ -372,24 +379,13 @@
   .lab-piece{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(24px,5vw,72px);align-items:center;
       padding:clamp(48px,9vh,110px) 0;border-bottom:1px solid var(--lab-line)}
   .lab-dots{display:none}
-  /* Touch: the deck. The two pieces sit side by side in a stage that pins
-     to the top of the screen while the page's own scroll slides them
-     sideways (lab.js rounds the position, so a whole piece or nothing),
-     then the stage lets go and scrolls away like anything else. Nothing
-     snaps and nothing scrolls inside anything: the stage is simply as tall
-     as its tallest piece, which is what keeps it smooth on a phone. */
-  html.hm-touch .lab-deck{position:relative}
-  html.hm-touch .lab-pieces{position:sticky;top:0;overflow:hidden;box-sizing:border-box;padding-top:calc(76px + env(safe-area-inset-top,0px))}
-  html.hm-touch .lab-track{display:flex;align-items:flex-start;will-change:transform;transition:transform .32s cubic-bezier(.22,1,.36,1)}
-  @media (prefers-reduced-motion:reduce){html.hm-touch .lab-track{transition:none}}
-  html.hm-touch .lab-piece,html.hm-touch .lab-piece--filed{flex:0 0 100%;min-width:0;box-sizing:border-box;
-      padding:0 0 56px;border-bottom:0;display:flex;flex-direction:column;gap:clamp(14px,3vh,26px)}
+  /* Touch: the pieces simply follow each other down the page, one column,
+     the object under its copy. Nothing pins, nothing moves sideways. */
+  html.hm-touch .lab-piece,html.hm-touch .lab-piece--filed{display:flex;flex-direction:column;gap:clamp(18px,3.5vh,30px);padding:clamp(40px,7vh,72px) 0;border-bottom:1px solid var(--lab-line)}
   html.hm-touch .lab-piece > *{flex:none}
   html.hm-touch .lab-copy p{margin-top:clamp(10px,1.8vh,18px);font-size:.95rem;line-height:1.5}
   html.hm-touch .lab-copy p.lab-meta{font-size:.74rem}
   html.hm-touch .lab-title{font-size:clamp(2rem,9vw,2.8rem)}
-  html.hm-touch .lab-dots{position:absolute;left:0;right:0;bottom:18px;display:flex;align-items:center;justify-content:center;gap:8px;
-        font-size:.72rem;font-weight:500;letter-spacing:.02em;text-transform:lowercase;color:var(--lab-mute);pointer-events:none}
   html.hm-touch .lab-dots i{width:6px;height:6px;border-radius:50%;background:var(--lab-line);transition:background .3s,transform .3s}
   html.hm-touch .lab-dots i.is-on{background:var(--lab-ink);transform:scale(1.25)}
   html.hm-touch .tv-shell{max-width:100%}
@@ -400,15 +396,12 @@
   html.hm-touch .rc-paper{padding:14px 14px 10px;font-size:.6rem;line-height:1.55}
   html.hm-touch .rc-logo{height:20px;margin-bottom:4px}
   html.hm-touch .rc-hr{margin:6px 0}
-  html.hm-touch .rc-x{display:none}
   html.hm-touch .rc-l.rc-tot{font-size:.74rem}
   html.hm-touch .rc-fine{margin-top:5px;font-size:.54rem}
   html.hm-touch .rc-tear{height:20px}
   html.hm-touch .rc-stub{padding:8px 12px 12px}
   html.hm-touch .rc-bars{height:20px}
   html.hm-touch .rc-ref{margin-top:4px;font-size:.54rem}
-  html.hm-touch .rc-get{grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:10px}
-  html.hm-touch .rc-btn small{display:none}
   html.hm-touch .rc-stubmsg{margin-top:8px;font-size:.52rem}
   .lab-copy{min-width:0}
   .lab-no{display:block;font-size:.8rem;font-weight:500;letter-spacing:.02em;color:var(--lab-mute);font-variant-numeric:tabular-nums}
@@ -418,7 +411,7 @@
   .lab-copy p{margin:clamp(18px,3vh,28px) 0 0;max-width:44ch;font-size:clamp(.98rem,1.2vw,1.08rem);line-height:1.6;color:var(--lab-ink);opacity:.84;text-wrap:pretty}
   .lab-copy p.lab-meta{font-size:.8rem;font-weight:500;letter-spacing:.02em;text-transform:lowercase;color:var(--lab-mute);opacity:1}
   .lab-copy p.lab-meta a{color:var(--lab-ink);text-decoration:underline;text-underline-offset:4px}
-  @media (hover:hover){.lab-copy p.lab-meta a:hover{color:var(--lab-lamp)}}
+  @media (hover:hover){.lab-copy p.lab-meta a:hover{color:var(--lab-green)}}
 
   /* 01 · The television. A shell, a curved screen, scanlines, a pixel
      avatar running in the glass. Click the glass for the story. */
@@ -480,12 +473,19 @@
      as each line lands, and the finished receipt drops with a small bounce. */
   @keyframes rc-chug{from{transform:translate(0,0)}to{transform:translate(0,1.6px)}}
   .rc-slot.is-printing{animation:rc-chug .09s ease-in-out infinite alternate}
-  .rc-head{position:absolute;left:6px;right:6px;top:0;height:3px;border-radius:2px;background:var(--lab-lamp);box-shadow:0 0 12px var(--lab-lamp),0 0 3px #fff;opacity:0;z-index:3;pointer-events:none;transition:opacity .2s}
+  .rc-head{position:absolute;left:40px;right:40px;top:0;height:3px;z-index:3;border-radius:2px;background:var(--lab-filed);box-shadow:0 0 12px var(--lab-filed),0 0 3px #fff;opacity:0;z-index:3;pointer-events:none;transition:opacity .2s}
   .rc-head.is-on{opacity:1}
-  @keyframes rc-land{0%{transform:translateY(-12px)}55%{transform:translateY(7px) rotate(.5deg)}80%{transform:translateY(-2px)}100%{transform:none}}
+  /* The last of it drops out and settles; nothing ever goes back up. */
+  @keyframes rc-land{0%{transform:translateY(-6px)}60%{transform:translateY(4px) rotate(.4deg)}100%{transform:none}}
   .rc.is-printed{animation:rc-land .7s var(--lab-ease) both}
   @media (prefers-reduced-motion:reduce){.rc-slot.is-printing,.rc.is-printed{animation:none}}
-  .rc{position:relative;z-index:1;margin:-6px 14px 0;transform-origin:50% 0}
+  /* The mouth of the printer. Its top edge sits on the black slit itself
+     (the slot is 18px tall, the slit runs 7px to 11px in), and it clips
+     everything above, so the paper comes out through the slit and hangs
+     over the printer's lower lip rather than appearing under the bar.
+     Room on the sides and below is for the paper's shadow. */
+  .rc-out{position:relative;z-index:3;margin:-9px -20px 0;padding:0 34px 44px;overflow:hidden}
+  .rc{position:relative;transform-origin:50% 0}
   .rc-paper{position:relative;background:var(--lab-paper);color:#141210;padding:22px 18px 16px;box-sizing:border-box;transition:background .8s ease;
       font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.72rem;letter-spacing:.02em;line-height:1.7;text-transform:uppercase;
       box-shadow:0 20px 40px -20px rgba(0,0,0,.8)}
@@ -511,25 +511,26 @@
   .rc-bars{display:flex;justify-content:center;align-items:stretch;gap:2px;height:34px}
   .rc-bars i{display:block;background:#141210;flex:0 0 auto}
   .rc-ref{margin-top:6px;text-align:center;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.6rem;letter-spacing:.3em;color:rgba(20,18,16,.6)}
-  .rc-get{display:grid;gap:8px;margin-top:14px}
-  .rc-btn{display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:var(--lab-disp);font-size:.9rem;font-weight:600;letter-spacing:-.01em;text-decoration:none;
-      color:var(--lab-forest);background:var(--lab-filed);border-radius:999px;padding:11px 16px;transition:transform .3s var(--lab-ease),background .25s}
-  .rc-btn.ghost{background:#EAFAE0;color:var(--lab-forest)}
-  .rc-btn small{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;opacity:.7}
-  @media (hover:hover){.rc-btn:hover{transform:translateX(3px);color:var(--lab-forest)}}
-  /* Must sit after the base rule above, not with the rest of the phone
-     overrides further up — same specificity, and the later one wins. Three
-     across a phone with a 999px radius drew ellipses rather than buttons, and
-     the two pale ones read as decoration: a fixed height, a real corner and an
-     outline make all three look like the links they are, at a thumb's size. */
-  html.hm-touch .rc-btn{justify-content:center;padding:0 6px;min-height:42px;font-size:.8rem;
-        white-space:nowrap;border-radius:11px;border:1.5px solid var(--lab-forest)}
-  html.hm-touch .rc-btn.ghost{background:transparent;color:var(--lab-forest)}
+  /* One receipt, one treatment. The stub used to print pill buttons on a
+     laptop and plain links on a phone, which made the same object look like
+     two different things; these are links on both. */
+  .rc-get{display:flex;flex-direction:column;align-items:center;gap:9px;margin-top:14px}
+  .rc-btn{display:flex;flex-direction:row;align-items:baseline;justify-content:center;gap:7px;
+      font-family:var(--lab-disp);font-size:.92rem;font-weight:600;letter-spacing:-.01em;
+      color:var(--lab-forest);background:none;border:0;border-radius:0;padding:0;white-space:nowrap;
+      text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px;
+      transition:opacity .25s}
+  .rc-btn.ghost{background:none;color:var(--lab-forest)}
+  /* Not shipped yet: no underline, no pointer, no hover — it reads as a
+     statement of what is coming, not as something that failed to open. */
+  .rc-btn.is-soon{opacity:.55;pointer-events:none;text-decoration:none;cursor:default}
+  .rc-btn small{display:inline;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;opacity:.6;text-decoration:none}
+  @media (hover:hover){.rc-btn:hover{opacity:.7;color:var(--lab-forest)}}
   .rc-stubmsg{margin-top:12px;text-align:center;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(20,18,16,.55)}
   .lab-foot{display:flex;justify-content:space-between;align-items:center;gap:12px 24px;flex-wrap:wrap;
       margin-top:clamp(28px,5vh,48px);font-size:.8rem;font-weight:500;letter-spacing:.02em;text-transform:lowercase;color:var(--lab-mute)}
   .lab-foot [data-go]{cursor:pointer;color:var(--lab-ink)}
-  @media (hover:hover){.lab-foot [data-go]:hover{color:var(--lab-lamp)}}
+  @media (hover:hover){.lab-foot [data-go]:hover{color:var(--lab-green)}}
   .lab-cta{position:relative;z-index:0;margin-top:auto;box-sizing:border-box;text-align:center;padding:clamp(32px,5vh,64px) var(--lab-gut) calc(clamp(24px,4vh,40px) + env(safe-area-inset-bottom,0px))}
 
   @media (max-width:900px){
@@ -542,7 +543,6 @@
     .lab-h2{font-size:clamp(1.8rem,8.4vw,2.6rem);white-space:normal}
     .lab-title{font-size:clamp(2.2rem,11vw,3.4rem)}
   }
-  html.hm-touch .lab-cord{display:none}
   @media (prefers-reduced-motion:reduce){
     .tv-shell,.lab-phone,.rc-stub,.lab-h2 .ch,.lab-title .ch{transition:none}
     .tv-blink{animation:none}
@@ -881,11 +881,11 @@
           <div class="cord-note" id="hm-cord-note"><svg viewBox="0 0 30 22"><path d="M28 4 C 20 2, 10 6, 4 16"/><path d="M4 10 L 4 16 L 10 16"/></svg><span>pull the cord</span></div>
         </div>
       </div>
+      <button class="lab-plate" id="hm-lab-plate" type="button" aria-label="Switch the lights" aria-pressed="false"><i aria-hidden="true"></i></button>
       <div id="hm-lab-side">
-        <button class="lab-sign" id="hm-lab-switch" type="button" aria-pressed="false" aria-label="Switch the lights" style="background:none;border:0;padding:0;margin:0;cursor:pointer;font:inherit;text-align:left"><span class="rocker" aria-hidden="true"><i></i></span><span style="display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap"><i class="lab-dot is-off" id="hm-lab-dot"></i><span id="hm-lab-sign">lights off</span><span aria-hidden="true">·</span><span><span class="lab-clock">--:--</span> in madrid</span></span></button>
+        <button class="lab-sign" id="hm-lab-switch" type="button" aria-pressed="false" aria-label="Switch the lights" style="background:none;border:0;padding:0;margin:0;cursor:pointer;font:inherit;text-align:left"><span style="display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap"><i class="lab-dot is-off" id="hm-lab-dot"></i><span id="hm-lab-sign">lights off</span><span aria-hidden="true">·</span><span><span class="lab-clock">--:--</span> in madrid</span></span></button>
         <h2 class="lab-h2" id="hm-lab-h2">Same brain, looser tie.</h2>
         <p class="lab-lede">Everything here exists for exactly one reason: I wanted it to exist. No business case, no roadmap, nobody to convince.</p>
-        <p class="lab-aside">on a laptop, the dark hands you a torch. here you just get the switch. same room, different toys.</p>
       </div>
       <div id="hm-lab-mark"><h1 id="hm-labname" class="hm-wordmark">Michael <br><span class="wm-l2">Hanna</span></h1></div>
     </div>
@@ -954,8 +954,9 @@
         <div class="lab-filed" id="hm-filed">
           <div class="rc-printer">
             <div class="rc-slot" aria-hidden="true"></div>
+            <div class="rc-out" id="hm-rc-out">
+            <div class="rc-head" id="hm-rc-head" aria-hidden="true"></div>
             <div class="rc" id="hm-rc">
-              <div class="rc-head" id="hm-rc-head" aria-hidden="true"></div>
               <div class="rc-paper" id="hm-rc-paper">
                 <img class="rc-logo" src="assets/filed-logo-black.svg" alt="Filed" width="199" height="73">
                 <div class="rc-c">receipts, filed as you go</div>
@@ -982,17 +983,16 @@
                 <div class="rc-ref">trip-ah-02</div>
                 <div class="rc-get" id="hm-rc-get">
                   <a class="rc-btn" href="https://testflight.apple.com/join/VhFXhywv" target="_blank" rel="noopener noreferrer"><span>iPhone</span><small>testflight ↗</small></a>
-                  <a class="rc-btn ghost" href="https://play.google.com/apps/testing/com.michaelhanna.filed" target="_blank" rel="noopener noreferrer"><span>Android</span><small>play beta ↗</small></a>
-                  <a class="rc-btn ghost" href="https://www.filedreceipts.com" target="_blank" rel="noopener noreferrer"><span>The site</span><small>filedreceipts.com ↗</small></a>
+                  <span class="rc-btn ghost is-soon"><span>Android</span><small>coming soon</small></span>
                 </div>
                 <div class="rc-stubmsg">free beta · nothing leaves your phone</div>
               </div>
+            </div>
             </div>
           </div>
         </div>
       </section>
       </div>
-      <div class="lab-dots" id="hm-dots" aria-hidden="true"><i class="is-on"></i><i></i></div>
       </div>
       </div>
 
@@ -1000,6 +1000,8 @@
         <span data-go="intro">↩ back to the day job</span>
         <span>built at 1am · shipped when it feels right</span>
       </div>
+
+      <p class="lab-aside">the dark in here is hiding something. a thumb will never find it — open this on a laptop.</p>
     </div>
 
     <section id="hm-lab-cta" class="lab-cta" data-screen-label="After Hours — contact">
@@ -1029,8 +1031,8 @@
     </section>
   </div>
 </div>
-<script src="script.js?v=96"></script>
-<script src="lab.js?v=11"></script>
+<script src="script.js?v=97"></script>
+<script src="lab.js?v=13"></script>
 <script>
   // Lanyard is web-only: it's a heavy WebGL scene (three.js + rapier physics
   // + a 2.4MB card model) built around a pointer drag that touch can't

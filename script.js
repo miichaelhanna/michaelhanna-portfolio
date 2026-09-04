@@ -55,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let labDark = true;
   const inkFor = m => m === 'intro' ? false : m === 'lab' ? labDark : true;
   const setChromeFor = m => {
+    if (m !== 'lab' && typeof labClock === 'function') labClock(false);
     setTheme(PAGE_BG[m] || '#ffffff');
     // Landing back on home mid-scroll (the curtain-only return from deep in
     // the page) must re-derive both bars from the actual scroll position —
@@ -76,9 +77,22 @@ document.addEventListener('DOMContentLoaded', () => {
     return fromLeft ? mid : 1 - mid;
   };
   const headSettle = m => { if (!head) return; setChromeFor(m); head.style.transition = 'background .3s'; };
+  // Every surface the browser and the page paint changes together, on the
+  // ground's own .8s clock: the header, the nav ink, and the two safe-area
+  // bands (the phone's status bar and home-indicator strips). Elsewhere
+  // those bands switch instantly, which is right for a scroll; here an
+  // instant band beside a fading page read as the header changing first.
+  const LAB_FADE = 'background .8s ease';
+  const labClock = on => {
+    [head, safeTop, safeBot].forEach(el => { if (el) el.style.transition = on ? LAB_FADE : (el === head ? 'background .3s' : 'none'); });
+    document.querySelectorAll('[data-ch="link"]').forEach(el => { el.style.transition = on ? 'color .8s ease' : 'color .3s'; });
+  };
   addEventListener('hm-lab-lights', e => {
     PAGE_BG.lab = e.detail.bg; labDark = e.detail.dark;
-    if (mode !== 'lab' || navBusy) return;
+    if (mode !== 'lab') return;
+    // Mid-travel the curtain owns the chrome; apply once it has settled.
+    if (navBusy) { setTimeout(() => dispatchEvent(new CustomEvent('hm-lab-lights', { detail: e.detail })), 200); return; }
+    labClock(true);
     setTheme(PAGE_BG.lab);
     if (head) head.style.background = PAGE_BG.lab;
     navInk(labDark);
