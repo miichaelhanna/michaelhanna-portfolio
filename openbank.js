@@ -215,14 +215,52 @@ document.addEventListener('DOMContentLoaded', () => {
   onScroll();
 
   // The band under the page — the phone's home-indicator strip — continues
-  // the footer, and the footer is black, so the band is black from the top of
-  // the page to the bottom. It used to follow whichever section sat at the
-  // bottom edge, which meant re-reading it on every scroll; there is nothing
-  // left to read. Only the strip is painted: the body is this page's own
-  // background and every prose section sits on it, so blacking that out would
-  // take the whole case study with it.
+  // whatever is actually at the foot of the screen, and it carries one of two
+  // colours: white under the prose, black under the black closing sections.
+  // It was pinned black for the whole page before, which is only true of the
+  // last two screens and left a black bar under a white page for all the rest.
+  // The change is a step, not a fade — the strip has no transition, so it
+  // switches on the frame the thing under it does. Only the strip is painted:
+  // the body is this page's own background and every prose section sits on it,
+  // so blacking that out would take the whole case study with it.
   const safeBot = $('hm-safe-bot');
-  if (safeBot) safeBot.style.background = '#000000';
+  const CLEAR = c => !c || c === 'transparent' || /^rgba\(0,\s*0,\s*0,\s*0\)$/.test(c);
+  // A pixel in from the bottom edge, then up through the ancestors until
+  // something actually paints: most sections are transparent and sit on the
+  // page's own ground.
+  const floorColour = () => {
+    let el = document.elementFromPoint(Math.round(innerWidth / 2), innerHeight - 2), guard = 0;
+    while (el && el !== document.documentElement && guard++ < 24) {
+      // Inline background before computed: the inline one is the colour a
+      // section is heading for, the computed one is whatever it is passing
+      // through if it happens to be animating.
+      const c = el.style.backgroundColor || getComputedStyle(el).backgroundColor;
+      if (!CLEAR(c)) return c;
+      el = el.parentElement;
+    }
+    return null;
+  };
+  let floorPaint = '';
+  const paintFloor = () => {
+    if (!safeBot) return;
+    const c = floorColour();
+    if (!c) return;
+    const p = c.match(/\d+/g);
+    // Two colours and nothing in between: a section's own tint never reaches
+    // the phone's bar, however light or dark that section happens to be.
+    const paint = !p || (p[0] * .299 + p[1] * .587 + p[2] * .114) > 140 ? '#ffffff' : '#000000';
+    if (paint === floorPaint) return;
+    floorPaint = paint;
+    safeBot.style.background = paint;
+  };
+  let floorRaf = 0;
+  const syncFloor = () => {
+    if (floorRaf) return;
+    floorRaf = requestAnimationFrame(() => { floorRaf = 0; paintFloor(); });
+  };
+  addEventListener('scroll', syncFloor, { passive: true });
+  addEventListener('resize', syncFloor, { passive: true });
+  paintFloor();
 
 
   // Footer headline word alternates between what someone might be reaching

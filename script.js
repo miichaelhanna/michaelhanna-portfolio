@@ -47,10 +47,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const h = c.length === 4 ? '#' + c[1] + c[1] + c[2] + c[2] + c[3] + c[3] : c;
     return 'rgb(' + parseInt(h.slice(1, 3), 16) + ', ' + parseInt(h.slice(3, 5), 16) + ', ' + parseInt(h.slice(5, 7), 16) + ')';
   };
+  // Two colours, and nothing else. Both bands used to carry whatever they
+  // read off the page, so a card's own tint — the mortgage cream, the Zinia
+  // mist — went straight into the phone's status bar and the bar changed with
+  // every section that passed under the header. The read still decides
+  // *which* of the two (a black footer cannot leave a white bar above it),
+  // but the answer is quantised: anything light paints white, anything dark
+  // paints black. Each band keeps its own black, so it still continues the
+  // thing it touches — the header at the top, the footer at the foot.
+  const CHROME_LIGHT = '#ffffff', TOP_DARK = '#0c0c0e', BOT_DARK = '#000000';
+  const isLight = c => {
+    const p = norm(c).match(/\d+/g);
+    if (!p) return true;
+    return (p[0] * .299 + p[1] * .587 + p[2] * .114) > 140;
+  };
   let topPaint = '', botPaint = '';
   const setChromeTop = c => {
-    if (!c || norm(c) === topPaint) return;
-    topPaint = norm(c);
+    if (!c) return;
+    c = isLight(c) ? CHROME_LIGHT : TOP_DARK;
+    if (c === topPaint) return;
+    topPaint = c;
     if (themeMeta) {
       const fresh = document.createElement('meta');
       fresh.setAttribute('name', 'theme-color'); fresh.setAttribute('content', c);
@@ -59,8 +75,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (safeTop) safeTop.style.background = c;
   };
   const setChromeBottom = c => {
-    if (!c || norm(c) === botPaint) return;
-    botPaint = norm(c);
+    if (!c) return;
+    c = isLight(c) ? CHROME_LIGHT : BOT_DARK;
+    if (c === botPaint) return;
+    botPaint = c;
     document.documentElement.style.background = c;
     document.body.style.background = c;
     if (safeBot) safeBot.style.background = c;
@@ -85,7 +103,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // it is this function's own output for the bottom band, so reading it
     // back would feed one band its answer from the other.
     while (el && el !== document.body && el !== document.documentElement && guard++ < 24) {
-      const c = getComputedStyle(el).backgroundColor;
+      // Inline background before computed, for the same reason the header's
+      // is read that way: when the After Hours ground eases from night to
+      // day the computed value is mid-fade, and a band quantised off it
+      // steps a third of a second after the switch was thrown. The inline
+      // one is where the ground is going, so the floor turns with it.
+      const c = el.style.backgroundColor || getComputedStyle(el).backgroundColor;
       if (!CLEAR(c)) return c;
       el = el.parentElement;
     }
@@ -104,7 +127,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // restored it leaves it that way for good — which is what stranded the
     // status bar on night while the room was lit. When it has no colour of
     // its own, the page's known colour is the answer, not a sample.
-    let top = head ? getComputedStyle(head).backgroundColor : null;
+    // The header's inline background is its *target*; the computed one is
+    // whatever it is passing through on its .3s ease. A band quantised off
+    // the computed value flips to white halfway down a fade to black and
+    // back again a frame later — a flicker at every section edge. The style
+    // attribute never lies about where the header is going, so the band
+    // changes on the frame the decision is made and stays there.
+    let top = head ? (head.style.background || getComputedStyle(head).backgroundColor) : null;
     if (CLEAR(top)) top = PAGE_BG[mode] || bgAt(x, 1) || '#ffffff';
     setChromeTop(top);
     // A pixel in from the bottom edge: exactly on it can land between two
@@ -142,10 +171,6 @@ document.addEventListener('DOMContentLoaded', () => {
     el.style.color = dark ? '#fff' : '#1a1a1a';
   });
   const PAGE_BG = { about: ABOUT_BG, lab: '#0f0d0b' };
-  // After Hours keeps its floor dark: the ID card band at the foot of the
-  // page, and with it the browser's bottom bar, stay the night colour even
-  // when the lights are on. Only the top follows the switch.
-  const LAB_FLOOR = '#0f0d0b';
   // After Hours has its own light switch (lab.js): its ground goes from a
   // warm black to ecru and back. Which ink the nav needs there depends on
   // that state, so it is asked for rather than assumed dark.
@@ -156,8 +181,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const inkFor = m => m === 'intro' ? false : m === 'lab' ? labDark : true;
   const setChromeFor = m => {
     if (m !== 'lab' && typeof labClock === 'function') labClock(false);
-    if (m === 'lab') { setChromeTop(PAGE_BG.lab); setChromeBottom(LAB_FLOOR); }
-    else setTheme(PAGE_BG[m] || '#ffffff');
+    // Both bands take the room on arrival — After Hours used to hold its
+    // floor at night even with the lights on, so the bar under the screen
+    // was black against a lit page. Whatever is really at the bottom edge
+    // (the ID card band, further down, is dark either way) is reconciled a
+    // frame later by paintBands.
+    setTheme(PAGE_BG[m] || '#ffffff');
     // Landing back on home mid-scroll (the curtain-only return from deep in
     // the page) must re-derive both bars from the actual scroll position —
     // the flat white set above is only right at the top.
@@ -553,15 +582,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const onDark = inDark(intro.scrollTop + HEAD_Y);
     if (wasBotDark === null) {
       wasBotDark = true;
-      // The floor of this page is always black, whatever is on screen — the
-      // footer is black, so the band under it is too, even from the top of a
-      // white page. The scroller itself stays white: the hero has no
-      // background of its own and sits on the scroller's, so any black in
-      // it would show through the page (it did, once). The bounce past the
-      // footer that used to expose the scroller is switched off in CSS
-      // instead, as on the case pages, so there is no gap to paint.
-      setChromeBottom('#000000');
+      // The floor used to be pinned black from the first frame, because the
+      // footer at the end of the page is black — which put a black bar under
+      // a white page for everything above it. It follows the page now: black
+      // only while something black is against the bottom edge, white the rest
+      // of the way, switched on the frame it changes. The scroller itself
+      // stays white: the hero has no background of its own and sits on the
+      // scroller's, so any black in it would show through the page (it did,
+      // once). The bounce past the footer that used to expose the scroller is
+      // switched off in CSS instead, as on the case pages, so there is no gap
+      // to paint.
       intro.style.background = '#ffffff';
+      setChromeBottom(bgAt(Math.round(innerWidth / 2), innerHeight - 2) || '#ffffff');
     }
     if (onDark === wasDark) return;
     wasDark = onDark;
