@@ -439,28 +439,22 @@ document.addEventListener('DOMContentLoaded', () => {
   let wasDark = null, wasBotDark = null;
   const inDark = y => darkSecs.some(s => y >= s.offsetTop && y <= s.offsetTop + s.offsetHeight);
   const paintChrome = () => {
-    // Top and bottom of the viewport are read separately: the header, the
-    // status bar, and the theme-color follow what's under the top edge, while
-    // the document background — what iOS blends its bottom search bar from —
-    // follows what's under the bottom edge. Mid-scroll through Work's black
-    // band those two disagree, and a single read left one bar mismatched.
+    // Only the top of the viewport is read now: the header, the status bar
+    // and the theme-color follow what's under the top edge. The bottom used to
+    // follow its own edge too, and the two disagreed mid-scroll through Work's
+    // black band; the floor is simply black now, so there is nothing to read.
     const onDark = inDark(intro.scrollTop + HEAD_Y);
-    // The visible bottom edge on iOS is the visual viewport, not the layout
-    // one — 100dvh includes the area behind a collapsed toolbar, and reading
-    // there flipped the bottom band a section early.
-    const seen = window.visualViewport ? Math.min(window.visualViewport.height, intro.clientHeight) : intro.clientHeight;
-    // Clamped to the scroller's last pixel: an iOS rubber-band past the end
-    // would otherwise sample below the footer and paint the band white.
-    const botDark = inDark(Math.min(intro.scrollTop + seen - 8, intro.scrollHeight - 1));
-    if (botDark !== wasBotDark) {
-      wasBotDark = botDark;
-      const c = botDark ? '#000000' : '#ffffff';
-      setChromeBottom(c);
-      // The body never scrolls here — #hm-intro does — so a rubber-band past
-      // the end bounces the SCROLLER's own background into view, not the
-      // document's. Painting only html/body left the black footer pulling
-      // away from a white gap. The layer follows the same bottom edge.
-      intro.style.background = c;
+    if (wasBotDark === null) {
+      wasBotDark = true;
+      // The floor of this page is always black, whatever is on screen — the
+      // footer is black, so the band under it is too, even from the top of a
+      // white page. The body never scrolls here, #hm-intro does, and that one
+      // scroller's background shows at BOTH ends of a rubber-band; painted
+      // solid it would flash black above the white header on a pull-down. So
+      // it is white for the top half and black for the bottom: a bounce at
+      // the top shows white, a bounce past the footer shows black.
+      setChromeBottom('#000000');
+      intro.style.background = 'linear-gradient(#fff,#fff) top / 100% 50% no-repeat #000';
     }
     if (onDark === wasDark) return;
     wasDark = onDark;
