@@ -325,86 +325,43 @@
     zone.addEventListener('pointerleave', () => { el.style.removeProperty('--ry'); el.style.removeProperty('--rx'); });
   };
 
-  // ── The deck (touch). The stage pins to the screen and the page's own
-  //    scroll drives it: a piece taller than the screen scrolls inside the
-  //    stage first, then the next piece slides in from the right, one
-  //    screen of travel per move. The deck is exactly as tall as all of
-  //    that travel, so the page carries on normally afterwards.
+  // ── The deck (touch). The stage pins to the top of the screen and the
+  //    page's own scroll drives the track sideways: a third of a screen of
+  //    scroll per move, rounded, so it shows a whole piece or nothing and a
+  //    flick lands a project. The deck is exactly the stage plus that
+  //    travel, so once the move is done the stage scrolls away normally.
+  //    Nothing snaps and nothing scrolls inside anything.
   const deck = $('#hm-deck'), pieces = $('#hm-pieces'), track = $('#hm-track'), dots = $('#hm-dots');
   if (deck && pieces && track && touch) {
     const slides = [...track.querySelectorAll(':scope > .lab-piece')], n = slides.length;
     const marks = dots ? [...dots.querySelectorAll('i')] : [];
-    // How far the page scrolls to carry one piece off and the next one on.
-    // A full screen made the reader work for it — a flick would not finish
-    // the move, so the deck sat between two projects. A third of a screen
-    // puts a whole project within one ordinary flick, and the markers below
-    // make sure it lands on one.
-    const STEP = () => Math.max(150, Math.round(vh * 0.34));
-    let vh = 0, top = 0, over = [], at = -1;
+    let vh = 0, top = 0, step = 260, at = -1;
     const place = () => {
-      const step = STEP();
-      let y = lab.scrollTop - top, tx = 0, i = 0;
-      for (i = 0; i < n; i++) {
-        const s = slides[i];
-        if (y <= 0) { s.scrollTop = 0; break; }
-        s.scrollTop = Math.min(over[i], y);
-        y -= over[i];
-        if (i === n - 1) { tx = i; break; }
-        if (y <= 0) { tx = i; break; }
-        if (y < step) { tx = i + y / step; slides[i + 1].scrollTop = 0; break; }
-        y -= step; tx = i + 1;
-      }
-      for (let k = i + 1; k < n; k++) slides[k].scrollTop = 0;
-      // A whole piece or nothing. Following the scroll continuously meant the
-      // deck could sit anywhere between two projects — half of one and half of
-      // the next — so the position is rounded and the track slides the rest of
-      // the way itself. Crossing the middle of a move is what triggers it, so
-      // one flick lands one project and there is no in-between to stop on.
-      const cur = Math.round(tx);
+      const y = lab.scrollTop - top;
+      const cur = clamp(Math.round(y / step), 0, n - 1);
+      if (cur === at) return;
+      at = cur;
       track.style.transform = 'translate3d(' + (-cur * 100) + '%,0,0)';
-      if (cur !== at) {
-        at = cur;
-        marks.forEach((m, k) => m.classList.toggle('is-on', k === cur));
-      }
+      marks.forEach((m, k) => m.classList.toggle('is-on', k === cur));
     };
-    // A marker per piece, at the scroll position where that piece is exactly
-    // in place. They are what the scroller snaps to, so the deck always comes
-    // to rest on one project rather than between two. Rebuilt on every measure
-    // because a piece's own overflow moves everything after it.
-    const snaps = slides.map(() => {
-      const m = document.createElement('div');
-      m.className = 'lab-snap';
-      m.setAttribute('aria-hidden', 'true');
-      deck.appendChild(m);
-      return m;
-    });
     const size = () => {
       vh = lab.clientHeight;
-      lab.style.setProperty('--vh', vh + 'px');
-      over = slides.map(s => Math.max(0, s.scrollHeight - s.clientHeight));
-      const step = STEP();
-      const travel = over.reduce((a, b) => a + b, 0) + step * (n - 1);
-      deck.style.height = (vh + travel) + 'px';
+      step = Math.max(150, Math.round(vh * 0.34));
+      deck.style.height = (pieces.offsetHeight + step * (n - 1)) + 'px';
       top = deck.getBoundingClientRect().top - lab.getBoundingClientRect().top + lab.scrollTop;
-      let at0 = 0;
-      snaps.forEach((m, k) => {
-        m.style.top = at0 + 'px';
-        at0 += over[k] + step;
-      });
-      place();
+      at = -1; place();
     };
-    // Driven from a frame loop while the deck is on screen, not from scroll
-    // events alone: inside an overflow scroller some phones only report a
-    // scroll once it has stopped, and the deck would jump instead of move.
+    // A frame loop while the deck is on screen, on top of the scroll event:
+    // inside an overflow scroller some phones only report a scroll once it
+    // has stopped, and the deck would jump instead of move.
     let raf = 0, lastY = -1;
     const loop = () => { if (lab.scrollTop !== lastY) { lastY = lab.scrollTop; place(); } raf = requestAnimationFrame(loop); };
     watch(deck, () => { if (!raf) raf = requestAnimationFrame(loop); }, () => { cancelAnimationFrame(raf); raf = 0; });
     lab.addEventListener('scroll', place, { passive: true });
-    lab.addEventListener('touchmove', place, { passive: true });
     addEventListener('resize', size);
     onArrive.push(() => setTimeout(size, 50));
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(size);
-    setTimeout(size, 600);
+    setTimeout(size, 600); setTimeout(size, 2000);
     size();
   }
 
@@ -514,11 +471,13 @@
       if (ui) ui.setAttribute('aria-hidden', String(on));
       want = on ? .35 : 1;
     };
-    if (tvScreen) tvScreen.addEventListener('click', e => { if (!e.target.closest('a,button')) story(!tv.classList.contains('is-story')); });
+    if (tvScreen && !touch) tvScreen.addEventListener('click', e => { if (!e.target.closest('a,button')) story(!tv.classList.contains('is-story')); });
     const coin = $('#hm-tv-coin'); if (coin) coin.addEventListener('click', () => story(true));
     const eject = $('#hm-tv-eject'); if (eject) eject.addEventListener('click', () => story(false));
     // A fresh coin means a fresh pair of runs on the game page.
-    const play = $('#hm-tv-play'); if (play) play.addEventListener('click', () => { try { sessionStorage.setItem('hm-404-runs', '0'); } catch (x) {} });
+    const fresh = () => { try { sessionStorage.setItem('hm-404-runs', '0'); } catch (x) {} };
+    const play = $('#hm-tv-play'); if (play) play.addEventListener('click', fresh);
+    const go = $('#hm-tv-go'); if (go) go.addEventListener('click', fresh);
   }
 
   // ── 02 · Filed. The receipt prints itself once the piece is properly in

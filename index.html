@@ -371,35 +371,24 @@
   /* A piece: copy on one side, the object on the other. */
   .lab-piece{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(24px,5vw,72px);align-items:center;
       padding:clamp(48px,9vh,110px) 0;border-bottom:1px solid var(--lab-line)}
-  .lab-dots,.lab-snaps{display:none}
+  .lab-dots{display:none}
   /* Touch: the deck. The two pieces sit side by side in a stage that pins
-     to the screen; the page's own vertical scroll drives them sideways,
-     one screen each, and a piece taller than the screen scrolls inside
-     the stage first (lab.js). Everything after the deck is normal flow. */
+     to the top of the screen while the page's own scroll slides them
+     sideways (lab.js rounds the position, so a whole piece or nothing),
+     then the stage lets go and scrolls away like anything else. Nothing
+     snaps and nothing scrolls inside anything: the stage is simply as tall
+     as its tallest piece, which is what keeps it smooth on a phone. */
   html.hm-touch .lab-deck{position:relative}
-  /* One flick, one project. The deck rests where the reader stops, and a
-       screen of travel per move meant stopping halfway — two half projects
-       on screen at once. These are the resting places: zero-size markers
-       laid at each piece's settled scroll position (lab.js measures them,
-       since a piece taller than the screen scrolls inside the stage first).
-       Proximity, not mandatory: the hero and the contact panel below carry
-       no markers, so the rest of the page is left to scroll normally. */
-  html.hm-touch #hm-lab{scroll-snap-type:y proximity}
-  html.hm-touch .lab-snap{position:absolute;left:0;width:1px;height:1px;pointer-events:none;scroll-snap-align:start}
-  html.hm-touch .lab-pieces{position:sticky;top:0;height:var(--vh,100dvh);overflow:hidden;box-sizing:border-box;padding-top:calc(76px + env(safe-area-inset-top,0px))}
-  /* The track only ever shows a whole piece (lab.js rounds the position),
-       so this is the move itself: short, and eased to a stop rather than
-       drifting. */
-  html.hm-touch .lab-track{display:flex;align-items:stretch;height:100%;will-change:transform;
-        transition:transform .28s cubic-bezier(.22,1,.36,1)}
+  html.hm-touch .lab-pieces{position:sticky;top:0;overflow:hidden;box-sizing:border-box;padding-top:calc(76px + env(safe-area-inset-top,0px))}
+  html.hm-touch .lab-track{display:flex;align-items:flex-start;will-change:transform;transition:transform .32s cubic-bezier(.22,1,.36,1)}
   @media (prefers-reduced-motion:reduce){html.hm-touch .lab-track{transition:none}}
-  html.hm-touch .lab-piece,html.hm-touch .lab-piece--filed{flex:0 0 100%;min-width:0;height:100%;box-sizing:border-box;overflow:hidden;
-        padding:0 0 64px;border-bottom:0;display:flex;flex-direction:column;gap:clamp(14px,3vh,26px)}
+  html.hm-touch .lab-piece,html.hm-touch .lab-piece--filed{flex:0 0 100%;min-width:0;box-sizing:border-box;
+      padding:0 0 56px;border-bottom:0;display:flex;flex-direction:column;gap:clamp(14px,3vh,26px)}
   html.hm-touch .lab-piece > *{flex:none}
   html.hm-touch .lab-copy p{margin-top:clamp(10px,1.8vh,18px);font-size:.95rem;line-height:1.5}
   html.hm-touch .lab-copy p.lab-meta{font-size:.74rem}
   html.hm-touch .lab-title{font-size:clamp(2rem,9vw,2.8rem)}
-  html.hm-touch .lab-dots{position:absolute;left:0;right:0;bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;justify-content:center;gap:8px;
+  html.hm-touch .lab-dots{position:absolute;left:0;right:0;bottom:18px;display:flex;align-items:center;justify-content:center;gap:8px;
         font-size:.72rem;font-weight:500;letter-spacing:.02em;text-transform:lowercase;color:var(--lab-mute);pointer-events:none}
   html.hm-touch .lab-dots i{width:6px;height:6px;border-radius:50%;background:var(--lab-line);transition:background .3s,transform .3s}
   html.hm-touch .lab-dots i.is-on{background:var(--lab-ink);transform:scale(1.25)}
@@ -469,6 +458,17 @@
   .tv-coin i{display:inline-block;width:9px;height:9px;border-radius:50%;background:#FFC61A;box-shadow:inset 0 0 0 2px #b8860b;vertical-align:-1px;margin-right:8px}
   @media (hover:hover){.tv-coin:hover{color:#111A36;background:var(--lab-acid);border-color:transparent}.tv-coin:hover i{box-shadow:inset 0 0 0 2px #7a5a10}}
   .tv-coin:focus-visible{outline:2px solid var(--lab-acid);outline-offset:3px}
+  /* On a phone the glass has no room for the story (it is in the copy
+     above anyway): no overlay, no coin, the set just plays and one button
+     under it opens the game. */
+  .tv-play{display:none}
+  html.hm-touch .tv-coin,html.hm-touch .tv-story,html.hm-touch .tv-top{display:none}
+  html.hm-touch .tv-screen{cursor:default}
+  html.hm-touch .tv-play{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;max-width:420px;box-sizing:border-box;
+      font-family:var(--px);font-size:.7rem;letter-spacing:.02em;color:#111A36;background:var(--lab-acid);border-radius:999px;padding:18px 22px;text-decoration:none;
+      box-shadow:0 14px 30px -12px rgba(215,255,63,.5)}
+  html.hm-touch .tv-play i{display:inline-block;width:0;height:0;border-left:11px solid #111A36;border-top:7px solid transparent;border-bottom:7px solid transparent}
+  html.hm-touch .tv-play:active{transform:scale(.98)}
   .tv-feet{width:60%;height:10px;border-radius:0 0 12px 12px;background:linear-gradient(#0b0a09,#000);margin-top:-16px}
 
   /* 02 · Filed. A receipt prints out of a slot; cut the stub for the app. */
@@ -934,6 +934,7 @@
           </div>
           <div class="tv-feet" aria-hidden="true"></div>
           <button class="tv-coin" id="hm-tv-coin" type="button"><i aria-hidden="true"></i>insert coin</button>
+          <a class="tv-play" id="hm-tv-go" href="/404?lab"><i aria-hidden="true"></i>play the 404</a>
         </div>
       </section>
 
@@ -1029,7 +1030,7 @@
   </div>
 </div>
 <script src="script.js?v=96"></script>
-<script src="lab.js?v=10"></script>
+<script src="lab.js?v=11"></script>
 <script>
   // Lanyard is web-only: it's a heavy WebGL scene (three.js + rapier physics
   // + a 2.4MB card model) built around a pointer drag that touch can't
