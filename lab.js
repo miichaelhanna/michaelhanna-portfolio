@@ -17,7 +17,9 @@
   if (!lab) return;
   const $ = s => lab.querySelector(s);
   const still = matchMedia('(prefers-reduced-motion:reduce)');
-  const touch = matchMedia('(hover:none)').matches;
+  // Phone mode is decided once, in the head, from the media query or a ?touch
+  // flag; the CSS keys off the same class.
+  const touch = document.documentElement.classList.contains('hm-touch');
   const labShown = () => getComputedStyle(lab).visibility !== 'hidden';
   const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
 

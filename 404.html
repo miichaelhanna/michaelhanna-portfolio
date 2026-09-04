@@ -160,7 +160,7 @@
   // A phone plays this as a runner: the level stands taller than it is
   // wide, you run on your own, and the only controls are a tap to jump and
   // a swipe down to drop. Decided before the game reads its canvas.
-  window.HM_RUN = matchMedia('(hover:none) and (pointer:coarse)').matches;
+  window.HM_RUN = matchMedia('(hover:none) and (pointer:coarse)').matches || /[?&]touch(=|&|$)/.test(location.search);
   window.HM_LAB = /(^|[?&])lab(=|&|$)/.test(location.search);
   if (window.HM_LAB) { document.body.classList.add('full'); document.getElementById('top-home').hidden = true; }
   if (window.HM_RUN) {
