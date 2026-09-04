@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0c0c0e">
+<title>404 · Michael Hanna</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="/assets/avatar-rig.png">
+<style>
+  :root{--ink:#F4F1EA;--mute:rgba(244,241,234,.58);--acid:#D7FF3F;--bg:#0c0c0e;--tile:#161619;--line:rgba(244,241,234,.1);--err:#ff5a5a;--sky:#4fb4ff}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);overscroll-behavior:none}
+  body{
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    min-height:100%;padding:env(safe-area-inset-top) 14px calc(env(safe-area-inset-bottom) + 14px);
+    -webkit-font-smoothing:antialiased;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+  }
+  a{color:inherit}
+  .px{font-family:'Press Start 2P',monospace}
+
+  .top{width:100%;max-width:800px;display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px;font-weight:500;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+  .top a{text-decoration:none;transition:color .2s}
+  @media (hover:hover){.top a:hover{color:var(--acid)}}
+  .top .err{color:var(--err)}
+
+  .cab{position:relative;width:100%;max-width:800px;border-radius:14px;overflow:hidden;background:var(--tile);border:1px solid var(--line);box-shadow:0 0 0 1px rgba(0,0,0,.4),0 30px 80px -30px rgba(0,0,0,.8)}
+  .stage{position:relative;width:100%;aspect-ratio:16/9;background:var(--sky);overflow:hidden}
+  canvas{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges;touch-action:none;outline:none}
+
+  .scan{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(180deg,rgba(0,0,0,.14) 0px,rgba(0,0,0,.14) 1px,transparent 1px,transparent 3px);opacity:.55}
+  .vig{position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 70px 6px rgba(0,0,0,.35)}
+
+  .hud{position:absolute;top:10px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:center;pointer-events:none;font-size:.62rem;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.55),0 0 6px rgba(0,0,0,.35)}
+  .hud .rings{display:flex;align-items:center;gap:8px}
+  .hud .rings i{width:12px;height:12px;border-radius:50%;border:3px solid #FFC61A;box-shadow:inset 0 0 0 1px #b8860b;display:inline-block;transform:translateY(-1px)}
+  .hud .rings.zero i{animation:blink .35s steps(1) infinite}
+  @keyframes blink{50%{opacity:.25}}
+  .hud .time{opacity:.9}
+
+  .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:20px;background:rgba(12,12,14,.66);transition:opacity .25s}
+  .overlay.hide{opacity:0;pointer-events:none}
+  .ov-title{font-size:clamp(.95rem,3.4vw,1.35rem);color:var(--acid);text-shadow:0 3px 0 rgba(0,0,0,.6);line-height:1.6}
+  .ov-title.err{color:var(--err)}
+  .ov-sub{font-size:.8rem;line-height:1.5;color:var(--ink);opacity:.85;max-width:38ch;text-wrap:pretty}
+  .ov-stats{font-size:.62rem;color:var(--ink);line-height:2}
+  .ov-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+  .ov-btn{font-size:.62rem;letter-spacing:.02em;color:#111A36;background:var(--acid);border:none;border-radius:999px;padding:12px 20px;cursor:pointer;text-decoration:none;display:inline-block}
+  .ov-btn.ghost{background:transparent;color:var(--ink);border:1px solid rgba(244,241,234,.35)}
+  .ov-btn:active{transform:scale(.96)}
+  .kbd{font-size:.68rem;color:var(--mute)}
+  .kbd b{font-weight:600;color:var(--ink);opacity:.85}
+
+  /* touch pad — only on devices with no hover pointer. Overlays the stage on
+     tablets; on phones it sits in its own bar under the stage so the buttons
+     never cover the game. */
+  .pad{position:absolute;left:0;right:0;bottom:0;height:34%;display:none;pointer-events:none}
+  .pad button{position:absolute;bottom:12px;width:58px;height:58px;border-radius:50%;border:2px solid rgba(255,255,255,.55);background:rgba(0,0,0,.28);color:#fff;font-size:1.2rem;pointer-events:auto;touch-action:none;-webkit-tap-highlight-color:transparent;backdrop-filter:blur(2px);padding:0}
+  .pad button:active,.pad button.on{background:rgba(215,255,63,.55);border-color:var(--acid);color:#111}
+  .pad .l{left:14px}.pad .r{left:84px}.pad .j{right:14px;width:68px;height:68px}
+  @media (hover:none) and (pointer:coarse){.pad{display:block}}
+  .pad.force{display:block}
+  @media (max-width:640px){
+    .pad{position:static;height:auto;padding:12px 14px 14px;background:var(--tile);border-top:1px solid var(--line);pointer-events:auto}
+    .pad button{position:static;bottom:auto;width:62px;height:62px;background:rgba(255,255,255,.06);border-color:rgba(244,241,234,.28)}
+    .pad .r{margin-left:10px}.pad .j{margin-left:auto;width:72px;height:72px}
+    @media (hover:none) and (pointer:coarse){.pad{display:flex;align-items:center}}
+    .pad.force{display:flex;align-items:center}
+    body{padding-left:8px;padding-right:8px}
+  }
+
+  .foot{width:100%;max-width:800px;margin-top:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:.76rem;color:var(--mute)}
+  .foot a{text-decoration:none;font-weight:500;transition:color .2s}
+  @media (hover:hover){.foot a:hover{color:var(--acid)}}
+  .foot .home{color:var(--ink)}
+  .foot .home::after{content:'→';margin-left:6px;display:inline-block;transition:transform .2s}
+  @media (hover:hover){.foot a.home:hover::after{transform:translateX(3px)}}
+
+  /* opened from After Hours: the cabinet takes the whole window, and an
+     escape hatch (the button, or the key) leads back to the bench */
+  .full{justify-content:flex-start;padding-top:calc(env(safe-area-inset-top) + 56px)}
+  .full .top{position:fixed;left:0;right:0;top:0;max-width:none;padding:calc(env(safe-area-inset-top) + 14px) 16px 10px;margin:0;z-index:3;background:var(--bg)}
+  .full .cab{max-width:none;width:min(100%,calc((100vh - 130px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) * 16 / 9))}
+  .full.run .cab{width:100%;max-width:560px}
+  .full .foot{max-width:none;width:min(100%,calc((100vh - 130px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) * 16 / 9))}
+  .full.run .foot{max-width:560px}
+  .esc{display:none;align-items:center;gap:8px;font-family:'Press Start 2P',monospace;font-size:.58rem;color:var(--ink);text-decoration:none;
+      border:1px solid rgba(244,241,234,.28);border-radius:999px;padding:9px 13px;transition:color .2s,border-color .2s,background .2s}
+  .esc b{font-weight:400;color:#111A36;background:var(--acid);border-radius:4px;padding:3px 5px}
+  .full .esc{display:inline-flex}
+  @media (hover:hover){.esc:hover{border-color:var(--acid)}}
+  /* runner mode (phones): no pad, a taller cabinet, the hint stays */
+  .run .pad{display:none !important}
+  .run .cab{max-width:520px}
+  .run .kbd{display:block !important;font-size:.62rem}
+  @media (max-width:520px){
+    .hud{font-size:.52rem}
+    .ov-title{font-size:.95rem}
+    .ov-sub{font-size:.74rem}
+    .kbd{display:none}
+  }
+</style>
+</head>
+<body>
+
+  <div class="top">
+    <span><span class="err">error 404</span> · page not found</span>
+    <a class="esc" id="esc" href="/#lab"><b>esc</b> back to after hours</a>
+    <a href="/" id="top-home">michael hanna</a>
+  </div>
+
+  <div class="cab">
+    <div class="stage" id="stage">
+      <canvas id="game" width="800" height="450" tabindex="0" aria-label="A retro platformer starring Michael's pixel-art avatar. Arrow keys to run, space to jump, find the missing page."></canvas>
+      <div class="scan"></div>
+      <div class="vig"></div>
+
+      <div class="hud px">
+        <span class="rings" id="hud-rings"><i></i><span id="hud-ringn">0</span></span>
+        <span class="time" id="hud-time">0:00</span>
+      </div>
+
+      <div class="overlay" id="ov-ready">
+        <div class="ov-title err px">404</div>
+        <div class="ov-sub" id="ov-ready-sub">this page ran off somewhere past the hills. go and get it back.</div>
+        <button class="ov-btn px" id="btn-start">press start</button>
+        <div class="kbd" id="ov-kbd"><b>← →</b> run &nbsp;·&nbsp; <b>space</b> jump &nbsp;·&nbsp; grab the rings, mind the spikes</div>
+      </div>
+
+      <div class="overlay hide" id="ov-win">
+        <div class="ov-title px" id="ov-win-title">page found</div>
+        <div class="ov-sub" id="ov-win-sub">…just kidding. it's still a 404. but that was a good run.</div>
+        <div class="ov-stats px" id="ov-stats"></div>
+        <div class="ov-row">
+          <button class="ov-btn px" id="btn-again">run it back</button>
+          <a class="ov-btn ghost px" id="btn-home" href="/">back home</a>
+        </div>
+        <div class="kbd" id="ov-bye" hidden></div>
+      </div>
+    </div>
+
+    <div class="pad" id="pad">
+      <button class="l" data-k="left" aria-label="run left">◀</button>
+      <button class="r" data-k="right" aria-label="run right">▶</button>
+      <button class="j" data-k="jump" aria-label="jump">●</button>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span id="foot-msg">lights on. bench open.</span>
+    <a class="home" id="foot-home" href="/">back home</a>
+  </div>
+
+<script>
+  // A phone plays this as a runner: the level stands taller than it is
+  // wide, you run on your own, and the only controls are a tap to jump and
+  // a swipe down to drop. Decided before the game reads its canvas.
+  window.HM_RUN = matchMedia('(hover:none) and (pointer:coarse)').matches;
+  window.HM_LAB = /(^|[?&])lab(=|&|$)/.test(location.search);
+  if (window.HM_LAB) { document.body.classList.add('full'); document.getElementById('top-home').hidden = true; }
+  if (window.HM_RUN) {
+    // The frame stands as tall as the phone allows (never shorter than
+    // 620): the world stays at the bottom and the sky grows above it.
+    var c = document.getElementById('game'), cw = 520;
+    var ch = window.HM_LAB ? Math.max(620, Math.min(1100, Math.round(cw * (innerHeight - 150) / Math.min(innerWidth, 560)))) : 620;
+    c.width = cw; c.height = ch;
+    document.getElementById('stage').style.aspectRatio = cw + ' / ' + ch;
+    document.body.classList.add('run');
+  }
+</script>
+<script src="/404.js"></script>
+</body>
+</html>

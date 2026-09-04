@@ -15,7 +15,7 @@
   // the bars already in that page's colour — waiting for the main script at
   // the end of the body left them white for the whole load.
   (function () {
-    var c = { about: '#0c0c0e', lab: '#0c0c0e' }[location.hash.slice(1)];
+    var c = { about: '#0c0c0e', lab: '#0f0d0b' }[location.hash.slice(1)];
     if (!c) return;
     document.querySelector('meta[name="theme-color"]').setAttribute('content', c);
     document.documentElement.style.background = c;
@@ -31,6 +31,10 @@
 <link rel="prefetch" href="/zinia">
 <link rel="prefetch" href="/sixflags">
 <link rel="prefetch" href="arrive.js">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- After Hours only: a variable grotesque whose width and weight bend to the pointer, and the game's pixel face. -->
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Caveat:wght@500&family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
   body{margin:0;background:#fff;color:#1a1a1a;font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;overflow:hidden}
   ::selection{background:#1D1AEA;color:#fff}
@@ -221,217 +225,315 @@
   @media (prefers-reduced-motion:reduce){.wk-pic img,.wk-cta .ln::after,.wk-cta .arr{transition:none}}
 
   /* ─────────────────────────── After Hours ───────────────────────────
-     A night room. Nothing on this page is a description of a project: each
-     piece IS the thing, small and running, built with no data and no
-     libraries (lab.js). Midnight indigo ground, ecru ink; the site's acid
-     green and the Toyo red arrive only as objects — one painted tile, the
-     ticket stub, the radio needle — never as type on the ground.
-     The grid is built on square units one column wide (a container-query
-     unit), so a tile that spans rows keeps its proportion at every width. */
-  #hm-lab{--lab-bg:#0c0c0e;--lab-tile:#161619;--lab-line:rgba(244,241,234,.1);
-          --lab-ink:#F4F1EA;--lab-mute:rgba(244,241,234,.58);--lab-acid:#D7FF3F;
-          --lab-red:#C0362C;--lab-paper:#F4F1EA;--lab-gut:clamp(22px,5vw,80px);
-          --lab-ease:cubic-bezier(.22,1,.36,1);--mono:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500}
-  /* The wordmark anchors on the right — the side the home page keeps it — so
-     the name barely moves and the page wipes in from that side. Its top is
-     synced from the home hero at runtime (syncAbout in script.js), as is the
-     sign that sits opposite it. */
-  #hm-lab-hero{position:relative;box-sizing:border-box}
+     The day job is the white pages. This is the room after everyone has
+     gone home: a warm black ground, a pull-cord lamp, and a torch that
+     follows the pointer until the lights are on. Two things sit on the
+     bench, each shown as the object it is (a television, a receipt) rather
+     than a card about it. Type here is Bricolage Grotesque, a variable face
+     whose width and weight bend towards the pointer — nowhere else on the
+     site does the type move. Everything runs in lab.js, no libraries. */
+  #hm-lab{--lab-bg:#0f0d0b;--lab-ink:#F4F1EA;--lab-mute:rgba(244,241,234,.6);--lab-line:rgba(244,241,234,.12);
+          --lab-lamp:#FFB65C;--lab-acid:#D7FF3F;--lab-sky:#4fb4ff;--lab-filed:#9FE870;--lab-forest:#163300;
+          --lab-paper:#EAF4FF;--lab-gut:clamp(22px,5vw,80px);--lab-ease:cubic-bezier(.22,1,.36,1);
+          --lab-disp:'Bricolage Grotesque',-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;
+          --lab-strong:#fff;--px:'Press Start 2P',ui-monospace,monospace;
+          font-family:var(--lab-disp);font-weight:400}
+  /* Lights on: the same room in daylight. Ecru ground, ink type; the
+     objects (television, phone, receipt) keep their own colours. */
+  #hm-lab.is-lit{--lab-bg:#FFFFFF;--lab-ink:#141210;--lab-strong:#0c0a08;--lab-mute:rgba(20,18,16,.62);--lab-line:rgba(20,18,16,.14);
+          --lab-lamp:#D97A12;--lab-paper:#EAF4FF}
+  .lab-ground{position:fixed;inset:0;z-index:0;background:var(--lab-bg);transition:background .8s ease}
+  #hm-lab{color:var(--lab-ink);transition:color .8s ease}
+  #hm-labname{color:var(--lab-strong);transition:color .8s ease}
+  #hm-lab.is-lit .cta-id{color:#141210}
+  #hm-lab.is-lit .cta-name,#hm-lab.is-lit .cta-badge,#hm-lab.is-lit .cta-clock{color:rgba(20,18,16,.62)}
+  #hm-lab ::selection{background:var(--lab-lamp);color:#1a1208}
+  #hm-lab{display:flex;flex-direction:column}
+  #hm-lab-hero{position:relative;z-index:0;flex:0 0 auto;width:100%;box-sizing:border-box}
   #hm-lab-mark{position:absolute;right:var(--lab-gut);top:0;z-index:2}
   #hm-labname{text-align:right}
-  /* The statement holds the left, on the name's own top line — the About
-     spread, mirrored. Its top (and, on a phone, its drop below the name) is
-     measured off the wordmark in syncAbout. */
-  #hm-lab-side{position:absolute;left:var(--lab-gut);top:0;z-index:2;width:min(40ch,44vw)}
+  #hm-lab-side{position:absolute;left:var(--lab-gut);top:0;z-index:2;width:min(46ch,46vw)}
   @media (max-width:900px){#hm-lab-side{right:var(--lab-gut);width:auto}}
-  @media (prefers-reduced-motion:reduce){.lab-dot{animation:none}}
 
-  .lab-wrap{max-width:1180px;margin:0 auto;padding:0 var(--lab-gut) clamp(56px,9vh,96px);box-sizing:border-box}
-  .lab-kicker{display:flex;justify-content:space-between;align-items:baseline;gap:8px 24px;flex-wrap:wrap;
-      font-family:var(--label);font-weight:500;font-size:.76rem;letter-spacing:.02em;text-transform:lowercase;color:var(--lab-mute)}
-  .lab-kicker b{font-weight:400;color:var(--lab-ink)}
-  /* The clock lives in the sign beside the wordmark; where that sign is
-     hidden it moves down into the kicker instead. */
-  .lab-m{display:none}
-  @media (max-width:900px){.lab-m{display:inline}}
-  /* The page is a flex column: the hero holds the name and the statement,
-     and the ID card pins to the bottom of the viewport, scrolling only when
-     a phone runs out of room. */
-  #hm-lab{display:flex;flex-direction:column}
-  #hm-lab-hero{flex:0 0 auto;width:100%}
-  #hm-lab-side .lab-h2{margin:0;font-size:clamp(1.7rem,3.4vw,2.9rem)}
-  .lab-soon{margin:clamp(14px,2.4vh,24px) 0 0;font-family:var(--label);font-weight:500;font-size:.76rem;letter-spacing:.02em;text-transform:lowercase;color:var(--lab-mute)}
-  .lab-soon [data-go]{cursor:pointer;color:var(--lab-ink);text-decoration:underline;text-underline-offset:4px}
-  /* The ID card, as on About, closing the page. */
-  .lab-cta{margin-top:auto;box-sizing:border-box;text-align:center;padding:clamp(32px,5vh,64px) var(--lab-gut) calc(clamp(24px,4vh,40px) + env(safe-area-inset-bottom,0px))}
-  .lab-h2{margin:16px 0 0;font-weight:700;font-size:clamp(2.1rem,5.4vw,4.2rem);letter-spacing:-.035em;line-height:1.02;color:#fff}
-  .lab-lede{margin:clamp(22px,4vh,36px) 0 0;max-width:52ch;font-size:clamp(.98rem,1.3vw,1.1rem);line-height:1.6;
-      color:rgba(244,241,234,.75);text-wrap:pretty}
+  /* The lamp: a warm pool in the top left corner once the lights are on. */
+  .lab-lamp{position:absolute;left:0;top:0;width:min(120vw,1400px);height:min(120vw,1400px);pointer-events:none;z-index:0;
+      background:radial-gradient(closest-side at 18% 6%,rgba(255,182,92,.5),rgba(255,182,92,.16) 38%,transparent 72%);
+      opacity:0;transition:opacity 1.1s ease}
+  #hm-lab.is-lit .lab-lamp{opacity:1}
+  /* The torch: a fixed cloak with a soft hole that rides on the pointer.
+     Compositor-only (transform), so it costs nothing while it moves. Under
+     the name and the statement (z:2), over everything else. */
+  .lab-torch{position:fixed;left:0;top:0;width:640px;height:640px;margin:-320px 0 0 -320px;border-radius:50%;pointer-events:none;z-index:1;
+      box-shadow:0 0 0 300vmax rgba(9,7,5,.84);
+      background:radial-gradient(closest-side,transparent 42%,rgba(9,7,5,.4) 70%,rgba(9,7,5,.84) 100%);
+      transform:translate3d(50vw,42vh,0);transition:opacity .9s ease;will-change:transform}
+  #hm-lab.is-lit .lab-torch{opacity:0}
+  /* No pointer, no torch: on touch the dark is simply dark. */
+  @media (hover:none){.lab-torch{display:none}}
+  /* In the dark the pointer is the torch itself: the native cursor goes,
+     a small flashlight rides the pointer with its lens on the hotspot, and
+     the beam (the hole in the cloak) sits just ahead of it. Over the cord
+     the torch becomes a white cartoon glove, and a fist while pulling. */
+  #hm-lab:not(.is-lit),#hm-lab:not(.is-lit) *{cursor:none !important}
+  .lab-cord,.lab-cord *{cursor:none !important}
+  .lab-cursor{position:fixed;left:0;top:0;z-index:4;pointer-events:none;opacity:0;transition:opacity .3s;will-change:transform}
+  .lab-cursor.is-on{opacity:1}
+  #hm-lab.is-lit .lab-cursor:not(.is-glove){opacity:0}
+  .lab-hand{position:absolute;left:-18px;top:-10px;width:36px;height:104px;transform-origin:18px 10px;transform:rotate(40deg);
+      filter:drop-shadow(0 6px 10px rgba(0,0,0,.6))}
+  .lab-hand .hand-glow{opacity:.7;transition:opacity .2s}
+  .lab-hand .hand-lens{transition:transform .2s;transform-origin:18px 10px}
+  .lab-cursor.is-hot .hand-glow{opacity:1}
+  .lab-cursor.is-hot .hand-lens{transform:scale(1.25)}
+  .lab-cursor.is-glove .lab-hand,#hm-lab.is-lit .lab-hand{display:none}
+  #hm-lab.is-pulling .lab-cursor{opacity:0}
+  @media (hover:none){.lab-cursor{display:none}#hm-lab:not(.is-lit),#hm-lab:not(.is-lit) *,.lab-cord,.lab-cord *{cursor:auto !important}}
+  /* On a phone there is no pointer to carry a torch and nowhere to hang a
+     cord, so the switch is a switch: a wall rocker in the sign. */
+  .rocker{display:none;position:relative;flex:none;width:44px;height:62px;border-radius:8px;background:linear-gradient(#f4f1ea,#d6d2c8);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 8px 16px -6px rgba(0,0,0,.5);perspective:220px}
+  .rocker::before,.rocker::after{content:'';position:absolute;left:50%;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:rgba(20,18,16,.28)}
+  .rocker::before{top:4px}.rocker::after{bottom:4px}
+  .rocker i{position:absolute;left:8px;right:8px;top:11px;bottom:11px;border-radius:4px;background:linear-gradient(#fbfaf6,#e9e5dc);
+      box-shadow:0 2px 0 rgba(0,0,0,.14),0 5px 8px rgba(0,0,0,.22);transform:rotateX(22deg);transition:transform .16s ease,box-shadow .16s ease}
+  #hm-lab.is-lit .rocker i{transform:rotateX(-22deg);box-shadow:0 -2px 0 rgba(0,0,0,.14),0 -4px 8px rgba(0,0,0,.18)}
+  .rocker i::after{content:'';position:absolute;left:50%;bottom:6px;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:rgba(20,18,16,.18);transition:background .3s,box-shadow .3s}
+  #hm-lab.is-lit .rocker i::after{background:var(--lab-acid);box-shadow:0 0 8px var(--lab-acid)}
+  @media (hover:none){.rocker{display:block}.lab-sign{gap:14px !important}}
 
-  /* The bench itself. */
-  .lab-grid{--g:14px;container-type:inline-size;margin-top:clamp(34px,6vh,64px);
-      display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:var(--g);
-      grid-auto-rows:84px;grid-auto-rows:calc((100cqw - 11*var(--g))/12)}
-  .lp{position:relative;grid-column:var(--c);grid-row:var(--r);display:flex;flex-direction:column;
-      box-sizing:border-box;min-width:0;min-height:0;overflow:hidden;border-radius:18px;
-      background:var(--lab-tile);border:1px solid var(--lab-line);color:var(--lab-ink);
-      transition:transform .5s var(--lab-ease),border-color .5s var(--lab-ease)}
-  @media (hover:hover){
-    .lp:hover{transform:translateY(-3px);border-color:rgba(244,241,234,.24)}
-    .lp:hover .lp-hint{color:var(--lab-acid)}
+  .lab-meta .h-touch{display:none}
+  @media (hover:none){.lab-meta .h-mouse{display:none}.lab-meta .h-touch{display:inline}}
+
+  /* The pull cord, after Feral UI's pullcord: a rope that is simulated
+     for real (sixteen links, gravity, damping, twenty passes of
+     constraint), so it hangs, swings and settles like one. It drops in
+     from above on every arrival, and the lights switch the moment the
+     pull passes the detent, not on release. Physics in lab.js. */
+  .lab-cord{position:absolute;left:calc(var(--lab-gut) - 4px);top:0;z-index:3;width:64px;height:calc(var(--cord-h,280px) + 140px);pointer-events:none;
+      -webkit-user-select:none;user-select:none}
+  .cord-inner{position:absolute;inset:0}
+  .cord-inner.is-drop{animation:cord-drop .6s .4s cubic-bezier(.45,0,.9,.5) both}
+  @keyframes cord-drop{0%{opacity:0;transform:translateY(-230px)}20%{opacity:1}100%{transform:translateY(0)}}
+  .lab-cord svg{display:block;width:100%;height:100%;overflow:visible}
+  .cord-rope{stroke:rgba(244,241,234,.42);stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round;transition:stroke .8s ease}
+  #hm-lab.is-lit .cord-rope{stroke:rgba(20,18,16,.4)}
+  .cord-knob{fill:url(#hm-knobg);stroke:rgba(0,0,0,.16);stroke-width:.6}
+  /* The hand holds the knob: a 90s pixel cursor hand, black outline and
+     white fill on a coarse grid. It appears when the pointer reaches the
+     cord and stays through the pull, moving only with the rope. */
+  .cord-glove{opacity:0;transition:opacity .18s ease;pointer-events:none}
+  .cord-glove rect{shape-rendering:crispEdges}
+  .lab-cord.is-hover .cord-glove,#hm-lab.is-pulling .cord-glove{opacity:1}
+  .cord-hit{position:absolute;left:9px;top:0;width:46px;height:46px;border:0;background:transparent;padding:0;pointer-events:auto;touch-action:none;border-radius:50%;
+      -webkit-tap-highlight-color:transparent;appearance:none;-webkit-appearance:none}
+  .cord-hit:focus-visible{outline:2px solid var(--lab-acid);outline-offset:-9px}
+  /* The note beside the knob, in handwriting, until the first pull. */
+  .cord-note{position:absolute;left:46px;top:0;display:flex;align-items:center;gap:4px;white-space:nowrap;pointer-events:none;
+      font-family:'Caveat',cursive;font-weight:500;font-size:1.3rem;line-height:1;color:var(--lab-lamp);transition:opacity .5s ease,color .8s ease}
+  .cord-note svg{width:30px;height:22px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .lab-cord.is-pulled .cord-note{opacity:0}
+  @media (prefers-reduced-motion:reduce){.cord-inner.is-drop{animation:none}}
+  /* A pull that runs past the cord must not start a text selection. */
+  #hm-lab.is-pulling,#hm-lab.is-pulling *{-webkit-user-select:none;user-select:none}
+
+  /* The sign and the statement beside the name. */
+  .lab-sign{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:.8rem;font-weight:500;letter-spacing:.02em;text-transform:lowercase;color:var(--lab-mute);
+      font-variant-numeric:tabular-nums}
+  .lab-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--lab-acid);box-shadow:0 0 10px var(--lab-acid)}
+  .lab-dot.is-off{background:rgba(244,241,234,.22);box-shadow:none}
+  .lab-h2{margin:clamp(12px,1.8vh,20px) 0 0;font-family:var(--lab-disp);font-weight:700;font-size:clamp(2rem,3.9vw,3.4rem);letter-spacing:-.03em;line-height:.98;color:var(--lab-strong);transition:color .8s ease;white-space:nowrap;overflow:visible;
+      font-variation-settings:"wdth" 88,"wght" 700;text-wrap:balance}
+  .lab-h2 .wd,.lab-title .wd{display:inline-block;white-space:nowrap}
+  .lab-h2 .ch{display:inline-block;white-space:pre;font-variation-settings:"wdth" var(--w,88),"wght" var(--g,700);transition:font-variation-settings .25s ease-out}
+  .lab-lede{margin:clamp(16px,3vh,28px) 0 0;max-width:46ch;font-size:clamp(.98rem,1.25vw,1.1rem);line-height:1.55;color:var(--lab-ink);opacity:.82;text-wrap:pretty}
+
+  .lab-wrap{position:relative;z-index:0;max-width:1180px;width:100%;margin:0 auto;padding:0 var(--lab-gut) clamp(40px,7vh,80px);box-sizing:border-box}
+  .lab-kicker{display:flex;justify-content:space-between;align-items:baseline;gap:8px 24px;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--lab-line);
+      font-size:.8rem;font-weight:500;letter-spacing:.02em;text-transform:lowercase;color:var(--lab-mute)}
+  .lab-kicker b{font-weight:500;color:var(--lab-ink)}
+
+  /* A piece: copy on one side, the object on the other. */
+  .lab-piece{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(24px,5vw,72px);align-items:center;
+      padding:clamp(48px,9vh,110px) 0;border-bottom:1px solid var(--lab-line)}
+  .lab-dots,.lab-snaps{display:none}
+  /* Touch: the deck. The two pieces sit side by side in a stage that pins
+     to the screen; the page's own vertical scroll drives them sideways,
+     one screen each, and a piece taller than the screen scrolls inside
+     the stage first (lab.js). Everything after the deck is normal flow. */
+  @media (hover:none){
+    .lab-deck{position:relative}
+    /* One flick, one project. The deck rests where the reader stops, and a
+       screen of travel per move meant stopping halfway — two half projects
+       on screen at once. These are the resting places: zero-size markers
+       laid at each piece's settled scroll position (lab.js measures them,
+       since a piece taller than the screen scrolls inside the stage first).
+       Proximity, not mandatory: the hero and the contact panel below carry
+       no markers, so the rest of the page is left to scroll normally. */
+    #hm-lab{scroll-snap-type:y proximity}
+    .lab-snap{position:absolute;left:0;width:1px;height:1px;pointer-events:none;scroll-snap-align:start}
+    .lab-pieces{position:sticky;top:0;height:var(--vh,100dvh);overflow:hidden;box-sizing:border-box;padding-top:calc(76px + env(safe-area-inset-top,0px))}
+    /* The track only ever shows a whole piece (lab.js rounds the position),
+       so this is the move itself: short, and eased to a stop rather than
+       drifting. */
+    .lab-track{display:flex;align-items:stretch;height:100%;will-change:transform;
+        transition:transform .28s cubic-bezier(.22,1,.36,1)}
+    @media (prefers-reduced-motion:reduce){.lab-track{transition:none}}
+    .lab-piece,.lab-piece--filed{flex:0 0 100%;min-width:0;height:100%;box-sizing:border-box;overflow:hidden;
+        padding:0 0 64px;border-bottom:0;display:flex;flex-direction:column;gap:clamp(14px,3vh,26px)}
+    .lab-piece > *{flex:none}
+    .lab-copy p{margin-top:clamp(10px,1.8vh,18px);font-size:.95rem;line-height:1.5}
+    .lab-copy p.lab-meta{font-size:.74rem}
+    .lab-title{font-size:clamp(2rem,9vw,2.8rem)}
+    .lab-dots{position:absolute;left:0;right:0;bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;justify-content:center;gap:8px;
+        font-size:.72rem;font-weight:500;letter-spacing:.02em;text-transform:lowercase;color:var(--lab-mute);pointer-events:none}
+    .lab-dots i{width:6px;height:6px;border-radius:50%;background:var(--lab-line);transition:background .3s,transform .3s}
+    .lab-dots i.is-on{background:var(--lab-ink);transform:scale(1.25)}
+    .tv-shell{max-width:100%}
+    /* The receipt, shortened for a phone: the lines that carry the story
+       stay, the rest is trimmed, and the ways in sit in one row. */
+    .lab-filed{width:100%}
+    .rc-printer{width:min(100%,280px);margin:0 auto}
+    .rc-paper{padding:14px 14px 10px;font-size:.6rem;line-height:1.55}
+    .rc-logo{height:20px;margin-bottom:4px}
+    .rc-hr{margin:6px 0}
+    .rc-x{display:none}
+    .rc-l.rc-tot{font-size:.74rem}
+    .rc-fine{margin-top:5px;font-size:.54rem}
+    .rc-tear{height:20px}
+    .rc-stub{padding:8px 12px 12px}
+    .rc-bars{height:20px}
+    .rc-ref{margin-top:4px;font-size:.54rem}
+    .rc-get{grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:10px}
+    .rc-btn small{display:none}
+    .rc-stubmsg{margin-top:8px;font-size:.52rem}
   }
-  .lp-stage{position:relative;flex:1;min-height:0;display:block;width:100%;margin:0;padding:0;border:0;
-      background:none;color:inherit;font:inherit;text-align:left;overflow:hidden;container-type:inline-size}
-  button.lp-stage{cursor:pointer;-webkit-tap-highlight-color:transparent;appearance:none;-webkit-appearance:none}
-  button.lp-stage:focus-visible{outline:2px solid var(--lab-acid);outline-offset:-4px;border-radius:18px 18px 0 0}
-  /* The label under each piece, set like a museum card: number in the
-     gutter, title and one line on why it exists, the way to touch it. */
-  .lp-cap{display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"no title hint" "no why why";
-      column-gap:12px;row-gap:3px;align-items:baseline;padding:12px 16px 14px;border-top:1px solid var(--lab-line)}
-  .lp-no{grid-area:no;align-self:start;padding-top:3px;font-family:var(--label);font-weight:500;font-size:.7rem;letter-spacing:.02em;color:var(--lab-mute)}
-  .lp-title{grid-area:title;margin:0;font-weight:700;font-size:clamp(.95rem,1.05vw,1.08rem);letter-spacing:-.02em;line-height:1.2;color:#fff}
-  .lp-why{grid-area:why;margin:0;font-size:.78rem;line-height:1.45;color:var(--lab-mute);text-wrap:pretty}
-  .lp-hint{grid-area:hint;align-self:start;padding-top:3px;font-family:var(--label);font-weight:500;font-size:.7rem;letter-spacing:.02em;
-      text-transform:lowercase;color:var(--lab-mute);white-space:nowrap;transition:color .3s}
-  /* One painted tile in the row — the acid the wordmark wears when the
-     header goes dark elsewhere on the site, here as a whole object. */
-  .lp.is-acid{background:var(--lab-acid);color:#111A36;border-color:transparent}
-  .lp.is-acid .lp-cap{border-top-color:rgba(17,26,54,.16)}
-  .lp.is-acid .lp-title{color:#111A36}
-  .lp.is-acid .lp-no,.lp.is-acid .lp-why,.lp.is-acid .lp-hint{color:rgba(17,26,54,.62)}
-  @media (hover:hover){.lp.is-acid:hover .lp-hint{color:#111A36}}
+  .lab-copy{min-width:0}
+  .lab-no{display:block;font-size:.8rem;font-weight:500;letter-spacing:.02em;color:var(--lab-mute);font-variant-numeric:tabular-nums}
+  .lab-title{margin:10px 0 0;font-family:var(--lab-disp);font-weight:800;font-size:clamp(2.4rem,5.6vw,5.2rem);letter-spacing:-.035em;line-height:.92;color:var(--lab-strong);transition:color .8s ease;
+      font-variation-settings:"wdth" 80,"wght" 800}
+  .lab-title .ch{display:inline-block;white-space:pre;font-variation-settings:"wdth" var(--w,80),"wght" var(--g,800);transition:font-variation-settings .25s ease-out}
+  .lab-copy p{margin:clamp(18px,3vh,28px) 0 0;max-width:44ch;font-size:clamp(.98rem,1.2vw,1.08rem);line-height:1.6;color:var(--lab-ink);opacity:.84;text-wrap:pretty}
+  .lab-copy p.lab-meta{font-size:.8rem;font-weight:500;letter-spacing:.02em;text-transform:lowercase;color:var(--lab-mute);opacity:1}
+  .lab-copy p.lab-meta a{color:var(--lab-ink);text-decoration:underline;text-underline-offset:4px}
+  @media (hover:hover){.lab-copy p.lab-meta a:hover{color:var(--lab-lamp)}}
 
-  /* 01 · Tonight's poster */
-  .pz{position:absolute;inset:0;padding:clamp(16px,6%,30px);box-sizing:border-box;display:flex;align-items:center;justify-content:center}
-  .pz svg{display:block;height:100%;width:auto;max-width:100%;filter:drop-shadow(0 18px 34px rgba(0,0,0,.42));
-      transition:opacity .28s ease,transform .5s var(--lab-ease)}
-  .pz.is-swap svg{opacity:0;transform:translateY(8px) rotate(-.6deg)}
+  /* 01 · The television. A shell, a curved screen, scanlines, a pixel
+     avatar running in the glass. Click the glass for the story. */
+  .lab-tv{position:relative;display:flex;flex-direction:column;align-items:center;gap:16px;perspective:1200px}
+  .tv-shell{position:relative;width:100%;max-width:640px;padding:clamp(14px,2.6vw,26px) clamp(14px,2.6vw,26px) clamp(10px,2vw,18px);box-sizing:border-box;border-radius:28px;
+      background:linear-gradient(160deg,#2a2622,#141210 60%,#1c1916);box-shadow:0 30px 80px -30px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.08),inset 0 -2px 0 rgba(0,0,0,.6);
+      transform:rotateY(var(--ry,0deg)) rotateX(var(--rx,0deg));transition:transform .5s var(--lab-ease)}
+  .tv-screen{position:relative;aspect-ratio:16/10;border-radius:22px/18px;overflow:hidden;background:#06070a;cursor:pointer;
+      box-shadow:inset 0 0 0 2px rgba(0,0,0,.8),inset 0 0 40px rgba(0,0,0,.7);-webkit-tap-highlight-color:transparent}
+  .tv-screen canvas{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges;display:block;transition:opacity .35s}
+  .tv-scan{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(180deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px);opacity:.7}
+  .tv-glass{position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 90% at 30% 10%,rgba(255,255,255,.14),transparent 55%);mix-blend-mode:screen}
+  .tv-ui{position:absolute;inset:0;pointer-events:none;display:flex;flex-direction:column;justify-content:space-between;padding:clamp(10px,3%,18px) clamp(12px,3.5%,20px);box-sizing:border-box;
+      font-family:var(--px);color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.6);transition:opacity .3s}
+  .tv-top{display:flex;justify-content:space-between;font-size:clamp(.5rem,1.6cqw,.7rem)}
+  .tv-top .err{color:#ff5a5a}
+  .tv-404{font-size:clamp(1.6rem,7cqw,3rem);color:var(--lab-acid);letter-spacing:.02em;align-self:flex-end}
+  .tv-blink{font-size:clamp(.5rem,1.7cqw,.72rem);animation:tv-blink 1s steps(1) infinite}
+  @keyframes tv-blink{50%{opacity:0}}
+  .tv-story{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:clamp(10px,3%,18px);padding:clamp(14px,5%,32px);box-sizing:border-box;
+      background:rgba(6,7,10,.82);color:#fff;font-family:var(--px);opacity:0;pointer-events:none;transition:opacity .3s}
+  .tv-story p{margin:0;font-size:clamp(.52rem,1.75cqw,.78rem);line-height:1.9;text-shadow:0 2px 0 rgba(0,0,0,.6);text-wrap:pretty}
+  .tv-story p b{color:var(--lab-acid);font-weight:400}
+  .tv-story .tv-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .tv-btn{display:inline-block;font-family:var(--px);font-size:clamp(.5rem,1.6cqw,.68rem);color:#111A36;background:var(--lab-acid);border:0;border-radius:999px;padding:11px 18px;cursor:pointer;text-decoration:none}
+  .tv-btn.ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4)}
+  .tv-btn:active{transform:scale(.96)}
+  .lab-tv.is-story .tv-story{opacity:1;pointer-events:auto}
+  .lab-tv.is-story .tv-ui{opacity:0}
+  .lab-tv.is-story .tv-screen canvas{opacity:.35}
+  .tv-chin{display:flex;justify-content:space-between;align-items:center;margin-top:clamp(10px,2vw,16px);padding:0 6px}
+  .tv-brand{font-size:.62rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:rgba(244,241,234,.38)}
+  .tv-led{width:7px;height:7px;border-radius:50%;background:#ff5a5a;box-shadow:0 0 8px #ff5a5a}
+  .lab-tv.is-story .tv-led{background:var(--lab-acid);box-shadow:0 0 8px var(--lab-acid)}
+  .tv-coin{font-family:var(--px);font-size:.62rem;color:var(--lab-mute);background:none;border:1px solid var(--lab-line);border-radius:999px;padding:10px 16px;cursor:pointer;
+      transition:color .25s,border-color .25s,background .25s}
+  .tv-coin i{display:inline-block;width:9px;height:9px;border-radius:50%;background:#FFC61A;box-shadow:inset 0 0 0 2px #b8860b;vertical-align:-1px;margin-right:8px}
+  @media (hover:hover){.tv-coin:hover{color:#111A36;background:var(--lab-acid);border-color:transparent}.tv-coin:hover i{box-shadow:inset 0 0 0 2px #7a5a10}}
+  .tv-coin:focus-visible{outline:2px solid var(--lab-acid);outline-offset:3px}
+  .tv-feet{width:60%;height:10px;border-radius:0 0 12px 12px;background:linear-gradient(#0b0a09,#000);margin-top:-16px}
 
-  /* 02 · The moon */
-  .mn{position:absolute;inset:0;padding:10%;box-sizing:border-box;display:flex;align-items:center;justify-content:center}
-  .mn svg{display:block;width:100%;height:100%}
-
-  /* 03 · A number that only goes up */
-  .cnt-lab{position:absolute;left:16px;top:14px;font-family:var(--label);font-weight:500;font-size:.7rem;letter-spacing:.02em;color:rgba(17,26,54,.62)}
-  .cnt{position:absolute;left:16px;bottom:10px;font-weight:700;letter-spacing:-.045em;line-height:.9;color:#111A36;
-      font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;white-space:nowrap}
-
-  /* 04 · Field */
-  .fd{position:absolute;inset:0;display:block;width:100%;height:100%;touch-action:pan-y}
-
-  /* 05 · Ticket to nowhere — the boarding-pass motif, with a stub that tears */
-  .tk{position:absolute;inset:clamp(14px,6%,26px);display:flex;flex-direction:column;background:var(--lab-paper);color:#111A36;
-      border-radius:10px;overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.42);
-      transition:transform .45s var(--lab-ease),opacity .3s ease}
-  .tk.is-swap{opacity:0;transform:translateY(10px) rotate(-1deg)}
-  .tk-main{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-between;gap:10px;padding:14px 16px 12px}
-  .tk-row{display:flex;justify-content:space-between;gap:10px;font-family:var(--label);font-weight:500;font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;color:rgba(17,26,54,.6)}
-  .tk-route{display:flex;align-items:center;justify-content:space-between;gap:10px}
-  .tk-route b{display:block;font-size:clamp(1.6rem,11cqw,2.4rem);font-weight:700;letter-spacing:-.045em;line-height:1}
-  .tk-route i{display:block;margin-top:5px;font-style:normal;font-family:var(--label);font-weight:500;font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;color:rgba(17,26,54,.6);white-space:nowrap}
-  .tk-route > div:last-child{text-align:right}
-  .tk-arrow{font-weight:700;font-size:1.3rem;color:var(--lab-red)}
-  .tk-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px}
-  .tk-fields span{display:block;font-family:var(--label);font-weight:500;font-size:.63rem;letter-spacing:.06em;text-transform:uppercase;color:rgba(17,26,54,.55)}
-  .tk-fields b{display:block;margin-top:2px;font-weight:700;font-size:1rem;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-  .tk-fine{font-family:var(--label);font-weight:500;font-size:.6rem;letter-spacing:.06em;text-transform:uppercase;color:rgba(17,26,54,.45)}
-  .tk-tear{position:relative;height:0;border-top:2px dashed rgba(17,26,54,.22);flex:0 0 auto}
-  .tk-tear::before,.tk-tear::after{content:'';position:absolute;top:-10px;width:18px;height:18px;border-radius:50%;background:var(--lab-tile)}
-  .tk-tear::before{left:-9px}.tk-tear::after{right:-9px}
-  .tk-stub{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;background:var(--lab-red);color:#F4F1EA}
-  .tk-bars{display:flex;align-items:stretch;gap:2px;height:32px;flex:1;max-width:58%}
-  .tk-bars i{display:block;background:#F4F1EA;opacity:.92;flex:0 0 auto}
-  .tk-stubmeta{text-align:right}
-  .tk-stubmeta b{display:block;font-size:1.1rem;font-weight:700;letter-spacing:-.02em}
-  .tk-stubmeta span{font-family:var(--label);font-weight:500;font-size:.63rem;letter-spacing:.06em;text-transform:uppercase;opacity:.82}
-
-  /* 06 · 1AM radio */
-  .rd{position:absolute;inset:0;display:grid;grid-template-columns:minmax(140px,36%) minmax(0,1fr);gap:12px 22px;
-      padding:16px 18px 14px;box-sizing:border-box;align-items:end}
-  .rd-read{align-self:center;min-width:0}
-  .rd-freq{font-weight:700;font-size:clamp(2rem,10cqw,3.4rem);letter-spacing:-.045em;line-height:.95;color:#fff;
-      font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
-  .rd-freq small{font-family:var(--label);font-weight:500;font-size:.7rem;letter-spacing:.02em;margin-left:6px;color:var(--lab-mute);vertical-align:.5em}
-  .rd-name{margin-top:8px;font-family:var(--label);font-weight:500;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--lab-acid);transition:color .3s}
-  .rd-name.is-static{color:var(--lab-mute)}
-  .rd-prog{margin-top:4px;font-size:.78rem;line-height:1.4;color:var(--lab-mute);text-wrap:pretty}
-  .rd-set{display:flex;flex-direction:column;justify-content:flex-end;gap:14px;min-width:0}
-  .rd-dial{position:relative;height:54px;touch-action:pan-y;cursor:ew-resize;-webkit-user-select:none;user-select:none;border-radius:6px}
-  .rd-dial:focus-visible{outline:2px solid var(--lab-acid);outline-offset:6px}
-  .rd-tick{position:absolute;bottom:0;width:1px;height:10px;background:rgba(244,241,234,.32);transform:translateX(-.5px)}
-  .rd-tick.is-major{height:18px;background:rgba(244,241,234,.66)}
-  .rd-tick.is-major::after{content:attr(data-f);position:absolute;bottom:22px;left:50%;transform:translateX(-50%);
-      font-family:var(--label);font-weight:500;font-size:.65rem;letter-spacing:.06em;color:var(--lab-mute)}
-  .rd-station{position:absolute;bottom:0;width:2px;height:18px;background:var(--lab-acid);transform:translateX(-1px)}
-  .rd-needle{position:absolute;top:0;bottom:-6px;width:2px;background:var(--lab-red);transform:translateX(-1px);
-      box-shadow:0 0 12px rgba(192,54,44,.6);pointer-events:none}
-  .rd-needle::before{content:'';position:absolute;top:-1px;left:-4px;border:5px solid transparent;border-top:7px solid var(--lab-red);border-bottom:0}
-  .rd-vu{display:flex;align-items:flex-end;gap:3px;height:38px}
-  .rd-vu i{flex:1;display:block;height:12%;background:rgba(244,241,234,.26);border-radius:1px;transition:background .35s}
-  .rd-vu.is-tuned i{background:var(--lab-acid)}
-  .rd-snd{position:absolute;top:12px;right:14px;font-family:var(--label);font-weight:500;font-size:.68rem;letter-spacing:.02em;text-transform:lowercase;
-      color:var(--lab-mute);background:none;border:1px solid var(--lab-line);border-radius:999px;padding:7px 11px;cursor:pointer;
-      transition:color .25s,background .25s,border-color .25s}
-  .rd-snd[aria-pressed="true"]{color:#111A36;background:var(--lab-acid);border-color:transparent}
-  @media (hover:hover){.rd-snd:hover{color:var(--lab-ink);border-color:rgba(244,241,234,.4)}.rd-snd[aria-pressed="true"]:hover{color:#111A36}}
-  /* The two columns need room; in a narrow tile the readout sits above the
-     dial instead, and the scale keeps every other label. */
-  @container (max-width:520px){
-    .rd{grid-template-columns:minmax(0,1fr);align-items:start}
-    .rd-read{align-self:start;padding-right:88px}
-    .rd-tick.is-major:not(.is-big)::after{display:none}
+  /* 02 · Filed. A receipt prints out of a slot; cut the stub for the app. */
+  .lab-filed{position:relative;display:flex;justify-content:center;align-items:flex-start}
+  .rc-printer{position:relative;width:min(100%,360px)}
+  .rc-slot{position:relative;z-index:2;height:18px;border-radius:9px;background:linear-gradient(#2a2622,#151311);box-shadow:0 6px 14px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.08)}
+  .rc-slot::after{content:'';position:absolute;left:14px;right:14px;top:7px;height:4px;border-radius:2px;background:#000}
+  /* Printing: the slot chugs, a print head glows at the edge of the paper
+     as each line lands, and the finished receipt drops with a small bounce. */
+  @keyframes rc-chug{from{transform:translate(0,0)}to{transform:translate(0,1.6px)}}
+  .rc-slot.is-printing{animation:rc-chug .09s ease-in-out infinite alternate}
+  .rc-head{position:absolute;left:6px;right:6px;top:0;height:3px;border-radius:2px;background:var(--lab-lamp);box-shadow:0 0 12px var(--lab-lamp),0 0 3px #fff;opacity:0;z-index:3;pointer-events:none;transition:opacity .2s}
+  .rc-head.is-on{opacity:1}
+  @keyframes rc-land{0%{transform:translateY(-12px)}55%{transform:translateY(7px) rotate(.5deg)}80%{transform:translateY(-2px)}100%{transform:none}}
+  .rc.is-printed{animation:rc-land .7s var(--lab-ease) both}
+  @media (prefers-reduced-motion:reduce){.rc-slot.is-printing,.rc.is-printed{animation:none}}
+  .rc{position:relative;z-index:1;margin:-6px 14px 0;transform-origin:50% 0}
+  .rc-paper{position:relative;background:var(--lab-paper);color:#141210;padding:22px 18px 16px;box-sizing:border-box;transition:background .8s ease;
+      font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.72rem;letter-spacing:.02em;line-height:1.7;text-transform:uppercase;
+      box-shadow:0 20px 40px -20px rgba(0,0,0,.8)}
+  .rc-paper::before{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(180deg,rgba(0,0,0,.025) 0 2px,transparent 2px 5px);opacity:.6}
+  .rc-logo{display:block;height:26px;width:auto;margin:0 auto 6px}
+  .rc-c{text-align:center}
+  .rc-hr{border:0;border-top:1px dashed rgba(20,18,16,.45);margin:10px 0}
+  .rc-l{display:flex;justify-content:space-between;gap:12px}
+  .rc-l span:last-child{text-align:right;white-space:nowrap}
+  .rc-l.rc-tot{font-weight:700;font-size:.84rem}
+  .rc-l s{text-decoration:line-through;color:rgba(20,18,16,.5)}
+  .rc-p{margin:0;text-transform:none;letter-spacing:0;line-height:1.55;font-size:.78rem;color:rgba(20,18,16,.85)}
+  .rc-fine{margin-top:8px;font-size:.6rem;color:rgba(20,18,16,.55);text-align:center}
+  /* The perforation between the receipt and its stub. */
+  .rc-tear{position:relative;height:26px;background:var(--lab-paper);transition:background .8s ease}
+  .rc-tear::before,.rc-tear::after{content:'';position:absolute;top:50%;width:22px;height:22px;margin-top:-11px;border-radius:50%;background:var(--lab-bg);z-index:2;transition:background .8s ease}
+  .rc-tear::before{left:-11px}.rc-tear::after{right:-11px}
+  .rc-tear span,.rc-tear i{display:none}
+  .rc-dash{position:absolute;left:14px;right:14px;top:50%;height:0;border-top:2px dashed rgba(20,18,16,.4)}
+  /* The stub: the barcode, the reference, and the ways to get the app. */
+  .rc-stub{position:relative;background:var(--lab-paper);color:#141210;padding:12px 18px 18px;box-sizing:border-box;border-radius:0 0 8px 8px;transition:background .8s ease}
+  #hm-lab.is-lit .rc-paper{box-shadow:0 20px 40px -20px rgba(25,33,61,.35)}
+  .rc-bars{display:flex;justify-content:center;align-items:stretch;gap:2px;height:34px}
+  .rc-bars i{display:block;background:#141210;flex:0 0 auto}
+  .rc-ref{margin-top:6px;text-align:center;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.6rem;letter-spacing:.3em;color:rgba(20,18,16,.6)}
+  .rc-get{display:grid;gap:8px;margin-top:14px}
+  .rc-btn{display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:var(--lab-disp);font-size:.9rem;font-weight:600;letter-spacing:-.01em;text-decoration:none;
+      color:var(--lab-forest);background:var(--lab-filed);border-radius:999px;padding:11px 16px;transition:transform .3s var(--lab-ease),background .25s}
+  .rc-btn.ghost{background:#EAFAE0;color:var(--lab-forest)}
+  .rc-btn small{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;opacity:.7}
+  @media (hover:hover){.rc-btn:hover{transform:translateX(3px);color:var(--lab-forest)}}
+  /* Must sit after the base rule above, not with the rest of the phone
+     overrides further up — same specificity, and the later one wins. Three
+     across a phone with a 999px radius drew ellipses rather than buttons, and
+     the two pale ones read as decoration: a fixed height, a real corner and an
+     outline make all three look like the links they are, at a thumb's size. */
+  @media (hover:none){
+    .rc-btn{justify-content:center;padding:0 6px;min-height:42px;font-size:.8rem;
+        white-space:nowrap;border-radius:11px;border:1.5px solid var(--lab-forest)}
+    .rc-btn.ghost{background:transparent;color:var(--lab-forest)}
   }
-
-  /* 07 · Roadmap poetry */
-  .po{position:absolute;inset:0;padding:16px 20px;box-sizing:border-box;display:flex;align-items:center}
-  .po-q{margin:0;font-weight:700;font-size:clamp(1.05rem,3.3cqw,1.55rem);letter-spacing:-.025em;line-height:1.25;color:#fff;
-      text-wrap:balance;max-width:38ch;transition:opacity .22s ease,transform .4s var(--lab-ease)}
-  .po-q::before{content:'“';color:var(--lab-acid)}
-  .po-q.is-swap{opacity:0;transform:translateY(6px)}
-
-  /* 08 · Open slot */
-  .lp.is-open{flex-direction:row;align-items:center;gap:14px;padding:0 18px;background:none;border:1.5px dashed rgba(244,241,234,.32)}
-  .lp.is-open .lp-why{flex:1;min-width:0}
-  .lp.is-open .lp-hint{color:var(--lab-ink);text-decoration:underline;text-underline-offset:4px}
-  @media (hover:hover){.lp.is-open:hover{transform:none;border-color:rgba(244,241,234,.6)}}
-
+  .rc-stubmsg{margin-top:12px;text-align:center;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(20,18,16,.55)}
   .lab-foot{display:flex;justify-content:space-between;align-items:center;gap:12px 24px;flex-wrap:wrap;
-      margin-top:clamp(28px,5vh,48px);font-family:var(--label);font-weight:500;font-size:.76rem;letter-spacing:.02em;text-transform:lowercase}
+      margin-top:clamp(28px,5vh,48px);font-size:.8rem;font-weight:500;letter-spacing:.02em;text-transform:lowercase;color:var(--lab-mute)}
   .lab-foot [data-go]{cursor:pointer;color:var(--lab-ink)}
+  @media (hover:hover){.lab-foot [data-go]:hover{color:var(--lab-lamp)}}
+  .lab-cta{position:relative;z-index:0;margin-top:auto;box-sizing:border-box;text-align:center;padding:clamp(32px,5vh,64px) var(--lab-gut) calc(clamp(24px,4vh,40px) + env(safe-area-inset-bottom,0px))}
 
-  /* Where each piece sits, in units. Desktop is twelve across. */
-  .lp[data-piece="poster"]{--c:1/6;--r:1/7;--m:.8}
-  .lp[data-piece="moon"]{--c:6/9;--r:1/4;--m:1}
-  .lp[data-piece="count"]{--c:9/13;--r:1/4;--m:1.25}
-  .lp[data-piece="field"]{--c:6/13;--r:4/7;--m:1.3}
-  .lp[data-piece="ticket"]{--c:1/5;--r:7/12;--m:.72}
-  .lp[data-piece="radio"]{--c:5/13;--r:7/10;--m:1.15}
-  .lp[data-piece="poem"]{--c:5/13;--r:10/12;--m:1.7}
-  .lp[data-piece="slot"]{--c:1/13;--r:12/13}
-  /* Tablets: six units across, the same pieces re-laid. */
   @media (max-width:900px){
-    .lab-grid{grid-template-columns:repeat(6,minmax(0,1fr));grid-auto-rows:calc((100cqw - 5*var(--g))/6)}
-    .lp[data-piece="poster"]{--c:1/5;--r:1/6}
-    .lp[data-piece="moon"]{--c:5/7;--r:1/3}
-    .lp[data-piece="count"]{--c:5/7;--r:3/6}
-    .lp[data-piece="field"]{--c:1/7;--r:6/9}
-    .lp[data-piece="ticket"]{--c:1/4;--r:9/14}
-    .lp[data-piece="radio"]{--c:4/7;--r:9/12}
-    .lp[data-piece="poem"]{--c:4/7;--r:12/14}
-    .lp[data-piece="slot"]{--c:1/7;--r:14/15}
-    .lp-cap{padding:10px 14px 12px}
-    .lp-why{font-size:.74rem}
+    .lab-piece,.lab-piece--filed{grid-template-columns:minmax(0,1fr);gap:clamp(24px,5vh,40px);padding:clamp(40px,7vh,72px) 0}
+    .lab-copy p{max-width:none}
+    .lab-cord{--cord-h:200px}
   }
-  /* Phones: one column, each piece at its own proportion. */
   @media (max-width:700px){
-    .lab-grid{display:flex;flex-direction:column;gap:14px}
-    .lp{aspect-ratio:var(--m,1)}
-    .lp.is-open{aspect-ratio:auto;flex-wrap:wrap;padding:16px 18px;min-height:0}
-    .lp.is-open .lp-why{flex-basis:100%;order:3}
-    .lp.is-open .lp-hint{margin-left:auto}
+    #hm-lab-side{width:auto}
+    .lab-h2{font-size:clamp(1.8rem,8.4vw,2.6rem);white-space:normal}
+    .lab-title{font-size:clamp(2.2rem,11vw,3.4rem)}
   }
+  @media (hover:none){.lab-cord{display:none}}
   @media (prefers-reduced-motion:reduce){
-    .lp,.pz svg,.tk,.po-q,.lp-hint,.rd-vu i{transition:none}
+    .tv-shell,.lab-phone,.rc-stub,.lab-h2 .ch,.lab-title .ch{transition:none}
+    .tv-blink{animation:none}
   }
 
   /* About. The name's top is synced from the home hero at runtime, so the move
@@ -736,18 +838,156 @@
   <!-- After Hours. The wordmark and its hero are what the page transition
        needs (script.js: NODES.lab, syncAbout); everything under .lab-wrap is
        the bench, and every piece on it is wired up in lab.js. -->
-  <div id="hm-lab" data-screen-label="After Hours" style="position:absolute;inset:0;background-color:#0c0c0e;color:#F4F1EA;opacity:0;visibility:hidden;pointer-events:none;overflow-y:auto;overflow-x:hidden;transition:opacity .35s,visibility .35s">
-    <div id="hm-lab-hero">
-      <div id="hm-lab-side">
-        <h2 class="lab-h2">Same brain,<br>looser tie.</h2>
-        <div class="lab-soon">coming soon · <span data-go="intro">↩ back to the day job</span></div>
-      </div>
-      <div id="hm-lab-mark"><h1 id="hm-labname" class="hm-wordmark" style="color:#fff">Michael <br><span class="wm-l2">Hanna</span></h1></div>
+  <div id="hm-lab" data-screen-label="After Hours" style="position:absolute;inset:0;background-color:#0f0d0b;color:#F4F1EA;opacity:0;visibility:hidden;pointer-events:none;overflow-y:auto;overflow-x:hidden;transition:opacity .35s,visibility .35s">
+    <div class="lab-ground" aria-hidden="true"></div>
+    <div class="lab-lamp" aria-hidden="true"></div>
+    <div class="lab-torch" id="hm-torch" aria-hidden="true"></div>
+    <div class="lab-cursor" id="hm-cursor" aria-hidden="true">
+      <svg class="lab-hand" viewBox="0 0 36 104">
+        <defs><radialGradient id="hm-lensg"><stop offset="0" stop-color="#FFFBE6"/><stop offset=".55" stop-color="#FFD76A"/><stop offset="1" stop-color="#D99A1E"/></radialGradient></defs>
+        <ellipse class="hand-glow" cx="18" cy="10" rx="17" ry="10" fill="rgba(255,215,106,.38)"/>
+        <path d="M5 12 L31 12 L27 32 L9 32 Z" fill="#3b3b42"/>
+        <rect x="9" y="31" width="18" height="66" rx="6" fill="#25252a"/>
+        <rect x="9" y="31" width="4" height="66" rx="2" fill="rgba(255,255,255,.09)"/>
+        <rect x="11" y="44" width="14" height="3" fill="#3b3b42"/><rect x="11" y="52" width="14" height="3" fill="#3b3b42"/><rect x="11" y="60" width="14" height="3" fill="#3b3b42"/>
+        <ellipse class="hand-lens" cx="18" cy="11" rx="13" ry="5" fill="url(#hm-lensg)"/>
+      </svg>
     </div>
-    <!-- Holding page for now: the name, the line beside it, and the ID card.
-         The bench (seven running pieces, lab.js) is parked in the template
-         below — inert, so nothing renders or runs — and comes back by
-         unwrapping it. -->
+    <div id="hm-lab-hero">
+      <div class="lab-cord" id="hm-cord">
+        <div class="cord-inner" id="hm-cord-inner">
+          <svg id="hm-cord-svg" viewBox="0 0 64 420" aria-hidden="true">
+            <defs>
+              <linearGradient id="hm-knobg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e7e7ec"/></linearGradient>
+              <filter id="hm-knobsh" x="-70%" y="-70%" width="240%" height="240%"><feDropShadow dx="0" dy="1.4" stdDeviation="1.5" flood-color="rgba(0,0,0,.35)"/></filter>
+            </defs>
+            <path class="cord-rope" id="hm-cord-rope" d="M 32 0 L 32 280"/>
+            <g id="hm-cord-knobg"><g filter="url(#hm-knobsh)"><circle class="cord-knob" id="hm-cord-knob" cx="32" cy="280" r="7"/></g>
+              <g class="cord-glove" id="hm-cord-glove" transform="translate(0 280)"></g></g>
+          </svg>
+          <button class="cord-hit" id="hm-cord-hit" type="button" aria-label="Pull the cord to switch the lights" aria-pressed="false" title="Pull the cord"></button>
+          <div class="cord-note" id="hm-cord-note"><svg viewBox="0 0 30 22"><path d="M28 4 C 20 2, 10 6, 4 16"/><path d="M4 10 L 4 16 L 10 16"/></svg><span>pull the cord</span></div>
+        </div>
+      </div>
+      <div id="hm-lab-side">
+        <button class="lab-sign" id="hm-lab-switch" type="button" aria-pressed="false" aria-label="Switch the lights" style="background:none;border:0;padding:0;margin:0;cursor:pointer;font:inherit;text-align:left"><span class="rocker" aria-hidden="true"><i></i></span><span style="display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap"><i class="lab-dot is-off" id="hm-lab-dot"></i><span id="hm-lab-sign">lights off</span><span aria-hidden="true">·</span><span><span class="lab-clock">--:--</span> in madrid</span></span></button>
+        <h2 class="lab-h2" id="hm-lab-h2">Same brain, looser tie.</h2>
+        <p class="lab-lede">Everything here exists for exactly one reason: I wanted it to exist. No business case, no roadmap, nobody to convince.</p>
+      </div>
+      <div id="hm-lab-mark"><h1 id="hm-labname" class="hm-wordmark">Michael <br><span class="wm-l2">Hanna</span></h1></div>
+    </div>
+
+    <div class="lab-wrap">
+      <div class="lab-kicker"><span>after hours</span><span>two things · <b>neither of them needed to exist</b></span></div>
+
+      <!-- On touch the pieces sit in a deck: it pins to the screen and the
+           vertical swipe slides them sideways, one screen each, until the
+           last one lets the page go on (lab.js). The markers are the snap
+           points for that. Elsewhere the deck is nothing and the pieces
+           simply follow each other. -->
+      <div class="lab-deck" id="hm-deck">
+      <div class="lab-pieces" id="hm-pieces">
+      <div class="lab-track" id="hm-track">
+      <!-- 01 · The 404. The television plays the game's own avatar in the
+           glass (lab.js draws it from the same rig the game uses). Clicking
+           the glass turns the picture into the story; press start opens the
+           game in its After Hours mode: two runs, then back here. -->
+      <section class="lab-piece" id="hm-p404" data-screen-label="After Hours — The 404">
+        <div class="lab-copy">
+          <span class="lab-no">01</span>
+          <h3 class="lab-title">The 404</h3>
+          <p>I grew up playing Sonic. So when this site needed a 404 page, I built one you would want to hit on purpose: my pixel self, a hill, a few rings, and the page you were looking for somewhere past the spikes.</p>
+          <p>You get two runs. Then it is back to business.</p>
+          <p class="lab-meta">runs in the browser · no libraries · <span class="h-mouse">arrows to run, space to jump</span><span class="h-touch">you run on your own, tap or swipe up to jump</span></p>
+        </div>
+        <div class="lab-tv" id="hm-tv">
+          <div class="tv-shell" id="hm-tv-shell">
+            <div class="tv-screen" id="hm-tv-screen" style="container-type:inline-size">
+              <canvas id="hm-tv-canvas" width="320" height="200" aria-hidden="true"></canvas>
+              <div class="tv-scan" aria-hidden="true"></div>
+              <div class="tv-ui" id="hm-tv-ui" aria-hidden="true">
+                <div class="tv-top"><span><span class="err">error 404</span> · page not found</span><span id="hm-tv-rings">◎ 0</span></div>
+                <div class="tv-404">404</div>
+                <div class="tv-blink">press start</div>
+              </div>
+              <div class="tv-story" id="hm-tv-story" aria-hidden="true">
+                <p>I grew up playing <b>Sonic</b>. Every site has a 404 page; mine should be fun to land on.</p>
+                <p>Two runs, then it sends you back here. <b>Back to business.</b></p>
+                <div class="tv-row"><a class="tv-btn" id="hm-tv-play" href="/404?lab">press start</a><button class="tv-btn ghost" id="hm-tv-eject" type="button">eject</button></div>
+              </div>
+              <div class="tv-glass" aria-hidden="true"></div>
+            </div>
+            <div class="tv-chin"><span class="tv-brand">hannavision · crt 404</span><i class="tv-led" aria-hidden="true"></i></div>
+          </div>
+          <div class="tv-feet" aria-hidden="true"></div>
+          <button class="tv-coin" id="hm-tv-coin" type="button"><i aria-hidden="true"></i>insert coin</button>
+        </div>
+      </section>
+
+      <!-- 02 · Filed. The story prints as a receipt when it scrolls into
+           view; the stub carries the download links, and the way to get
+           them is the app's own gesture: drag the scissors across the
+           perforation. The plain link under it is for anyone who would
+           rather not. -->
+      <section class="lab-piece lab-piece--filed" id="hm-pfiled" data-screen-label="After Hours — Filed">
+        <div class="lab-copy">
+          <span class="lab-no">02</span>
+          <h3 class="lab-title">Filed</h3>
+          <p>I travelled a lot for work. Too many air miles, and a jacket pocket full of receipts that had to be sorted by trip, by project, by client lunch. I hated filing them.</p>
+          <p>I tried a lot of apps and did not like any of them, so I built my own. Everything stays on the phone, each receipt lands in the right trip by itself, and to export a trip you cut the stub off a boarding pass.</p>
+          <p class="lab-meta">open beta · ios 17+ and android · <a href="https://www.filedreceipts.com" target="_blank" rel="noopener noreferrer">filedreceipts.com ↗</a></p>
+        </div>
+        <div class="lab-filed" id="hm-filed">
+          <div class="rc-printer">
+            <div class="rc-slot" aria-hidden="true"></div>
+            <div class="rc" id="hm-rc">
+              <div class="rc-head" id="hm-rc-head" aria-hidden="true"></div>
+              <div class="rc-paper" id="hm-rc-paper">
+                <img class="rc-logo" src="assets/filed-logo-black.svg" alt="Filed" width="199" height="73">
+                <div class="rc-c">receipts, filed as you go</div>
+                <div class="rc-c">madrid · after hours</div>
+                <hr class="rc-hr">
+                <div class="rc-l"><span>air miles</span><span>too many</span></div>
+                <div class="rc-l rc-x"><span>receipts in pocket</span><span>all of them</span></div>
+                <div class="rc-l"><span>sorted by trip</span><span>by hand</span></div>
+                <div class="rc-l rc-x"><span>sorted by project</span><span>by hand</span></div>
+                <div class="rc-l rc-x"><span>client lunches</span><span>unsorted</span></div>
+                <hr class="rc-hr">
+                <div class="rc-l"><span>apps tried</span><span>a lot</span></div>
+                <div class="rc-l"><span>apps liked</span><span>0</span></div>
+                <div class="rc-l"><span>apps built</span><span>1</span></div>
+                <hr class="rc-hr">
+                <div class="rc-l rc-tot"><span>total</span><span>filed</span></div>
+                <div class="rc-l rc-x"><span>uploaded</span><span>nothing</span></div>
+                <div class="rc-l rc-x"><span>servers</span><span>none</span></div>
+                <div class="rc-fine">thank you for keeping it local</div>
+              </div>
+              <div class="rc-tear" aria-hidden="true"><div class="rc-dash"></div></div>
+              <div class="rc-stub" id="hm-rc-stub">
+                <div class="rc-bars" id="hm-rc-bars" aria-hidden="true"></div>
+                <div class="rc-ref">trip-ah-02</div>
+                <div class="rc-get" id="hm-rc-get">
+                  <a class="rc-btn" href="https://testflight.apple.com/join/VhFXhywv" target="_blank" rel="noopener noreferrer"><span>iPhone</span><small>testflight ↗</small></a>
+                  <a class="rc-btn ghost" href="https://play.google.com/apps/testing/com.michaelhanna.filed" target="_blank" rel="noopener noreferrer"><span>Android</span><small>play beta ↗</small></a>
+                  <a class="rc-btn ghost" href="https://www.filedreceipts.com" target="_blank" rel="noopener noreferrer"><span>The site</span><small>filedreceipts.com ↗</small></a>
+                </div>
+                <div class="rc-stubmsg">free beta · nothing leaves your phone</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      </div>
+      <div class="lab-dots" id="hm-dots" aria-hidden="true"><i class="is-on"></i><i></i></div>
+      </div>
+      </div>
+
+      <div class="lab-foot">
+        <span data-go="intro">↩ back to the day job</span>
+        <span>built at 1am · shipped when it feels right</span>
+      </div>
+    </div>
+
     <section id="hm-lab-cta" class="lab-cta" data-screen-label="After Hours — contact">
       <div class="cta-id">
         <div class="cta-name">Michael Hanna</div>
@@ -773,99 +1013,10 @@
         <div class="cta-clock"><span class="cta-time">--:--:--</span> <span class="cta-tz">CET</span></div>
       </div>
     </section>
-    <template id="hm-bench-later">
-      <div id="hm-lab-side" aria-hidden="true">
-        <div><i class="lab-dot" id="hm-lab-dot"></i><span class="lab-clock">--:--</span> in madrid</div>
-        <div class="lab-mute" id="hm-lab-sign">lights on. bench open.</div>
-      </div>
-      <div class="lab-kicker"><span>after hours<span class="lab-m"> · <b class="lab-clock">--:--</b> in madrid</span></span><span>seven pieces · none of them needed to exist</span></div>
-      <p class="lab-lede">Everything on it exists for exactly one reason: I wanted it to exist. No business case, no roadmap, nobody to convince. The same instincts that ship the day job, just pointed somewhere stranger, with a lot less distance between the idea and the thing actually running.</p>
-
-      <section class="lab-grid" aria-label="On the bench">
-
-        <article class="lp" data-piece="poster">
-          <button class="lp-stage" id="hm-poster" type="button" aria-label="Another poster"><div class="pz" id="hm-poster-art"></div></button>
-          <footer class="lp-cap"><span class="lp-no">01</span><h3 class="lp-title">Tonight’s poster</h3><p class="lp-why">A new composition every night, seeded by the date. Click for another.</p><span class="lp-hint">click</span></footer>
-        </article>
-
-        <article class="lp" data-piece="moon">
-          <div class="lp-stage"><div class="mn" id="hm-moon" role="img" aria-label="Tonight’s moon"></div></div>
-          <footer class="lp-cap"><span class="lp-no">02</span><h3 class="lp-title">The moon, right now</h3><p class="lp-why" id="hm-moon-why">From the date alone.</p></footer>
-        </article>
-
-        <article class="lp is-acid" data-piece="count">
-          <div class="lp-stage"><span class="cnt-lab">seconds since 01·01·2020, 00:00 utc</span><span class="cnt" id="hm-count">0</span></div>
-          <footer class="lp-cap"><span class="lp-no">03</span><h3 class="lp-title">A number that only goes up</h3><p class="lp-why">One per second since the first of January, 2020. It has never been smaller than it is right now.</p><span class="lp-hint">live</span></footer>
-        </article>
-
-        <article class="lp" data-piece="field">
-          <div class="lp-stage"><canvas class="fd" id="hm-field" aria-hidden="true"></canvas></div>
-          <footer class="lp-cap"><span class="lp-no">04</span><h3 class="lp-title">Field</h3><p class="lp-why">A few hundred short lines that turn to face the pointer. Nothing is stored, nothing is sent.</p><span class="lp-hint">move across it</span></footer>
-        </article>
-
-        <article class="lp" data-piece="ticket">
-          <button class="lp-stage" id="hm-ticket" type="button" aria-label="Reissue the ticket">
-            <div class="tk" id="hm-ticket-pass">
-              <div class="tk-main">
-                <div class="tk-row"><span>after hours air</span><span>boarding pass</span></div>
-                <div class="tk-route">
-                  <div><b>MAD</b><i>Madrid</i></div>
-                  <span class="tk-arrow">→</span>
-                  <div><b id="tk-to">KEF</b><i id="tk-city">Reykjavík</i></div>
-                </div>
-                <div class="tk-fields">
-                  <div><span>flight</span><b id="tk-flight">AH 142</b></div>
-                  <div><span>boards</span><b id="tk-time">01:40</b></div>
-                  <div><span>gate</span><b id="tk-gate">C7</b></div>
-                  <div><span>seat</span><b id="tk-seat">14A</b></div>
-                </div>
-                <div class="tk-fine">not valid for travel · valid for daydreaming</div>
-              </div>
-              <div class="tk-tear"></div>
-              <div class="tk-stub"><div class="tk-bars" id="tk-bars"></div><div class="tk-stubmeta"><b id="tk-seat2">14A</b><span id="tk-date">03 sep</span></div></div>
-            </div>
-          </button>
-          <footer class="lp-cap"><span class="lp-no">05</span><h3 class="lp-title">Ticket to nowhere</h3><p class="lp-why">A boarding pass for a flight that doesn’t exist, reissued every time you ask.</p><span class="lp-hint">click to reissue</span></footer>
-        </article>
-
-        <article class="lp" data-piece="radio">
-          <div class="lp-stage">
-            <div class="rd">
-              <div class="rd-read">
-                <div class="rd-freq"><span id="rd-f">94.7</span><small>fm</small></div>
-                <div class="rd-name" id="rd-name">The Bench</div>
-                <div class="rd-prog" id="rd-prog">Whatever is being built tonight, live.</div>
-              </div>
-              <div class="rd-set">
-                <div class="rd-dial" id="rd-dial" role="slider" tabindex="0" aria-label="Tuning" aria-valuemin="87.5" aria-valuemax="108" aria-valuenow="94.7"><div class="rd-needle" id="rd-needle"></div></div>
-                <div class="rd-vu" id="rd-vu" aria-hidden="true"></div>
-              </div>
-              <button class="rd-snd" id="rd-snd" type="button" aria-pressed="false">sound off</button>
-            </div>
-          </div>
-          <footer class="lp-cap"><span class="lp-no">06</span><h3 class="lp-title">1AM radio</h3><p class="lp-why">Six stations that only broadcast here. Sound stays off until you say otherwise.</p><span class="lp-hint">drag to tune</span></footer>
-        </article>
-
-        <article class="lp" data-piece="poem">
-          <button class="lp-stage" id="hm-poem" type="button" aria-label="Another line"><div class="po"><p class="po-q" id="hm-poem-q">Let’s double-click on the north star before we boil the ocean.</p></div></button>
-          <footer class="lp-cap"><span class="lp-no">07</span><h3 class="lp-title">Roadmap poetry</h3><p class="lp-why">Sentences I have actually heard in meetings, recombined. Every one is plausible, which is the problem.</p><span class="lp-hint">click</span></footer>
-        </article>
-
-        <article class="lp is-open" data-piece="slot">
-          <span class="lp-no">08</span><h3 class="lp-title">Open slot</h3><p class="lp-why">Whatever I get curious about next. This one fills itself in.</p><a class="lp-hint" href="mailto:Michaelhannafarag@gmail.com" target="_blank" rel="noopener noreferrer">want in early? →</a>
-        </article>
-
-      </section>
-
-      <div class="lab-foot">
-        <span data-go="intro">↩ back to the day job</span>
-        <span class="lab-mute">built at 1am · shipped when it feels right</span>
-      </div>
-    </template>
   </div>
 </div>
-<script src="script.js?v=95"></script>
-<script src="lab.js?v=6"></script>
+<script src="script.js?v=96"></script>
+<script src="lab.js?v=9"></script>
 <script>
   // Lanyard is web-only: it's a heavy WebGL scene (three.js + rapier physics
   // + a 2.4MB card model) built around a pointer drag that touch can't

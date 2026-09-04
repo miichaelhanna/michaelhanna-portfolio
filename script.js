@@ -48,7 +48,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const navInk = dark => document.querySelectorAll('[data-ch="link"]').forEach(el => {
     el.style.color = dark ? '#fff' : '#1a1a1a';
   });
-  const PAGE_BG = { about: ABOUT_BG, lab: '#0c0c0e' };
+  const PAGE_BG = { about: ABOUT_BG, lab: '#0f0d0b' };
+  // After Hours has its own light switch (lab.js): its ground goes from a
+  // warm black to ecru and back. Which ink the nav needs there depends on
+  // that state, so it is asked for rather than assumed dark.
+  let labDark = true;
+  const inkFor = m => m === 'intro' ? false : m === 'lab' ? labDark : true;
   const setChromeFor = m => {
     setTheme(PAGE_BG[m] || '#ffffff');
     // Landing back on home mid-scroll (the curtain-only return from deep in
@@ -56,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // the flat white set above is only right at the top.
     if (!PAGE_BG[m]) { setChrome(false); wasDark = null; wasBotDark = null; paintChrome(); return; }
     if (head) head.style.background = PAGE_BG[m];
-    navInk(true);
+    navInk(inkFor(m));
     document.querySelectorAll('[data-ch="name"]').forEach(el => { el.style.color = '#1a1a1a'; });
   };
   // While the curtain is crossing, the header steps out of the way so the wipe
@@ -71,6 +76,13 @@ document.addEventListener('DOMContentLoaded', () => {
     return fromLeft ? mid : 1 - mid;
   };
   const headSettle = m => { if (!head) return; setChromeFor(m); head.style.transition = 'background .3s'; };
+  addEventListener('hm-lab-lights', e => {
+    PAGE_BG.lab = e.detail.bg; labDark = e.detail.dark;
+    if (mode !== 'lab' || navBusy) return;
+    setTheme(PAGE_BG.lab);
+    if (head) head.style.background = PAGE_BG.lab;
+    navInk(labDark);
+  });
 
   const resetHover = () => {
     setChrome(false);
@@ -288,7 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (toKey === 'intro') { wasDark = null; wasBotDark = null; paintChrome(); }
       else setTheme(PAGE_BG[toKey]);
     };
-    const inkAt = setTimeout(() => { paintNav(toKey); navInk(toKey !== 'intro'); },
+    const inkAt = setTimeout(() => { paintNav(toKey); navInk(inkFor(toKey)); },
       still.matches ? 0 : timeAtProgress(navCross(fromLeft)));
     const tintAt = setTimeout(tintNow, still.matches ? 0 : timeAtProgress(0.5));
     animateNav([
@@ -302,7 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // below throws — a stuck navBusy deadens every nav link on the site.
       try {
         clearTimeout(inkAt); clearTimeout(tintAt);
-        paintNav(toKey); navInk(toKey !== 'intro');
+        paintNav(toKey); navInk(inkFor(toKey));
         to.layer.style.clipPath = 'none'; to.layer.style.zIndex = toKey === 'intro' ? 2 : 3;
         headSettle(toKey);
         to.name.style.transform = ''; from.name.style.transform = '';

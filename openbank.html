@@ -65,7 +65,12 @@ a{color:var(--ink);text-decoration:underline;text-underline-offset:3px;text-deco
 a.plain,a.plain:hover{text-decoration:none}
 a.hm-nav-link{color:#1a1a1a;text-decoration:none}
 @media (hover:hover){a.hm-nav-link:hover{color:#666;text-decoration:none}}
-@media (max-width:700px){nav a.hm-nav-link{padding:13px 6px;margin:-13px -6px}}
+/* Every nav link gets an invisible enlarged hit area — padding offset by
+   an equal negative margin, so the tap/click target grows without moving
+   anything on screen. The back arrow especially needs this: it is a single
+   narrow glyph sitting at the very edge of the page, with nothing else to
+   give it room. This used to only apply on a phone; a mouse needs it too. */
+nav a.hm-nav-link{padding:13px 6px;margin:-13px -6px;display:inline-block}
 img{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-user-drag:none;pointer-events:none}
 .mono{font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500}
 .kick{font-family:-apple-system,BlinkMacSystemFont,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-weight:500;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--soft)}

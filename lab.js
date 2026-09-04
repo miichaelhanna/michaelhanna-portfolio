@@ -1,20 +1,25 @@
-// After Hours. Every piece on the bench is a small thing that actually runs,
-// built here with no data and no libraries. Each one is its own block below;
-// a piece whose markup is missing simply doesn't start.
+// After Hours. The room after everyone has gone home. Two things sit on the
+// bench, and the page around them is built to be touched: a pull cord for
+// the lights (a real rope, after Feral UI's pullcord), a torch that rides
+// the pointer while they are off and turns into a glove on the cord, type
+// that bends towards the hand, a television playing the 404 game's own
+// avatar, and a receipt that prints the Filed story out of a slot. On a
+// phone the switch is a wall rocker and the pieces sit in a deck that pins
+// and slides sideways.
 //
 // Anything that animates runs only while it can be seen: the page has to be
-// the one on screen (the layers are stacked and hidden with visibility, so a
-// hidden layer still has layout) and the piece has to be inside the page's
+// the one on screen (the layers are stacked and hidden with visibility, so
+// a hidden layer still has layout) and the piece has to be inside the page's
 // own scroller. Both are watched, and nothing burns a frame behind another
-// page. (A background tab needs no check of its own: the browser already
-// stops animation frames there.)
+// page. No data, no libraries.
 (() => {
   const lab = document.getElementById('hm-lab');
   if (!lab) return;
   const $ = s => lab.querySelector(s);
   const still = matchMedia('(prefers-reduced-motion:reduce)');
-  const ACID = '#D7FF3F', INK = '#111A36', PAPER = '#F4F1EA';
+  const touch = matchMedia('(hover:none)').matches;
   const labShown = () => getComputedStyle(lab).visibility !== 'hidden';
+  const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
 
   const runners = [];
   const sync = () => {
@@ -25,386 +30,533 @@
       else if (!want && r.on) { r.on = false; r.stop(); }
     });
   };
-  const watch = (el, start, stop) => {
-    const r = { inView: false, on: false, start, stop };
+  const watch = (el, start, stop, threshold) => {
+    const r = { inView: false, on: false, start, stop: stop || (() => {}) };
     runners.push(r);
     if (typeof IntersectionObserver === 'undefined') { r.inView = true; sync(); return; }
     new IntersectionObserver(es => { es.forEach(e => { r.inView = e.isIntersecting; }); sync(); },
-      { root: lab, threshold: .05 }).observe(el);
+      { root: lab, threshold: threshold || .05 }).observe(el);
   };
-  new MutationObserver(sync).observe(lab, { attributes: true, attributeFilter: ['style'] });
+  // Every arrival starts in the dark: coming back from About, from home, or
+  // from the game finds the lights off again. Read off the inline style,
+  // not the computed one: the layer fades out over a third of a second,
+  // and the computed visibility still says 'visible' as the hide is written.
+  const labWanted = () => lab.style.visibility !== 'hidden';
+  let wasShown = labWanted();
+  const onArrive = [];
+  new MutationObserver(() => {
+    const shown = labWanted();
+    if (shown && !wasShown) onArrive.forEach(f => f());
+    wasShown = shown;
+    sync();
+  }).observe(lab, { attributes: true, attributeFilter: ['style'] });
 
-  // A small seeded generator, so "tonight's" things are the same for everyone
-  // who looks tonight, and different tomorrow.
-  const mulberry = seed => () => {
-    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
-    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
-    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
-    return ((t ^ t >>> 14) >>> 0) / 4294967296;
-  };
-  const daySeed = () => { const d = new Date(); return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate(); };
-  const ri = (r, lo, hi) => lo + Math.floor(r() * (hi - lo + 1));
-  const pick = (r, a) => a[Math.floor(r() * a.length)];
-
-  // ── The clock. Madrid time; the sign beside it reads "lights on" through
-  //    the hours the bench is actually used. The holding page carries the
-  //    seconds; the kicker (parked with the bench) only the minutes.
-  const clocks = lab.querySelectorAll('.lab-clock'), secs = $('#hm-lab-clock-s'), dot = $('#hm-lab-dot'), sign = $('#hm-lab-sign');
-  if (clocks.length || secs) {
+  // ── The clock. Madrid time, minutes only, in the sign beside the name.
+  const clocks = lab.querySelectorAll('.lab-clock');
+  if (clocks.length) {
     const tick = () => {
       const t = new Date().toLocaleTimeString('en-GB', { timeZone: 'Europe/Madrid', hour12: false });
       clocks.forEach(c => { c.textContent = t.slice(0, 5); });
-      if (secs) secs.innerHTML = t.split(':').join('<span class="hold-colon">:</span>');
-      const h = (+t.slice(0, 2)) % 24;
-      const night = h >= 22 || h < 6;
-      if (dot) dot.classList.toggle('is-off', !night);
-      if (sign) sign.textContent = secs ? (night ? 'lights on' : 'lights off')
-                                        : (night ? 'lights on. bench open.' : 'lights off. day job hours.');
     };
-    tick(); setInterval(tick, secs ? 1000 : 15000);
+    tick(); setInterval(tick, 15000);
   }
 
-  // ── 01 · Tonight's poster. A handful of compositions with room to vary,
-  //    rather than random shapes: the floor stays high, and the date picks.
-  const posterArt = $('#hm-poster-art'), posterBtn = $('#hm-poster');
-  if (posterArt) {
-    const W = 400, H = 500, u = W / 12;
-    const PALS = [
-      ['#1D1AEA', '#C0362C', INK], [INK, ACID, '#C0362C'], ['#3A5B85', '#C0362C', INK],
-      ['#C0362C', '#1D1AEA', ACID], [INK, '#3A5B85', ACID], ['#C0362C', INK, '#3A5B85']
-    ];
-    const shuffle = (a, r) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
-    const circle = (cx, cy, rad, c) => `<circle cx="${cx * u}" cy="${cy * u}" r="${rad * u}" fill="${c}"/>`;
-    const rect = (x, y, w, h, c) => `<rect x="${x * u}" y="${y * u}" width="${w * u}" height="${h * u}" fill="${c}"/>`;
-    const RECIPES = [
-      // disc, a bar across, a rule down
-      (r, p) => circle(ri(r, 4, 8), ri(r, 4, 7), ri(r, 3, 4), p[0]) + rect(0, ri(r, 9, 12), 12, ri(r, 1, 2), p[1]) + rect(ri(r, 1, 10), 0, 1, 15, p[2]),
-      // a stack of bars and a ring
-      (r, p) => {
-        let s = '', y = ri(r, 1, 3);
-        for (let i = 0; i < 3; i++) { const h = ri(r, 1, 3), x = ri(r, 0, 3); s += rect(x, y, 12 - x - ri(r, 0, 2), h, p[i % 3]); y += h + 1; }
-        return s + `<circle cx="${ri(r, 7, 10) * u}" cy="${ri(r, 10, 13) * u}" r="${1.5 * u}" fill="none" stroke="${p[1]}" stroke-width="${u * .6}"/>`;
-      },
-      // a split, a disc on the seam
-      (r, p) => rect(0, 0, 6, 15, p[0]) + circle(6, ri(r, 5, 9), 2.5 + r() * 1.5, p[1]) + rect(ri(r, 7, 9), ri(r, 11, 13), 3, 1, p[2]),
-      // a quarter in a corner, a line through, a dot
-      (r, p) => {
-        const R = ri(r, 7, 10) * u, k = ri(r, 0, 3);
-        const d = [`M0,0 h${R} a${R},${R} 0 0 1 -${R},${R} z`, `M${W},0 v${R} a${R},${R} 0 0 1 -${R},-${R} z`,
-                   `M${W},${H} h-${R} a${R},${R} 0 0 1 ${R},-${R} z`, `M0,${H} v-${R} a${R},${R} 0 0 1 ${R},${R} z`][k];
-        const y = ri(r, 2, 13) * u;
-        return `<path d="${d}" fill="${p[0]}"/><line x1="0" y1="${y}" x2="${W}" y2="${y + ri(r, -3, 3) * u}" stroke="${p[1]}" stroke-width="${u * .35}"/>` + circle(ri(r, 2, 10), ri(r, 2, 13), 1.2, p[2]);
-      },
-      // a grid of dots with one square, a bar underneath
-      (r, p) => {
-        let s = ''; const ox = ri(r, 1, 2), oy = ri(r, 1, 3), sx = ri(r, 0, 3), sy = ri(r, 0, 3);
-        for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) {
-          const x = ox + i * 2.5 + 1, y = oy + j * 2.5 + 1;
-          s += (i === sx && j === sy) ? rect(x - 1, y - 1, 2, 2, p[1]) : circle(x, y, 1, p[0]);
+  // ── The lights. Off on arrival, everywhere. The ground goes from a warm
+  //    black to ecru; the header, the browser tint and the safe-area strips
+  //    belong to script.js, which listens for the event and follows.
+  const DARK_BG = '#0f0d0b', LIT_BG = '#ffffff';
+  const sw = $('#hm-lab-switch'), dot = $('#hm-lab-dot'), sign = $('#hm-lab-sign'), side = $('#hm-lab-side');
+  let lit = false;
+  const onLights = [];
+  const paintLights = () => {
+    lab.classList.toggle('is-lit', lit);
+    onLights.forEach(f => f());
+    lab.style.backgroundColor = lit ? LIT_BG : DARK_BG;
+    dispatchEvent(new CustomEvent('hm-lab-lights', { detail: { bg: lit ? LIT_BG : DARK_BG, dark: !lit } }));
+    if (dot) dot.classList.toggle('is-off', !lit);
+    if (sign) sign.textContent = lit ? 'lights on' : 'lights off';
+    if (sw) sw.setAttribute('aria-pressed', String(lit));
+  };
+  const toggleLights = () => {
+    lit = !lit; paintLights();
+    if (touch && navigator.vibrate) { try { navigator.vibrate(10); } catch (e) {} }
+  };
+  paintLights();
+  if (sw) sw.addEventListener('click', toggleLights);
+  onArrive.push(() => { lit = false; paintLights(); });
+  // The browser's back button can restore this page from its back-forward
+  // cache exactly as it was left, lights and all. That counts as an
+  // arrival too: everything registered for one runs again.
+  addEventListener('pageshow', e => { if (e.persisted && labWanted()) onArrive.forEach(f => f()); });
+
+  // ── The torch. A fixed cloak with a soft hole rides the pointer, and the
+  //    pointer itself is a small flashlight, lens on the hotspot, beam just
+  //    ahead of it. Over the cord it is a white glove; a fist while pulling.
+  const torch = $('#hm-torch'), cur = $('#hm-cursor');
+  if (torch && cur && !touch) {
+    let tx = innerWidth / 2, ty = innerHeight * .42, raf = 0;
+    const place = () => {
+      torch.style.transform = 'translate3d(' + (tx + 44) + 'px,' + (ty - 44) + 'px,0)';
+      cur.style.transform = 'translate3d(' + tx + 'px,' + ty + 'px,0)';
+      raf = 0;
+    };
+    lab.addEventListener('pointermove', e => {
+      tx = e.clientX; ty = e.clientY;
+      if (!raf) raf = requestAnimationFrame(place);
+      cur.classList.add('is-on');
+      cur.classList.toggle('is-glove', !!e.target.closest('.lab-cord'));
+      cur.classList.toggle('is-hot', !!e.target.closest('a,button,[role="button"],.tv-screen'));
+    }, { passive: true });
+    lab.addEventListener('pointerleave', () => cur.classList.remove('is-on'));
+    place();
+  }
+
+  // ── The cord. Feral UI's pullcord, ported: a rope of sixteen links under
+  //    gravity, damped, pulled straight by twenty passes of constraint each
+  //    frame, drawn as one smooth path with a knob on the end. The lights
+  //    switch the moment the pull crosses the detent, like a real chain,
+  //    and a click or the keyboard gives it a scripted tug. It drops in from
+  //    above on every arrival and the fall's momentum becomes the swing.
+  const cordEl = $('#hm-cord'), rope = $('#hm-cord-rope'), knobG = $('#hm-cord-knobg'), knob = $('#hm-cord-knob'),
+        hit = $('#hm-cord-hit'), inner = $('#hm-cord-inner'), note = $('#hm-cord-note'), cordSvg = $('#hm-cord-svg');
+  if (cordEl && rope && knobG && hit && !touch) {
+    const CFG = { gravity: 1250, damping: .94, iterations: 20, stretchMax: 26, stretchToggle: 20, maxVelocity: 22, sleep: .15 };
+    const AX = 32, SEG = 16;
+    let restY = 260, restSeg = restY / SEG, pts = [];
+    const make = () => { pts = []; for (let i = 0; i <= SEG; i++) { const y = restSeg * i; pts.push({ x: AX, y, ox: AX, oy: y, fixed: i === 0 }); } };
+    const path = () => {
+      let d = 'M ' + pts[0].x.toFixed(1) + ' ' + pts[0].y.toFixed(1);
+      for (let i = 1; i < pts.length - 1; i++) {
+        const xc = (pts[i].x + pts[i + 1].x) / 2, yc = (pts[i].y + pts[i + 1].y) / 2;
+        d += ' Q ' + pts[i].x.toFixed(1) + ' ' + pts[i].y.toFixed(1) + ' ' + xc.toFixed(1) + ' ' + yc.toFixed(1);
+      }
+      return d + ' L ' + pts[SEG].x.toFixed(1) + ' ' + pts[SEG].y.toFixed(1);
+    };
+    const render = () => {
+      rope.setAttribute('d', path());
+      knobG.setAttribute('transform', 'translate(' + (pts[SEG].x - AX).toFixed(2) + ' ' + (pts[SEG].y - restY).toFixed(2) + ')');
+    };
+    let raf = 0, running = false, prevT = 0, prevDt = 0, dragging = false;
+    const target = { x: AX, y: restY };
+    const step = now => {
+      const dt = prevT ? Math.min(.04, Math.max(.004, (now - prevT) / 1000)) : 1 / 60;
+      prevT = now;
+      const tc = prevDt > 0 ? dt / prevDt : 1;
+      const velCoef = tc * Math.pow(CFG.damping, dt * 60), accCoef = dt * dt;
+      pts[SEG].fixed = dragging;
+      for (let i = 1; i < pts.length; i++) {
+        const p = pts[i];
+        if (p.fixed) continue;
+        const vx = p.x - p.ox, vy = p.y - p.oy;
+        p.ox = p.x; p.oy = p.y;
+        p.x += vx * velCoef;
+        p.y += vy * velCoef + CFG.gravity * accCoef;
+      }
+      pts[0].x = AX; pts[0].y = 0;
+      if (dragging) { pts[SEG].ox = pts[SEG].x; pts[SEG].oy = pts[SEG].y; pts[SEG].x = target.x; pts[SEG].y = target.y; }
+      for (let k = 0; k < CFG.iterations; k++) {
+        for (let i = 0; i < SEG; i++) {
+          const a = pts[i], b = pts[i + 1];
+          const dx = b.x - a.x, dy = b.y - a.y;
+          const dist = Math.hypot(dx, dy) || 1e-4;
+          const diff = (restSeg - dist) / dist * .5;
+          const ox = dx * diff, oy = dy * diff;
+          if (!a.fixed) { a.x -= ox; a.y -= oy; }
+          if (!b.fixed) { b.x += ox; b.y += oy; }
         }
-        return s + rect(0, 13, 12, 1, p[2]);
-      },
-      // two discs and a rule
-      (r, p) => circle(6, 7, 5, p[0]) + circle(6 + ri(r, -3, 3), 7 + ri(r, -3, 3), 2, p[1]) + rect(ri(r, 0, 2), 0, 1, 15, p[2])
+      }
+      prevDt = dt;
+      render();
+      let speed = 0;
+      for (let i = 1; i < pts.length; i++) speed += Math.abs(pts[i].x - pts[i].ox) + Math.abs(pts[i].y - pts[i].oy);
+      if (!dragging && speed < CFG.sleep * dt * 60) { running = false; return; }
+      raf = requestAnimationFrame(step);
+    };
+    const wake = () => { if (running) return; running = true; prevT = 0; prevDt = 0; raf = requestAnimationFrame(step); };
+    // The cord ends a little above the statement, wherever the layout puts
+    // it (syncAbout in script.js positions the statement).
+    const layout = () => {
+      const top = parseFloat(side && side.style.top) || 0;
+      restY = clamp(top ? top - 40 : 260, 140, 360);
+      restSeg = restY / SEG;
+      cordEl.style.setProperty('--cord-h', restY + 'px');
+      cordSvg.setAttribute('viewBox', '0 0 64 ' + (restY + 140));
+      knob.setAttribute('cy', restY);
+      const glove = $('#hm-cord-glove'); if (glove) glove.setAttribute('transform', 'translate(' + (AX - 8 * PX) + ' ' + (restY - 10 * PX) + ')');
+      hit.style.top = (restY - 23) + 'px';
+      if (note) note.style.top = (restY - 11) + 'px';
+      cancelAnimationFrame(raf); running = false;
+      make(); render();
+    };
+    // The hand: a 90s cursor hand on a 16 by 18 grid, 1 = outline, 2 = fill,
+    // each cell PX units, laid so the palm closes on the knob.
+    const PX = 2.2;
+    const HAND = [
+      '......11........', '.....1221.......', '.....1221.......', '.....1221.......', '.....122111.....',
+      '.....12212211...', '.....1221221211.', '.11..12212212221', '1221.12222222221', '1222122222222221',
+      '1222222222222221', '.122222222222221', '..12222222222221', '..1222222222221.', '...122222222221.',
+      '...12222222221..', '....1222222221..', '....1111111111..'
     ];
-    let grid = '<g stroke="rgba(17,26,54,.08)">';
-    for (let i = 1; i < 12; i++) grid += `<line x1="${i * u}" y1="0" x2="${i * u}" y2="${H}"/>`;
-    for (let j = 1; j < 15; j++) grid += `<line x1="0" y1="${j * u}" x2="${W}" y2="${j * u}"/>`;
-    grid += '</g>';
-    const poster = (seed, n) => {
-      const r = mulberry(seed);
-      const p = shuffle(pick(r, PALS), r);
-      const body = pick(r, RECIPES)(r, p);
-      const date = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase();
-      const foot = `<g font-family="-apple-system,BlinkMacSystemFont,system-ui,sans-serif" font-size="8.5" letter-spacing="1.2" fill="${INK}" stroke="${PAPER}" stroke-width="3" stroke-linejoin="round" paint-order="stroke"><text x="${u}" y="${H - u * .55}">AFTER HOURS · Nº ${String(n).padStart(3, '0')}</text><text x="${W - u}" y="${H - u * .55}" text-anchor="end">${date}</text></g>`;
-      return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"><rect width="${W}" height="${H}" fill="${PAPER}"/>${grid}<g style="mix-blend-mode:multiply">${body}</g>${foot}</svg>`;
-    };
-    let n = 1;
-    posterArt.innerHTML = poster(daySeed(), n);
-    posterBtn.addEventListener('click', () => {
-      n++;
-      const seed = Math.floor(Math.random() * 2 ** 31);
-      if (still.matches) { posterArt.innerHTML = poster(seed, n); return; }
-      posterArt.classList.add('is-swap');
-      setTimeout(() => { posterArt.innerHTML = poster(seed, n); requestAnimationFrame(() => posterArt.classList.remove('is-swap')); }, 280);
-    });
-  }
-
-  // ── 02 · The moon. Phase from the date against a known new moon; the lit
-  //    side is one path — a semicircle and an elliptical terminator.
-  const moon = $('#hm-moon'), moonWhy = $('#hm-moon-why');
-  if (moon) {
-    const SYN = 29.530588853;
-    let p = ((Date.now() - Date.UTC(2000, 0, 6, 18, 14)) / 864e5 / SYN) % 1; if (p < 0) p += 1;
-    const k = Math.cos(2 * Math.PI * p), waxing = p < .5, crescent = k > 0;
-    const r = 78, cx = 100, cy = 100, rx = Math.abs(k) * r;
-    const lit = `M${cx},${cy - r} A${r},${r} 0 0 1 ${cx},${cy + r} A${rx.toFixed(2)},${r} 0 0 ${crescent ? 0 : 1} ${cx},${cy - r} Z`;
-    const sr = mulberry(daySeed());
-    let stars = '';
-    for (let i = 0; i < 26; i++) {
-      const x = sr() * 200, y = sr() * 200;
-      if (Math.hypot(x - cx, y - cy) < r + 8) continue;
-      stars += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(0.5 + sr() * .9).toFixed(2)}" fill="rgba(244,241,234,${(0.25 + sr() * .5).toFixed(2)})"/>`;
+    const gloveG = $('#hm-cord-glove');
+    if (gloveG) {
+      let s = '';
+      HAND.forEach((row, y) => [...row].forEach((c, x) => {
+        if (c === '.') return;
+        s += '<rect x="' + (x * PX).toFixed(2) + '" y="' + (y * PX).toFixed(2) + '" width="' + PX + '" height="' + PX + '" fill="' + (c === '1' ? '#141210' : '#fff') + '"/>';
+      }));
+      gloveG.innerHTML = s;
     }
-    moon.innerHTML = `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">${stars}<circle cx="${cx}" cy="${cy}" r="${r}" fill="#0B1126" stroke="rgba(244,241,234,.14)"/><path d="${lit}" fill="${PAPER}"${waxing ? '' : ' transform="translate(200,0) scale(-1,1)"'}/></svg>`;
-    const lit100 = Math.round((1 - k) / 2 * 100);
-    const name = p < .03 || p > .97 ? 'New moon' : p < .22 ? 'Waxing crescent' : p < .28 ? 'First quarter'
-      : p < .47 ? 'Waxing gibbous' : p < .53 ? 'Full moon' : p < .72 ? 'Waning gibbous' : p < .78 ? 'Last quarter' : 'Waning crescent';
-    const toFull = Math.round(((0.5 - p + 1) % 1) * SYN);
-    const when = Math.abs(p - .5) < .03 ? 'Full tonight.' : toFull === 1 ? 'Full tomorrow.' : `Full in ${toFull} days.`;
-    if (moonWhy) moonWhy.textContent = `${name}, ${lit100}% lit. ${when} From the date alone.`;
-    moon.setAttribute('aria-label', `${name}, ${lit100}% lit`);
+    if (side) new MutationObserver(layout).observe(side, { attributes: true, attributeFilter: ['style'] });
+    layout();
+
+    let pulled = false, clicked = false, didDrag = false, x0 = 0, y0 = 0;
+    const pull = () => {
+      toggleLights();
+      if (!pulled) { pulled = true; cordEl.classList.add('is-pulled'); }
+      hit.setAttribute('aria-pressed', String(lit));
+    };
+    const scripted = () => { pull(); if (still.matches) return; pts[SEG].oy -= 22; wake(); };
+    hit.addEventListener('pointerdown', e => {
+      if (e.button !== 0) return;
+      dragging = true; didDrag = false; clicked = false; x0 = e.clientX; y0 = e.clientY;
+      target.x = AX; target.y = restY;
+      try { hit.setPointerCapture(e.pointerId); } catch (x) {}
+      lab.classList.add('is-pulling');
+      wake();
+      e.preventDefault();
+    });
+    hit.addEventListener('pointermove', e => {
+      if (!dragging) return;
+      const rx = e.clientX - x0, ry = restY + (e.clientY - y0);
+      if (Math.abs(rx) > 3 || Math.abs(e.clientY - y0) > 3) didDrag = true;
+      const dist = Math.hypot(rx, ry) || 1e-4, maxD = restY + CFG.stretchMax;
+      const k = dist > maxD ? maxD / dist : 1;
+      target.x = AX + rx * k; target.y = ry * k;
+      if (!clicked && dist - restY >= Math.min(CFG.stretchToggle, CFG.stretchMax - 1)) { clicked = true; pull(); }
+    });
+    const up = () => {
+      if (!dragging) return;
+      dragging = false; lab.classList.remove('is-pulling');
+      const p = pts[SEG], vx = p.x - p.ox, vy = p.y - p.oy, v = Math.hypot(vx, vy);
+      if (v > CFG.maxVelocity) { const k = CFG.maxVelocity / v; p.ox = p.x - vx * k; p.oy = p.y - vy * k; }
+      wake();
+      if (!didDrag && !clicked) scripted();
+    };
+    hit.addEventListener('pointerup', up); hit.addEventListener('pointercancel', up);
+    hit.addEventListener('pointerenter', () => cordEl.classList.add('is-hover'));
+    hit.addEventListener('pointerleave', () => cordEl.classList.remove('is-hover'));
+    hit.addEventListener('mousedown', e => e.preventDefault());
+    hit.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) { e.preventDefault(); scripted(); } });
+    // The entrance: a clean fall from above (CSS), then the rope takes the
+    // momentum and does the overshoot, the swing and the settle itself.
+    let dropped = false;
+    const endDrop = () => {
+      if (dropped) return; dropped = true;
+      inner.classList.remove('is-drop');
+      if (still.matches) return;
+      pts[SEG].oy -= 13; pts[SEG].ox -= 6; wake();
+    };
+    const drop = () => {
+      if (!inner || still.matches) return;
+      dropped = false;
+      inner.classList.remove('is-drop'); void inner.offsetWidth; inner.classList.add('is-drop');
+      setTimeout(endDrop, 1700);
+    };
+    if (inner) inner.addEventListener('animationend', e => { if (e.animationName === 'cord-drop') endDrop(); });
+    onArrive.push(drop);
+    if (labWanted()) drop();
   }
 
-  // ── 03 · A number that only goes up.
-  const count = $('#hm-count');
-  if (count) {
-    const EPOCH = Date.UTC(2020, 0, 1), stage = count.parentElement;
-    const fmt = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-    const fit = () => {
-      const availW = stage.clientWidth - 32, availH = stage.clientHeight - 44;
-      if (availW <= 0 || availH <= 0) return;
-      count.style.fontSize = '100px';
-      const w = count.getBoundingClientRect().width;
-      if (w) count.style.fontSize = Math.max(16, Math.min(100 * availW / w, availH * .8)) + 'px';
+  // ── Type that bends. Each letter of the headline and the piece titles is
+  //    its own span; the nearer the pointer, the wider and heavier it sets.
+  //    Words stay whole (a widening letter must never push its neighbour
+  //    onto the next line); only the spaces between them can break.
+  const lens = [];
+  lab.querySelectorAll('.lab-h2, .lab-title').forEach(h => {
+    const base = h.classList.contains('lab-title') ? [80, 800] : [88, 700];
+    const text = h.textContent;
+    h.textContent = '';
+    text.split(' ').forEach((word, i) => {
+      if (i) h.appendChild(document.createTextNode(' '));
+      const w = document.createElement('span'); w.className = 'wd';
+      [...word].forEach(ch => {
+        const s = document.createElement('span');
+        s.className = 'ch'; s.textContent = ch; w.appendChild(s);
+        lens.push({ el: s, base });
+      });
+      h.appendChild(w);
+    });
+  });
+  if (lens.length && !touch && !still.matches) {
+    let px = -1e4, py = -1e4, raf = 0;
+    const relax = () => lens.forEach(l => { l.el.style.removeProperty('--w'); l.el.style.removeProperty('--g'); });
+    onLights.push(() => { if (lit) relax(); });
+    const paint = () => {
+      raf = 0;
+      // Only in the dark: with the lights on the type stands still.
+      if (lit) { relax(); return; }
+      lens.forEach(l => {
+        const r = l.el.getBoundingClientRect();
+        if (!r.width) return;
+        const dx = px - (r.left + r.width / 2), dy = py - (r.top + r.height / 2);
+        const k = Math.exp(-(dx * dx + dy * dy) / 16000);
+        l.el.style.setProperty('--w', (l.base[0] + (100 - l.base[0]) * k).toFixed(1));
+        l.el.style.setProperty('--g', (l.base[1] - 380 * k).toFixed(0));
+      });
     };
-    const tick = () => { count.textContent = fmt(Math.floor((Date.now() - EPOCH) / 1000)); };
-    tick(); fit();
-    setInterval(tick, 1000);
-    addEventListener('resize', fit);
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
-    new MutationObserver(fit).observe(lab, { attributes: true, attributeFilter: ['style'] });
+    lab.addEventListener('pointermove', e => { px = e.clientX; py = e.clientY; if (!raf) raf = requestAnimationFrame(paint); }, { passive: true });
+    lab.addEventListener('pointerleave', () => { px = -1e4; py = -1e4; if (!raf) raf = requestAnimationFrame(paint); });
   }
 
-  // ── 04 · Field. A lattice of short lines; each drifts on its own slow wave
-  //    and turns to face the pointer as it comes near.
-  const field = $('#hm-field');
-  if (field) {
-    const ctx = field.getContext('2d');
-    let W = 0, H = 0, pts = [], px = -1e4, py = -1e4, raf = 0, dirty = true;
-    const t0 = performance.now();
-    const wrap = a => { a = (a + Math.PI) % (2 * Math.PI); if (a < 0) a += 2 * Math.PI; return a - Math.PI; };
-    const build = () => {
-      const dpr = Math.min(2, devicePixelRatio || 1), r = field.getBoundingClientRect();
-      W = r.width; H = r.height;
-      if (!W || !H) return;
-      field.width = Math.round(W * dpr); field.height = Math.round(H * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const s = 22, ox = ((W % s) / 2) + s / 2, oy = ((H % s) / 2) + s / 2;
-      pts = [];
-      for (let y = oy; y < H; y += s) for (let x = ox; x < W; x += s) pts.push({ x, y, a: 0 });
-      dirty = true;
-    };
-    const draw = t => {
-      ctx.clearRect(0, 0, W, H);
-      const tt = still.matches ? 0 : (t - t0) / 1000, L = 4.5;
-      ctx.lineWidth = 1.5; ctx.lineCap = 'round';
-      for (const p of pts) {
-        const idle = Math.sin(p.x * .012 + tt * .6) * 1.2 + Math.cos(p.y * .015 - tt * .45) * 1.2;
-        const dx = px - p.x, dy = py - p.y;
-        const w = Math.exp(-(dx * dx + dy * dy) / 45000);
-        const target = idle + wrap(Math.atan2(dy, dx) - idle) * w;
-        p.a += wrap(target - p.a) * .14;
-        const c = Math.cos(p.a) * L, s = Math.sin(p.a) * L;
-        ctx.strokeStyle = w > .4 ? ACID : `rgba(244,241,234,${(.24 + w * .6).toFixed(3)})`;
-        ctx.beginPath(); ctx.moveTo(p.x - c, p.y - s); ctx.lineTo(p.x + c, p.y + s); ctx.stroke();
+  // ── Objects that lean after the pointer.
+  const tilt = (zone, el, ry0, rx0, amt) => {
+    if (!zone || !el || touch || still.matches) return;
+    const rest = () => { el.style.removeProperty('--ry'); el.style.removeProperty('--rx'); };
+    onLights.push(() => { if (lit) rest(); });
+    zone.addEventListener('pointermove', e => {
+      if (lit) return;
+      const r = zone.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+      el.style.setProperty('--ry', (ry0 + x * amt) + 'deg');
+      el.style.setProperty('--rx', (rx0 - y * amt) + 'deg');
+    }, { passive: true });
+    zone.addEventListener('pointerleave', () => { el.style.removeProperty('--ry'); el.style.removeProperty('--rx'); });
+  };
+
+  // ── The deck (touch). The stage pins to the screen and the page's own
+  //    scroll drives it: a piece taller than the screen scrolls inside the
+  //    stage first, then the next piece slides in from the right, one
+  //    screen of travel per move. The deck is exactly as tall as all of
+  //    that travel, so the page carries on normally afterwards.
+  const deck = $('#hm-deck'), pieces = $('#hm-pieces'), track = $('#hm-track'), dots = $('#hm-dots');
+  if (deck && pieces && track && touch) {
+    const slides = [...track.querySelectorAll(':scope > .lab-piece')], n = slides.length;
+    const marks = dots ? [...dots.querySelectorAll('i')] : [];
+    // How far the page scrolls to carry one piece off and the next one on.
+    // A full screen made the reader work for it — a flick would not finish
+    // the move, so the deck sat between two projects. A third of a screen
+    // puts a whole project within one ordinary flick, and the markers below
+    // make sure it lands on one.
+    const STEP = () => Math.max(150, Math.round(vh * 0.34));
+    let vh = 0, top = 0, over = [], at = -1;
+    const place = () => {
+      const step = STEP();
+      let y = lab.scrollTop - top, tx = 0, i = 0;
+      for (i = 0; i < n; i++) {
+        const s = slides[i];
+        if (y <= 0) { s.scrollTop = 0; break; }
+        s.scrollTop = Math.min(over[i], y);
+        y -= over[i];
+        if (i === n - 1) { tx = i; break; }
+        if (y <= 0) { tx = i; break; }
+        if (y < step) { tx = i + y / step; slides[i + 1].scrollTop = 0; break; }
+        y -= step; tx = i + 1;
+      }
+      for (let k = i + 1; k < n; k++) slides[k].scrollTop = 0;
+      // A whole piece or nothing. Following the scroll continuously meant the
+      // deck could sit anywhere between two projects — half of one and half of
+      // the next — so the position is rounded and the track slides the rest of
+      // the way itself. Crossing the middle of a move is what triggers it, so
+      // one flick lands one project and there is no in-between to stop on.
+      const cur = Math.round(tx);
+      track.style.transform = 'translate3d(' + (-cur * 100) + '%,0,0)';
+      if (cur !== at) {
+        at = cur;
+        marks.forEach((m, k) => m.classList.toggle('is-on', k === cur));
       }
     };
-    const frame = t => { draw(t); raf = requestAnimationFrame(frame); };
-    // Reduced motion: no drift, but the lines still look at the pointer —
-    // redrawn only while it moves.
-    const stillFrame = () => { if (!dirty) return; draw(0); dirty = pts.some(p => Math.abs(wrap(p.a - (Math.sin(p.x * .012) * 1.2 + Math.cos(p.y * .015) * 1.2))) > .01 && px > -1e3); raf = dirty ? requestAnimationFrame(stillFrame) : 0; };
-    field.addEventListener('pointermove', e => { const r = field.getBoundingClientRect(); px = e.clientX - r.left; py = e.clientY - r.top; dirty = true; if (still.matches && !raf) raf = requestAnimationFrame(stillFrame); }, { passive: true });
-    field.addEventListener('pointerleave', () => { px = -1e4; py = -1e4; dirty = true; if (still.matches && !raf) raf = requestAnimationFrame(stillFrame); });
-    addEventListener('resize', () => { build(); if (!raf && still.matches) raf = requestAnimationFrame(stillFrame); });
-    build();
-    watch(field, () => { if (!W) build(); if (still.matches) { dirty = true; if (!raf) raf = requestAnimationFrame(stillFrame); } else if (!raf) raf = requestAnimationFrame(frame); },
-                 () => { cancelAnimationFrame(raf); raf = 0; });
-  }
-
-  // ── 05 · Ticket to nowhere. Tonight's is the same for everyone; a reissue
-  //    is yours.
-  const ticket = $('#hm-ticket'), pass = $('#hm-ticket-pass');
-  if (ticket && pass) {
-    const DEST = [['KEF', 'Reykjavík'], ['LIS', 'Lisbon'], ['OAX', 'Oaxaca'], ['CTS', 'Sapporo'], ['TBS', 'Tbilisi'], ['RAK', 'Marrakesh'],
-      ['TOS', 'Tromsø'], ['NAP', 'Naples'], ['BEY', 'Beirut'], ['OPO', 'Porto'], ['PMO', 'Palermo'], ['ATH', 'Athens'], ['TNG', 'Tangier'],
-      ['FAE', 'Vágar'], ['LJU', 'Ljubljana'], ['HND', 'Tokyo'], ['MEX', 'Mexico City'], ['CPT', 'Cape Town'], ['MLA', 'Valletta'], ['SPU', 'Split']];
-    const el = id => document.getElementById(id);
-    const issue = r => {
-      const d = pick(r, DEST);
-      el('tk-to').textContent = d[0]; el('tk-city').textContent = d[1];
-      el('tk-flight').textContent = 'AH ' + ri(r, 100, 999);
-      el('tk-time').textContent = '0' + ri(r, 0, 4) + ':' + String(ri(r, 0, 11) * 5).padStart(2, '0');
-      el('tk-gate').textContent = String.fromCharCode(65 + ri(r, 0, 5)) + ri(r, 1, 24);
-      const seat = ri(r, 1, 32) + 'ACDF'[ri(r, 0, 3)];
-      el('tk-seat').textContent = seat; el('tk-seat2').textContent = seat;
-      el('tk-date').textContent = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }).toLowerCase();
-      let bars = '';
-      for (let i = 0; i < 44; i++) bars += `<i style="width:${[1, 1, 1, 2, 2, 3][ri(r, 0, 5)]}px"></i>`;
-      el('tk-bars').innerHTML = bars;
-    };
-    issue(mulberry(daySeed() + 7));
-    ticket.addEventListener('click', () => {
-      const r = mulberry(Math.floor(Math.random() * 2 ** 31));
-      if (still.matches) { issue(r); return; }
-      pass.classList.add('is-swap');
-      setTimeout(() => { issue(r); requestAnimationFrame(() => pass.classList.remove('is-swap')); }, 300);
+    // A marker per piece, at the scroll position where that piece is exactly
+    // in place. They are what the scroller snaps to, so the deck always comes
+    // to rest on one project rather than between two. Rebuilt on every measure
+    // because a piece's own overflow moves everything after it.
+    const snaps = slides.map(() => {
+      const m = document.createElement('div');
+      m.className = 'lab-snap';
+      m.setAttribute('aria-hidden', 'true');
+      deck.appendChild(m);
+      return m;
     });
-  }
-
-  // ── 06 · 1AM radio. Six stations on a dial; between them, static. Sound is
-  //    synthesised (one loop of noise through a filter) and only on request.
-  const dial = $('#rd-dial');
-  if (dial) {
-    const STATIONS = [
-      [88.9, 'Test card', 'A tone and a pattern. Nobody watching.'],
-      [91.3, 'Rain on Calle Mayor', 'Recorded from a window. Loops forever.'],
-      [94.7, 'The Bench', 'Whatever is being built tonight, live.'],
-      [98.2, 'Búho N26', 'The last night bus home, and the one after it.'],
-      [101.5, 'Dead air', 'Nothing. On purpose.'],
-      [104.9, 'Closedown', 'The anthem, then nothing until six.']
-    ];
-    const FMIN = 87.5, FMAX = 108, SPAN = FMAX - FMIN;
-    const pct = f => ((f - FMIN) / SPAN * 100).toFixed(3);
-    let html = '';
-    for (let f = 88; f <= 108; f += .5) {
-      const major = f % 2 === 0;
-      html += `<span class="rd-tick${major ? ' is-major' : ''}${f % 4 === 0 ? ' is-big' : ''}" style="left:${pct(f)}%"${major ? ` data-f="${f}"` : ''}></span>`;
-    }
-    STATIONS.forEach(s => { html += `<span class="rd-station" style="left:${pct(s[0])}%"></span>`; });
-    dial.insertAdjacentHTML('afterbegin', html);
-    const needle = $('#rd-needle'), fEl = $('#rd-f'), nameEl = $('#rd-name'), progEl = $('#rd-prog'), vu = $('#rd-vu'), snd = $('#rd-snd');
-    const bars = [];
-    for (let i = 0; i < 28; i++) { const b = document.createElement('i'); vu.appendChild(b); bars.push(b); }
-    let f = 94.7, tuned = null, q = 0;
-
-    const audio = (() => {
-      let ac = null, filt, gain, on = false;
-      const build = () => {
-        const AC = window.AudioContext || window.webkitAudioContext;
-        if (!AC) return false;
-        ac = new AC();
-        const len = ac.sampleRate * 2, buf = ac.createBuffer(1, len, ac.sampleRate), d = buf.getChannelData(0);
-        for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
-        const src = ac.createBufferSource(); src.buffer = buf; src.loop = true;
-        filt = ac.createBiquadFilter(); gain = ac.createGain(); gain.gain.value = 0;
-        src.connect(filt); filt.connect(gain); gain.connect(ac.destination); src.start();
-        return true;
-      };
-      const paint = () => { snd.setAttribute('aria-pressed', String(on)); snd.textContent = on ? 'sound on' : 'sound off'; };
-      return {
-        set(st, qq) {
-          if (!ac || !on) return;
-          const t = ac.currentTime;
-          if (st) {
-            filt.type = 'lowpass';
-            filt.frequency.setTargetAtTime(320 + STATIONS.indexOf(st) * 170, t, .08);
-            filt.Q.setTargetAtTime(1.1, t, .08);
-            gain.gain.setTargetAtTime(st[1] === 'Dead air' ? .003 : .028 + .05 * (1 - qq), t, .08);
-          } else {
-            filt.type = 'bandpass';
-            filt.frequency.setTargetAtTime(2400, t, .08);
-            filt.Q.setTargetAtTime(.5, t, .08);
-            gain.gain.setTargetAtTime(.07, t, .08);
-          }
-        },
-        async toggle() {
-          if (!ac && !build()) return;
-          on = !on; paint();
-          try { if (on) await ac.resume(); else await ac.suspend(); } catch (e) {}
-          if (on) this.set(tuned, q);
-        },
-        off() { if (on) this.toggle(); }
-      };
-    })();
-
-    const setF = nf => {
-      f = Math.max(FMIN, Math.min(FMAX, Math.round(nf * 10) / 10));
-      needle.style.left = pct(f) + '%';
-      fEl.textContent = f.toFixed(1);
-      dial.setAttribute('aria-valuenow', f.toFixed(1));
-      let best = null, bd = 9;
-      STATIONS.forEach(s => { const d = Math.abs(s[0] - f); if (d < bd) { bd = d; best = s; } });
-      q = bd < .35 ? 1 - bd / .35 : 0;
-      tuned = q > 0 ? best : null;
-      nameEl.textContent = tuned ? tuned[1] : 'static';
-      nameEl.classList.toggle('is-static', !tuned);
-      progEl.textContent = tuned ? tuned[2] : 'Between stations. Keep going.';
-      vu.classList.toggle('is-tuned', !!tuned);
-      dial.setAttribute('aria-valuetext', f.toFixed(1) + (tuned ? ', ' + tuned[1] : ', static'));
-      audio.set(tuned, q);
-    };
-    const fromX = x => { const r = dial.getBoundingClientRect(); return FMIN + Math.max(0, Math.min(1, (x - r.left) / r.width)) * SPAN; };
-    let drag = false;
-    dial.addEventListener('pointerdown', e => { drag = true; try { dial.setPointerCapture(e.pointerId); } catch (x) {} setF(fromX(e.clientX)); });
-    dial.addEventListener('pointermove', e => { if (drag) setF(fromX(e.clientX)); });
-    const up = () => { drag = false; };
-    dial.addEventListener('pointerup', up); dial.addEventListener('pointercancel', up);
-    dial.addEventListener('keydown', e => {
-      const step = e.shiftKey ? 1 : .1;
-      if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { setF(f - step); e.preventDefault(); }
-      if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { setF(f + step); e.preventDefault(); }
-    });
-    snd.addEventListener('click', () => audio.toggle());
-    lab.querySelectorAll('[data-go]').forEach(el => el.addEventListener('click', () => audio.off()));
-    document.querySelectorAll('#hm-head [data-go]').forEach(el => el.addEventListener('click', () => audio.off()));
-    setF(f);
-
-    let raf = 0; const t0 = performance.now();
-    const frame = t => {
-      const tt = (t - t0) / 1000;
-      bars.forEach((b, i) => {
-        let h;
-        if (tuned && tuned[1] === 'Dead air') h = .05 + Math.random() * .03;
-        else if (tuned) { const beat = Math.sin(tt * 2.3 + i * .42) * Math.sin(tt * .8 + i * .11); h = .12 + .8 * Math.abs(beat) * (.55 + .45 * q); }
-        else h = .06 + Math.random() * .5;
-        b.style.height = (h * 100).toFixed(1) + '%';
+    const size = () => {
+      vh = lab.clientHeight;
+      lab.style.setProperty('--vh', vh + 'px');
+      over = slides.map(s => Math.max(0, s.scrollHeight - s.clientHeight));
+      const step = STEP();
+      const travel = over.reduce((a, b) => a + b, 0) + step * (n - 1);
+      deck.style.height = (vh + travel) + 'px';
+      top = deck.getBoundingClientRect().top - lab.getBoundingClientRect().top + lab.scrollTop;
+      let at0 = 0;
+      snaps.forEach((m, k) => {
+        m.style.top = at0 + 'px';
+        at0 += over[k] + step;
       });
+      place();
+    };
+    // Driven from a frame loop while the deck is on screen, not from scroll
+    // events alone: inside an overflow scroller some phones only report a
+    // scroll once it has stopped, and the deck would jump instead of move.
+    let raf = 0, lastY = -1;
+    const loop = () => { if (lab.scrollTop !== lastY) { lastY = lab.scrollTop; place(); } raf = requestAnimationFrame(loop); };
+    watch(deck, () => { if (!raf) raf = requestAnimationFrame(loop); }, () => { cancelAnimationFrame(raf); raf = 0; });
+    lab.addEventListener('scroll', place, { passive: true });
+    lab.addEventListener('touchmove', place, { passive: true });
+    addEventListener('resize', size);
+    onArrive.push(() => setTimeout(size, 50));
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(size);
+    setTimeout(size, 600);
+    size();
+  }
+
+  // ── 01 · The television. The 404 game's avatar, drawn from the same
+  //    sprite sheet the game cuts its parts from, running along a hill that
+  //    never ends. Rings drift past and get picked up. Hover and it runs
+  //    faster; click the glass and the picture becomes the story.
+  const tv = $('#hm-tv'), cv = $('#hm-tv-canvas'), tvScreen = $('#hm-tv-screen');
+  if (tv && cv && cv.getContext) {
+    const ctx = cv.getContext('2d');
+    const W = cv.width, H = cv.height, GY = 168, SC = .6;
+    ctx.imageSmoothingEnabled = false;
+    const rig = new Image(); let rigReady = false;
+    rig.onload = () => { rigReady = true; };
+    rig.src = '/assets/avatar-rig.png';
+    const P = {
+      head: { sx: 0, sy: 0, w: 48, h: 51, px: 25.5, py: 50 }, torso: { sx: 50, sy: 0, w: 41, h: 37, px: 20.3, py: 36.5 },
+      armF: { sx: 93, sy: 0, w: 21, h: 29, px: 10, py: 2.2 }, armB: { sx: 116, sy: 0, w: 8, h: 14, px: -2.5, py: -9.8 },
+      legB: { sx: 126, sy: 0, w: 20, h: 24, px: 15.3, py: .2 }, legF: { sx: 148, sy: 0, w: 34, h: 24, px: 5.2, py: .2 }
+    };
+    const A = { neck: [0, -36.2], shF: [-16.3, -32], shB: [9.5, -30.3], hipB: [-6.2, .2], hipF: [6.3, .2] };
+    const part = (p, rot) => { ctx.save(); ctx.rotate(rot || 0); ctx.drawImage(rig, p.sx, p.sy, p.w, p.h, -p.px, -p.py, p.w, p.h); ctx.restore(); };
+    let cam = 0, phase = 0, speed = 1, want = 1, rings = [], sparks = [], got = 0, nextRing = 1.2, raf = 0, last = 0;
+    const ringsEl = $('#hm-tv-rings');
+    const cloud = (x, y, s) => { ctx.fillStyle = 'rgba(255,255,255,.92)'; ctx.fillRect(x, y, 30 * s, 9 * s); ctx.fillRect(x + 7 * s, y - 6 * s, 14 * s, 7 * s); ctx.fillRect(x + 17 * s, y - 4 * s, 10 * s, 5 * s); };
+    const draw = () => {
+      const g = ctx.createLinearGradient(0, 0, 0, H);
+      g.addColorStop(0, '#3fa6ff'); g.addColorStop(.6, '#7fcbff'); g.addColorStop(1, '#c9ecff');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = '#fff4b0'; ctx.beginPath(); ctx.arc(268, 34, 15, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#ffe36e'; ctx.beginPath(); ctx.arc(268, 34, 11, 0, Math.PI * 2); ctx.fill();
+      const cx = (cam * .15) % 420;
+      for (let i = -1; i < 2; i++) { cloud(i * 420 - cx + 40, 40, 1.2); cloud(i * 420 - cx + 210, 66, .9); cloud(i * 420 - cx + 330, 26, 1); }
+      const hx = (cam * .3) % 300;
+      for (let i = -1; i < 3; i++) {
+        const bx = i * 300 - hx;
+        ctx.fillStyle = '#5fcf7a'; ctx.beginPath(); ctx.arc(bx + 70, GY + 12, 95, Math.PI, 0); ctx.fill();
+        ctx.fillStyle = '#4bbf68'; ctx.beginPath(); ctx.arc(bx + 220, GY + 18, 75, Math.PI, 0); ctx.fill();
+      }
+      const nx = (cam * .55) % 240;
+      for (let i = -1; i < 3; i++) {
+        const bx = i * 240 - nx;
+        ctx.fillStyle = '#2fa34e'; ctx.beginPath(); ctx.arc(bx + 40, GY + 4, 32, Math.PI, 0); ctx.fill();
+        ctx.fillStyle = '#278f44'; ctx.beginPath(); ctx.arc(bx + 160, GY + 6, 44, Math.PI, 0); ctx.fill();
+      }
+      ctx.fillStyle = '#3bb54a'; ctx.fillRect(0, GY, W, 6);
+      ctx.fillStyle = '#8a5a2b'; ctx.fillRect(0, GY + 6, W, H - GY - 6);
+      const ox = cam % 24;
+      ctx.fillStyle = '#a56d36';
+      for (let y = GY + 6; y < H; y += 12) for (let x = -24 - ox + ((y - GY - 6) / 12 % 2) * 12; x < W; x += 24) ctx.fillRect(x, y, 12, 12);
+      rings.forEach(r => {
+        ctx.strokeStyle = '#FFC61A'; ctx.lineWidth = 3;
+        const sq = Math.abs(Math.cos(r.t * 5));
+        ctx.beginPath(); ctx.ellipse(r.x, r.y, 7 * (0.25 + 0.75 * sq), 7, 0, 0, Math.PI * 2); ctx.stroke();
+      });
+      sparks.forEach(s => { ctx.fillStyle = s.c; ctx.fillRect(s.x - 2, s.y - 2, 4, 4); });
+      if (!rigReady) return;
+      const c = clamp(speed, 0, 1.6), s = Math.sin(phase), cs = Math.cos(phase);
+      const legF = -s * .95 * (.4 + .6 * c), legB = s * .95 * (.4 + .6 * c);
+      const armF = s * .8 * (.3 + .7 * c) - .2 * c, armB = -s * .8 * (.3 + .7 * c) + .2 * c;
+      const lean = .2 * Math.min(1, c), head = -.1 * c + cs * .04 * c, bounce = Math.abs(cs) * 5 * c;
+      ctx.save();
+      ctx.translate(96, GY);
+      ctx.scale(SC, SC);
+      ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.beginPath(); ctx.ellipse(0, 2, 20, 5, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.translate(0, -24.3 - bounce);
+      ctx.save(); ctx.translate(A.hipB[0], A.hipB[1]); part(P.legB, legB); ctx.restore();
+      ctx.save(); ctx.rotate(lean);
+      ctx.save(); ctx.translate(A.shB[0], A.shB[1]); part(P.armB, armB); ctx.restore();
+      part(P.torso, 0);
+      ctx.save(); ctx.translate(A.neck[0], A.neck[1]); part(P.head, head); ctx.restore();
+      ctx.restore();
+      ctx.save(); ctx.translate(A.hipF[0], A.hipF[1]); part(P.legF, legF); ctx.restore();
+      ctx.save(); ctx.rotate(lean); ctx.translate(A.shF[0], A.shF[1]); part(P.armF, armF); ctx.restore();
+      ctx.restore();
+    };
+    const frame = t => {
+      const dt = Math.min(.05, (t - last) / 1000 || 0); last = t;
+      speed += (want - speed) * Math.min(1, dt * 4);
+      const v = 150 * speed;
+      cam += v * dt; phase += dt * 13 * speed;
+      nextRing -= dt;
+      if (nextRing <= 0) { nextRing = 1 + Math.random() * 1.6; const n = Math.random() < .35 ? 3 : 1; for (let i = 0; i < n; i++) rings.push({ x: W + 20 + i * 20, y: GY - 40 - Math.random() * 40, t: Math.random() * 6 }); }
+      rings.forEach(r => { r.x -= v * dt; r.t += dt; });
+      rings = rings.filter(r => {
+        if (Math.abs(r.x - 96) < 12 && r.y > GY - 70) {
+          got++; if (ringsEl) ringsEl.textContent = '◎ ' + got;
+          for (let i = 0; i < 6; i++) sparks.push({ x: r.x, y: r.y, vx: (Math.random() - .5) * 120, vy: -40 - Math.random() * 90, t: 0, c: i % 2 ? '#FFC61A' : '#fff' });
+          return false;
+        }
+        return r.x > -20;
+      });
+      sparks.forEach(s => { s.t += dt; s.x += s.vx * dt; s.y += s.vy * dt; s.vy += 260 * dt; });
+      sparks = sparks.filter(s => s.t < .5);
+      draw();
       raf = requestAnimationFrame(frame);
     };
-    if (still.matches) bars.forEach((b, i) => { b.style.height = (12 + 60 * Math.abs(Math.sin(i * .5))).toFixed(0) + '%'; });
-    else watch(dial, () => { if (!raf) raf = requestAnimationFrame(frame); }, () => { cancelAnimationFrame(raf); raf = 0; audio.off(); });
+    if (still.matches) { rig.onload = () => { rigReady = true; draw(); }; draw(); }
+    else watch(tv, () => { if (!raf) { last = 0; raf = requestAnimationFrame(frame); } }, () => { cancelAnimationFrame(raf); raf = 0; });
+    tv.addEventListener('pointerenter', () => { want = 1.7; });
+    tv.addEventListener('pointerleave', () => { want = 1; });
+    tilt($('#hm-tv'), $('#hm-tv-shell'), 0, 0, 7);
+    const story = on => {
+      tv.classList.toggle('is-story', on);
+      const st = $('#hm-tv-story'), ui = $('#hm-tv-ui');
+      if (st) st.setAttribute('aria-hidden', String(!on));
+      if (ui) ui.setAttribute('aria-hidden', String(on));
+      want = on ? .35 : 1;
+    };
+    if (tvScreen) tvScreen.addEventListener('click', e => { if (!e.target.closest('a,button')) story(!tv.classList.contains('is-story')); });
+    const coin = $('#hm-tv-coin'); if (coin) coin.addEventListener('click', () => story(true));
+    const eject = $('#hm-tv-eject'); if (eject) eject.addEventListener('click', () => story(false));
+    // A fresh coin means a fresh pair of runs on the game page.
+    const play = $('#hm-tv-play'); if (play) play.addEventListener('click', () => { try { sessionStorage.setItem('hm-404-runs', '0'); } catch (x) {} });
   }
 
-  // ── 07 · Roadmap poetry.
-  const poemBtn = $('#hm-poem'), poemQ = $('#hm-poem-q');
-  if (poemBtn && poemQ) {
-    const N = ['north star', 'MVP', 'roadmap', 'flywheel', 'single source of truth', 'alignment', 'low-hanging fruit', 'quick win',
-      'parking lot', 'learnings', 'synergy', 'bandwidth', 'runway', 'tiger team', 'ask', 'why', 'table stakes', 'guardrails',
-      'growth loop', 'definition of done', 'happy path', 'blast radius', 'north-star metric', 'one-pager', 'discovery phase', 'value prop'];
-    const V = ['double-click on', 'socialise', 'de-risk', 'unpack', 'level-set on', 'pressure-test', 'take offline', 'right-size',
-      'sunset', 'land', 'unblock', 'action', 'workshop', 'ladder up', 'circle back on', 'park', 'align on', 'get ahead of', 'lean into',
-      'operationalise', 'boil down', 'sanity-check'];
-    const A = ['cross-functional', 'scrappy', 'holistic', 'outcome-driven', 'zero-to-one', 'best-in-class', 'ruthless', 'data-informed',
-      'frictionless', 'lightweight', 'strategic', 'non-trivial', 'directionally correct', 'high-leverage'];
-    const T = ['a two-week sprint', 'a quick sync', 'a fifteen-minute huddle', 'Q3', 'the next planning cycle', 'a working session', 'EOD', 'the offsite'];
-    const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
-    const the = n => 'the ' + n;
-    const an = n => (/^[aeiou]/i.test(n) ? 'an ' : 'a ') + n;
-    const TPL = [
-      p => `Let’s ${p.v()} ${the(p.n())} before we ${p.v()} ${the(p.n())}.`,
-      p => `Circling back: ${the(p.n())} is ${an(p.a())} ${p.n()}, not ${an(p.n())}.`,
-      p => `Can we ${p.v()} ${the(p.n())} in ${p.t()}?`,
-      p => `${cap(the(p.n()))} is really just ${the(p.n())} for ${the(p.n())}.`,
-      p => `Zoom out: we’re here to ${p.v()} ${the(p.n())}, not to ${p.v()} ${the(p.n())}.`,
-      p => `Quick one: who owns ${the(p.n())} once we ${p.v()} the ${p.a()} ${p.n()}?`,
-      p => `Parking this, but ${the(p.n())} feels ${p.a()} and I’d love us to ${p.v()} it by ${p.t()}.`,
-      p => `The ${p.a()} version of this is that we ${p.v()} ${the(p.n())} and call it ${the(p.n())}.`,
-      p => `Not to ${p.v()} ${the(p.n())}, but is ${the(p.n())} even ${p.a()}?`
-    ];
-    let last = -1;
-    const line = () => {
-      const r = Math.random;
-      const ns = N.slice(), vs = V.slice(), as = A.slice();
-      const take = a => a.splice(Math.floor(r() * a.length), 1)[0];
-      let i; do { i = Math.floor(r() * TPL.length); } while (i === last);
-      last = i;
-      return TPL[i]({ n: () => take(ns), v: () => take(vs), a: () => take(as), t: () => pick(r, T) });
+  // ── 02 · Filed. The receipt prints itself once the piece is properly in
+  //    view, the way a thermal printer does it in a cartoon: the slot chugs,
+  //    the paper comes out a line at a time with a glow at the print head,
+  //    pauses to think now and then, and drops with a bounce at the end.
+  const rc = $('#hm-rc'), printer = lab.querySelector('.rc-printer'), slot = lab.querySelector('.rc-slot'), head = $('#hm-rc-head');
+  if (rc) {
+    const bars = $('#hm-rc-bars');
+    if (bars) { let s = '', seed = 7; for (let i = 0; i < 46; i++) { seed = (seed * 9301 + 49297) % 233280; s += '<i style="width:' + [1, 1, 2, 2, 3, 1][seed % 6] + 'px"></i>'; } bars.innerHTML = s; }
+    let printed = false;
+    const LINES = 34;
+    const print = () => {
+      if (printed) return; printed = true;
+      if (still.matches) { rc.style.clipPath = ''; return; }
+      let q = 0;
+      if (slot) slot.classList.add('is-printing');
+      if (head) head.classList.add('is-on');
+      const line = () => {
+        q++;
+        const p = q / LINES;
+        rc.style.clipPath = 'inset(0 0 ' + ((1 - p) * 100).toFixed(2) + '% 0)';
+        // the paper twitches as each line is laid down
+        rc.style.transform = 'translateY(' + ((Math.random() - .5) * 2.4).toFixed(2) + 'px) rotate(' + ((Math.random() - .5) * .5).toFixed(2) + 'deg)';
+        if (head) head.style.top = 'calc(' + (p * 100).toFixed(2) + '% - 2px)';
+        if (q < LINES) {
+          // a beat every few lines, as if it had to think about the next one
+          const pause = q % 7 === 0 ? 260 + Math.random() * 220 : 0;
+          setTimeout(line, 55 + Math.random() * 70 + pause);
+          return;
+        }
+        rc.style.clipPath = ''; rc.style.transform = '';
+        if (slot) slot.classList.remove('is-printing');
+        if (head) head.classList.remove('is-on');
+        rc.classList.add('is-printed');
+      };
+      setTimeout(line, 420);
     };
-    poemBtn.addEventListener('click', () => {
-      if (still.matches) { poemQ.textContent = line(); return; }
-      poemQ.classList.add('is-swap');
-      setTimeout(() => { poemQ.textContent = line(); requestAnimationFrame(() => poemQ.classList.remove('is-swap')); }, 220);
-    });
+    rc.style.clipPath = 'inset(0 0 100% 0)';
+    watch(printer || rc, print, null, .45);
   }
+
 })();
