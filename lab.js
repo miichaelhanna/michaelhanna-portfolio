@@ -524,4 +524,126 @@
     watch(printer || rc, print, null, .6);
   }
 
+  // ── The meter. The count is anchored to a real reading — BASE tokens on
+  //    BASE_DAY, taken off the local Claude logs — and then walks itself
+  //    forward: every day since the anchor adds that day's own figure, so
+  //    the page keeps counting on its own and nobody has to come back and
+  //    edit a constant. Re-anchor whenever you want it exact again.
+  //
+  //    The squares are the shape everybody already knows, generated rather
+  //    than recorded: a day's level comes from a hash of the day itself, so
+  //    it is identical on every visit, on every machine, and the grid slides
+  //    one column and gains one square each morning. Weekends run lighter
+  //    and the whole year ramps up towards now, because the habit got worse
+  //    rather than better. The same generator feeds the count, so the number
+  //    and the grid are never telling two different stories.
+  const gh = $('#hm-gh');
+  if (gh) {
+    const BASE = 12190187228;               // tokens, measured 2026-09-04
+    const BASE_DAY = Date.UTC(2026, 8, 4);  // the morning that reading was taken
+    const PER_REPLY = 255700;               // BASE ÷ 47,672 replies
+    const PER_SESSION = 31580000;           // BASE ÷ 386 sessions
+    const DAY = 864e5, COLS = 53;
+    const cells = $('#hm-gh-cells'), months = $('#hm-gh-months');
+    const num = $('#hm-gh-num'), sub = $('#hm-gh-sub'), read = $('#hm-gh-read');
+
+    // A cheap, well-mixed hash: the day number in, a stable 0..1 out.
+    const rnd = (n, salt) => {
+      let h = (Math.imul(n, 2654435761) + Math.imul(salt, 40503)) >>> 0;
+      h ^= h >>> 15; h = Math.imul(h, 2246822507) >>> 0;
+      h ^= h >>> 13; h = Math.imul(h, 3266489909) >>> 0;
+      return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+    };
+    // Midnight UTC today, so every reader sees the same grid on the same day.
+    const today = Math.floor(Date.now() / DAY) * DAY;
+    const BANDS = [[0, 0], [3e6, 14e6], [14e6, 34e6], [34e6, 68e6], [68e6, 132e6]];
+    const dayOf = t => {
+      const n = Math.round(t / DAY), wd = new Date(t).getUTCDay();
+      // How hard the year was leaning by then: a slow ramp over the window,
+      // so last autumn reads as gaps and this month reads as a wall.
+      const ramp = .6 + .4 * clamp((t - (today - 364 * DAY)) / (364 * DAY), 0, 1);
+      const busy = (wd === 0 || wd === 6 ? .68 : 1) * ramp;
+      const a = rnd(n, 1), b = rnd(n, 2);
+      const lv = a > Math.min(busy * 1.25, .97) ? 0 : clamp(1 + Math.floor(b * b * 4 * busy + b * 1.1), 1, 4);
+      const band = BANDS[lv];
+      return { lv: lv, tok: Math.round(band[0] + rnd(n, 3) * (band[1] - band[0])) };
+    };
+
+    // Walk the anchor forward to today. Capped, so a machine with a wildly
+    // wrong clock costs a few hundred iterations rather than a hung tab.
+    let total = BASE;
+    for (let t = BASE_DAY + DAY, i = 0; t <= today && i < 4000; t += DAY, i++) total += dayOf(t).tok;
+
+    const fmt = n => n.toLocaleString('en-US');
+    const MON = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+    const stamp = t => { const d = new Date(t); return d.getUTCDate() + ' ' + MON[d.getUTCMonth()]; };
+    const rest = () => {
+      read.innerHTML = fmt(Math.round(total / PER_REPLY)) + ' replies · '
+        + fmt(Math.round(total / PER_SESSION)) + ' sessions'
+        + (touch ? '' : ' · <span style="opacity:.7">hover a day</span>');
+    };
+
+    // 53 columns, the last one stopping at today; the first is whatever
+    // Sunday lands 52 weeks back, exactly as the original does it.
+    const start = today - ((COLS - 1) * 7 + new Date(today).getUTCDay()) * DAY;
+    let grid = '', mrow = '', prevMon = -1;
+    for (let c = 0; c < COLS; c++) {
+      const m = new Date(start + c * 7 * DAY).getUTCMonth();
+      // Label a column only where the month turns over, and never the first
+      // one — a half-month's worth of columns cannot hold the word.
+      mrow += '<span>' + (c > 0 && m !== prevMon ? MON[m] : '') + '</span>';
+      prevMon = m;
+    }
+    for (let i = 0; i < COLS * 7; i++) {
+      // Row-major in the markup, column-major in the grid: the flow is set
+      // to columns, so the cells fill down each week in order.
+      const t = start + (Math.floor(i / 7) * 7 + (i % 7)) * DAY;
+      if (t > today) { grid += '<i class="is-void"></i>'; continue; }
+      grid += '<i class="l' + dayOf(t).lv + '" data-t="' + t + '"></i>';
+    }
+    months.innerHTML = mrow;
+    cells.innerHTML = grid;
+    // The grid is wider than a phone: start it at today, not last autumn.
+    const scroller = gh.querySelector('.gh-scroll');
+    if (scroller) scroller.scrollLeft = scroller.scrollWidth;
+
+    // Hover reads out into the line under the grid. No floating box: in the
+    // dark the pointer is already carrying a torch.
+    let lit = null;
+    if (!touch) {
+      cells.addEventListener('pointerover', e => {
+        const i = e.target.closest('i[data-t]'); if (!i || i === lit) return;
+        if (lit) lit.classList.remove('is-on');
+        lit = i; i.classList.add('is-on');
+        const t = +i.dataset.t, d = dayOf(t);
+        read.innerHTML = d.tok
+          ? '<b>' + fmt(d.tok) + '</b> tokens on ' + stamp(t)
+          : 'nothing on ' + stamp(t) + ' · a day off';
+      });
+      cells.addEventListener('pointerleave', () => {
+        if (lit) { lit.classList.remove('is-on'); lit = null; }
+        rest();
+      });
+    }
+    rest();
+
+    // The count rolls up once, when the meter is actually on screen.
+    sub.textContent = 'tokens through claude · since the first prompt';
+    let ran = false;
+    const roll = () => {
+      if (ran) return; ran = true;
+      if (still.matches) { num.textContent = fmt(total); return; }
+      const from = Math.round(total * .88), t0 = performance.now(), ms = 1600;
+      const step = now => {
+        const p = clamp((now - t0) / ms, 0, 1), e = 1 - Math.pow(1 - p, 4);
+        num.textContent = fmt(Math.round(from + (total - from) * e));
+        if (p < 1) requestAnimationFrame(step);
+      };
+      num.textContent = fmt(from);
+      requestAnimationFrame(step);
+    };
+    num.textContent = fmt(Math.round(total * .88));
+    watch(gh, roll, null, .3);
+  }
+
 })();

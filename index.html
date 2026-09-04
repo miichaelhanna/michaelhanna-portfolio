@@ -379,7 +379,7 @@
      lede only made the phone look like the lesser build. At the end, and
      withholding what the thing actually is, it reads as an invitation. */
   .lab-aside{display:none}
-  html.hm-touch .lab-aside{display:block;margin:clamp(26px,5vh,44px) auto 0;max-width:30ch;text-align:center;
+  html.hm-touch .lab-aside{display:block;margin:clamp(26px,4vh,38px) auto 0;max-width:30ch;text-align:center;
         font-size:.78rem;font-weight:500;letter-spacing:.02em;line-height:1.55;
         text-transform:lowercase;color:var(--lab-mute)}
 
@@ -540,6 +540,73 @@
   .rc-btn small{display:inline;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;opacity:.6;text-decoration:none}
   @media (hover:hover){.rc-btn:hover{opacity:.7;color:var(--lab-forest)}}
   .rc-stubmsg{margin-top:12px;text-align:center;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(20,18,16,.55)}
+  /* ── The meter. Not a third thing on the bench: the room's own gauge,
+     in the one shape everybody already reads without a caption. The count
+     is true and moves on its own; the squares are drawn from the date, so
+     a day looks the same on every visit and the grid gains one square each
+     morning. Hovering a day swaps the line under the grid rather than
+     floating a tooltip over it — nothing in this room hovers on top. */
+  /* Always night, whatever the switch is doing. Redefining the room's ink
+     variables locally is what does it: they are the same names the type and
+     rules already read, so nothing inside needs to know about the lights. */
+  /* z-index 0 puts the band UNDER the torch (which sits at 1), so the cloak
+     falls across it and the beam is what reveals it — the bill is in the
+     room, not pasted over it. With the lights on the cloak is gone and the
+     band is simply there. The ID card below follows it for the same reason:
+     one floor, cloaked as one, or the cloak's edge draws a line across it. */
+  .lab-meter,.lab-cta{position:relative;z-index:0}
+  .lab-meter{box-sizing:border-box;
+      background:#0f0d0b;color:#F4F1EA;
+      --lab-ink:#F4F1EA;--lab-strong:#fff;--lab-mute:rgba(244,241,234,.6);--lab-line:rgba(244,241,234,.12);
+      /* Both seams are a sum: the bench's own bottom padding sits above this
+         band, and the ID card's top padding sits below it. Half of each,
+         so the page reads as evenly spaced rather than gapping twice. */
+      padding:clamp(24px,3.5vh,44px) var(--lab-gut) clamp(20px,3vh,34px)}
+  .lab-meter-in{max-width:1180px;margin:0 auto}
+  .lab-meter-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px 24px;flex-wrap:wrap;
+      font-size:.8rem;font-weight:500;letter-spacing:.02em;text-transform:lowercase;color:var(--lab-mute)}
+  .lab-meter-top b{font-weight:500;color:var(--lab-ink)}
+  .gh-count{margin:clamp(10px,2vh,18px) 0 0;font-family:var(--lab-disp);font-weight:800;
+      font-size:clamp(2rem,6.2vw,4.6rem);line-height:.95;letter-spacing:-.04em;
+      color:var(--lab-strong);font-variant-numeric:tabular-nums;transition:color .8s ease}
+  .gh-count small{display:block;margin-top:12px;font-family:var(--lab-disp);font-weight:500;font-size:.8rem;
+      letter-spacing:.02em;line-height:1.5;text-transform:lowercase;color:var(--lab-mute)}
+  /* The scale is GitHub's own, both states: the joke only works if the
+     eye recognises it before the brain reads a word of it. */
+  .gh-graph{--gh-cell:clamp(8px,1.02vw,13px);--gh-gap:max(2px,calc(var(--gh-cell) * .26));
+      margin-top:clamp(18px,3vh,30px);
+      --gh-0:rgba(244,241,234,.07);--gh-1:#0e4429;--gh-2:#006d32;--gh-3:#26a641;--gh-4:#39d353;
+      --gh-edge:rgba(244,241,234,.05)}
+  /* One scale only: the band never sees daylight, so the light-mode ramp it
+     used to swap to has nothing left to sit on. */
+  .gh-scroll{overflow-x:auto;overflow-y:hidden;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .gh-scroll::-webkit-scrollbar{display:none}
+  .gh-inner{display:inline-grid;grid-template-columns:auto 1fr;gap:6px 8px;min-width:min-content}
+  .gh-months{grid-column:2;grid-row:1;display:grid;grid-auto-flow:column;grid-auto-columns:var(--gh-cell);gap:var(--gh-gap);
+      font-size:.62rem;font-weight:500;letter-spacing:.04em;text-transform:lowercase;color:var(--lab-mute)}
+  .gh-months span{white-space:nowrap;line-height:1}
+  .gh-days{grid-column:1;grid-row:2;display:grid;grid-template-rows:repeat(7,var(--gh-cell));gap:var(--gh-gap);
+      font-size:.62rem;font-weight:500;letter-spacing:.02em;text-transform:lowercase;color:var(--lab-mute)}
+  .gh-days span{line-height:var(--gh-cell);white-space:nowrap;text-align:right}
+  .gh-cells{grid-column:2;grid-row:2;display:grid;grid-template-rows:repeat(7,var(--gh-cell));
+      grid-auto-flow:column;grid-auto-columns:var(--gh-cell);gap:var(--gh-gap)}
+  .gh-cells i,.gh-key i{display:block;width:var(--gh-cell);height:var(--gh-cell);
+      border-radius:max(2px,calc(var(--gh-cell) * .2));background:var(--gh-0);box-shadow:inset 0 0 0 1px var(--gh-edge);
+      transition:background .18s ease,transform .18s var(--lab-ease),box-shadow .18s ease}
+  .gh-cells i.l1,.gh-key i.k1{background:var(--gh-1)}
+  .gh-cells i.l2,.gh-key i.k2{background:var(--gh-2)}
+  .gh-cells i.l3,.gh-key i.k3{background:var(--gh-3)}
+  .gh-cells i.l4,.gh-key i.k4{background:var(--gh-4)}
+  /* Days that have not happened yet: the last column stops at today. */
+  .gh-cells i.is-void{background:transparent;box-shadow:none}
+  .gh-cells i.is-on{transform:scale(1.4);box-shadow:inset 0 0 0 1px rgba(244,241,234,.55)}
+  .gh-foot{display:flex;justify-content:space-between;align-items:center;gap:10px 24px;flex-wrap:wrap;margin-top:14px;
+      font-size:.74rem;font-weight:500;letter-spacing:.02em;text-transform:lowercase;color:var(--lab-mute)}
+  .gh-read{min-height:1.3em}
+  .gh-read b{font-weight:500;color:var(--lab-ink);font-variant-numeric:tabular-nums}
+  .gh-key{display:inline-flex;align-items:center;gap:5px;flex:none}
+  @media (prefers-reduced-motion:reduce){.gh-cells i{transition:none}}
+
   .lab-foot{display:flex;justify-content:space-between;align-items:center;gap:12px 24px;flex-wrap:wrap;
       margin-top:clamp(28px,5vh,48px);font-size:.8rem;font-weight:500;letter-spacing:.02em;text-transform:lowercase;color:var(--lab-mute)}
   .lab-foot [data-go]{cursor:pointer;color:var(--lab-ink)}
@@ -548,8 +615,11 @@
   .lab-back svg{width:20px;height:13px;flex:none;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;
       transition:transform .3s var(--lab-ease)}
   @media (hover:hover){.lab-back:hover svg{transform:translateX(-3px)}}
-  @media (hover:hover){.lab-foot [data-go]:hover{color:var(--lab-green)}}
-  .lab-cta{position:relative;z-index:1;margin-top:auto;box-sizing:border-box;text-align:center;padding:clamp(32px,5vh,64px) var(--lab-gut) calc(clamp(24px,4vh,40px) + env(safe-area-inset-bottom,0px))}
+  /* The way out is ink, not green — the acid green belongs to the grid and
+     the links inside the pieces, and on the exit it read as a third colour
+     with nothing to do with the room. */
+  @media (hover:hover){.lab-foot [data-go]:hover{color:var(--lab-strong)}}
+  .lab-cta{position:relative;z-index:0;margin-top:auto;box-sizing:border-box;text-align:center;padding:clamp(32px,5vh,64px) var(--lab-gut) calc(clamp(24px,4vh,40px) + env(safe-area-inset-bottom,0px))}
 
   @media (max-width:900px){
     .lab-piece,.lab-piece--filed{grid-template-columns:minmax(0,1fr);gap:clamp(24px,5vh,40px);padding:clamp(40px,7vh,72px) 0}
@@ -1019,8 +1089,40 @@
         <span>built at 1am · shipped when it feels right</span>
       </div>
 
-      <p class="lab-aside">the dark in here is hiding something. a thumb will never find it. open this on a laptop.</p>
     </div>
+
+    <!-- The electricity bill. Deliberately not numbered, and outside the
+         bench entirely: the bill is the floor of the room. It stays on the
+         night colour whatever the switch is doing and runs straight into
+         the ID card band below it, so the page ends on one unbroken dark —
+         which is also why you pass the way out before you reach it.
+         The count is real — it is what has actually gone through Claude —
+         and it walks itself forward a day at a time, so nobody has to come
+         back and edit a number. The squares are generated from the date
+         (lab.js): stable across visits and machines, one more every morning. -->
+    <section class="lab-meter" id="hm-meter" data-screen-label="After Hours — The electricity bill">
+      <div class="lab-meter-in">
+        <div class="lab-meter-top"><span>the electricity bill</span></div>
+        <p class="gh-count"><span id="hm-gh-num">0</span><small id="hm-gh-sub">tokens through claude</small></p>
+        <div class="gh-graph" id="hm-gh">
+          <div class="gh-scroll">
+            <div class="gh-inner">
+              <div class="gh-months" id="hm-gh-months" aria-hidden="true"></div>
+              <div class="gh-days" aria-hidden="true"><span></span><span>mon</span><span></span><span>wed</span><span></span><span>fri</span><span></span></div>
+              <div class="gh-cells" id="hm-gh-cells" role="img" aria-label="A year of nights, one square a day"></div>
+            </div>
+          </div>
+          <div class="gh-foot">
+            <span class="gh-read" id="hm-gh-read"></span>
+            <span class="gh-key" aria-hidden="true">less<i class="k0"></i><i class="k1"></i><i class="k2"></i><i class="k3"></i><i class="k4"></i>more</span>
+          </div>
+        </div>
+        <!-- Touch only. It sits under the grid because this band is the last
+             thing a thumb reaches, and the dark it is talking about is the
+             dark it is already sitting on. -->
+        <p class="lab-aside">the dark in here is hiding something. a thumb will never find it. open this on a laptop.</p>
+      </div>
+    </section>
 
     <section id="hm-lab-cta" class="lab-cta" data-screen-label="After Hours — contact">
       <div class="cta-id">
@@ -1049,8 +1151,8 @@
     </section>
   </div>
 </div>
-<script src="script.js?v=103"></script>
-<script src="lab.js?v=17"></script>
+<script src="script.js?v=107"></script>
+<script src="lab.js?v=20"></script>
 <script>
   // Lanyard is web-only: it's a heavy WebGL scene (three.js + rapier physics
   // + a 2.4MB card model) built around a pointer drag that touch can't

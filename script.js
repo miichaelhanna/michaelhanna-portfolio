@@ -36,7 +36,21 @@ document.addEventListener('DOMContentLoaded', () => {
   // element in its place is what makes it look again. The strip stays as
   // the paint under the status bar for the browsers that sample the page.
   let themeMeta = document.querySelector('meta[name="theme-color"]');
+  // Both setters are called every frame while a band is being tracked, so
+  // they early-out on an unchanged colour: replacing the meta element 60
+  // times a second for the same value is what iOS reads as a flicker. The
+  // comparison is done on a normalised value, because the same colour
+  // arrives as '#fff' from the page's own constants and as 'rgb(255, 255,
+  // 255)' when it has been read back off an element.
+  const norm = c => {
+    if (!c || c[0] !== '#') return c;
+    const h = c.length === 4 ? '#' + c[1] + c[1] + c[2] + c[2] + c[3] + c[3] : c;
+    return 'rgb(' + parseInt(h.slice(1, 3), 16) + ', ' + parseInt(h.slice(3, 5), 16) + ', ' + parseInt(h.slice(5, 7), 16) + ')';
+  };
+  let topPaint = '', botPaint = '';
   const setChromeTop = c => {
+    if (!c || norm(c) === topPaint) return;
+    topPaint = norm(c);
     if (themeMeta) {
       const fresh = document.createElement('meta');
       fresh.setAttribute('name', 'theme-color'); fresh.setAttribute('content', c);
@@ -45,11 +59,82 @@ document.addEventListener('DOMContentLoaded', () => {
     if (safeTop) safeTop.style.background = c;
   };
   const setChromeBottom = c => {
+    if (!c || norm(c) === botPaint) return;
+    botPaint = norm(c);
     document.documentElement.style.background = c;
     document.body.style.background = c;
     if (safeBot) safeBot.style.background = c;
   };
   const setTheme = c => { setChromeTop(c); setChromeBottom(c); };
+
+  // ── Keeping the two bands honest.
+  // Pushing a colour at each state change is what let them drift: an event
+  // that lands while the page is still arriving is dropped, and a floor
+  // hardcoded to black cannot know the lights just came on. So the bands are
+  // *derived* instead — the top takes the header it sits against, the bottom
+  // reads whatever element is actually under the bottom edge — and that is
+  // reconciled on every scroll and after every state change. The pushes
+  // below stay: they paint instantly mid-transition, and this keeps them
+  // true afterwards. Wrong for one frame at worst, never wrong for good.
+  const CLEAR = c => !c || c === 'transparent' || /^rgba\(0,\s*0,\s*0,\s*0\)$/.test(c);
+  const bgAt = (x, y) => {
+    let el = document.elementFromPoint(x, y), guard = 0;
+    // Up through the ancestors until something actually paints: the layers
+    // and most sections are transparent and sit on the ground behind them.
+    // The walk stops short of <body>, whose background is not the page's —
+    // it is this function's own output for the bottom band, so reading it
+    // back would feed one band its answer from the other.
+    while (el && el !== document.body && el !== document.documentElement && guard++ < 24) {
+      const c = getComputedStyle(el).backgroundColor;
+      if (!CLEAR(c)) return c;
+      el = el.parentElement;
+    }
+    return null;
+  };
+  const paintBands = () => {
+    // While the curtain is crossing it owns both bands (and has deliberately
+    // made the header transparent) — reading the screen then would sample
+    // the wipe itself.
+    if (navBusy) return;
+    const x = Math.round(innerWidth / 2);
+    // The top band meets the header, not the page: over a dark Work section
+    // the header is black while the page behind the band is still white, and
+    // a band that disagreed with the bar it touches is the visible seam.
+    // The header is left transparent by the curtain, and a landing that never
+    // restored it leaves it that way for good — which is what stranded the
+    // status bar on night while the room was lit. When it has no colour of
+    // its own, the page's known colour is the answer, not a sample.
+    let top = head ? getComputedStyle(head).backgroundColor : null;
+    if (CLEAR(top)) top = PAGE_BG[mode] || bgAt(x, 1) || '#ffffff';
+    setChromeTop(top);
+    // A pixel in from the bottom edge: exactly on it can land between two
+    // stacked layers and read the one behind.
+    setChromeBottom(bgAt(x, innerHeight - 2));
+  };
+  let bandsRaf = 0;
+  const syncBands = () => {
+    if (bandsRaf) return;
+    bandsRaf = requestAnimationFrame(() => { bandsRaf = 0; paintBands(); });
+  };
+  // After a change that fades (the lights), the bands are sampled every frame
+  // for the length of it, so the phone's bars cross from night to day on the
+  // room's own clock instead of stepping at one end of it.
+  let trackUntil = 0, trackRaf = 0;
+  const trackBands = ms => {
+    trackUntil = Math.max(trackUntil, performance.now() + ms);
+    if (trackRaf) return;
+    const step = () => {
+      paintBands();
+      if (performance.now() < trackUntil) { trackRaf = requestAnimationFrame(step); return; }
+      trackRaf = 0;
+      // A fade that started late (a switch thrown while the page was still
+      // arriving) can outlast the burst, which would leave the bars holding
+      // the last colour it saw — an almost-white, not white. One more look
+      // after everything has certainly stopped moving.
+      setTimeout(paintBands, 260);
+    };
+    trackRaf = requestAnimationFrame(step);
+  };
   // The About page is dark, so the header has to follow it — but only the nav
   // ink: the [data-ch=name] rule must leave the home wordmark black, because the
   // two wordmarks are stacked on top of each other during the move.
@@ -64,7 +149,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // After Hours has its own light switch (lab.js): its ground goes from a
   // warm black to ecru and back. Which ink the nav needs there depends on
   // that state, so it is asked for rather than assumed dark.
-  let labDark = true, labSettle = 0;
+  // labSettle is cleared by the transition code; the lights retry must not
+  // share it, or a nav landing mid-chain silently ends the retries and the
+  // switch is lost again. Its own timer, and a bounded number of goes.
+  let labDark = true, labSettle = 0, labRetry = 0, labTries = 0;
   const inkFor = m => m === 'intro' ? false : m === 'lab' ? labDark : true;
   const setChromeFor = m => {
     if (m !== 'lab' && typeof labClock === 'function') labClock(false);
@@ -89,7 +177,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const mid = (r.left + r.width / 2) / innerWidth;
     return fromLeft ? mid : 1 - mid;
   };
-  const headSettle = m => { if (!head) return; setChromeFor(m); head.style.transition = 'background .3s'; };
+  // Once the curtain is off the chrome, the bands read the page they landed on.
+  const headSettle = m => { if (!head) return; setChromeFor(m); head.style.transition = 'background .3s'; trackBands(400); };
   // Every surface the browser and the page paint changes together, on the
   // ground's own .8s clock: the header, the nav ink, and the two safe-area
   // bands (the phone's status bar and home-indicator strips). Elsewhere
@@ -97,23 +186,34 @@ document.addEventListener('DOMContentLoaded', () => {
   // instant band beside a fading page read as the header changing first.
   const LAB_FADE = 'background .8s ease';
   const labClock = on => {
-    [head, safeTop, safeBot].forEach(el => { if (el) el.style.transition = on ? LAB_FADE : (el === head ? 'background .3s' : 'none'); });
+    // Only the header eases now. The two bands are sampled every frame off
+    // the ground itself while it fades, so they are already carrying its
+    // easing — giving them a transition of their own eased the easing twice
+    // and left them trailing the room by a visible beat.
+    if (head) head.style.transition = on ? LAB_FADE : 'background .3s';
+    [safeTop, safeBot].forEach(el => { if (el) el.style.transition = 'none'; });
     document.querySelectorAll('[data-ch="link"]').forEach(el => { el.style.transition = on ? 'color .8s ease' : 'color .3s'; });
   };
   addEventListener('hm-lab-lights', e => {
     PAGE_BG.lab = e.detail.bg; labDark = e.detail.dark;
-    if (mode !== 'lab') return;
-    // Mid-travel the curtain owns the chrome; apply once it has settled.
-    if (navBusy) { setTimeout(() => dispatchEvent(new CustomEvent('hm-lab-lights', { detail: e.detail })), 200); return; }
+    // The switch can be thrown before the page has finished arriving — on a
+    // direct load of #lab, setMode('lab') only runs once the landing is over,
+    // so a toggle in that window used to be dropped on the floor and the bars
+    // stayed on night for good. Neither of these is a reason to discard the
+    // change: retry until the page is current and the curtain has passed.
+    if (mode !== 'lab' || navBusy) {
+      clearTimeout(labRetry);
+      if (labTries++ > 40) return;
+      labRetry = setTimeout(() => dispatchEvent(new CustomEvent('hm-lab-lights', { detail: e.detail })), 120);
+      return;
+    }
+    labTries = 0;
     labClock(true);
-    setChromeTop(PAGE_BG.lab); setChromeBottom(LAB_FLOOR);
     if (head) head.style.background = PAGE_BG.lab;
     navInk(labDark);
-    // iOS samples the tint for its bottom toolbar on its own schedule, and a
-    // single change during a fade can be missed: the same colour is stated
-    // again once the fade has landed, which is when Safari looks next.
-    clearTimeout(labSettle);
-    labSettle = setTimeout(() => { setChromeTop(PAGE_BG.lab); setChromeBottom(LAB_FLOOR); if (head) head.style.background = PAGE_BG.lab; }, 850);
+    // The bands ride the ground's own .8s fade, sampled per frame, and the
+    // burst outlasts it so the colour iOS eventually reads is the settled one.
+    trackBands(1100);
   });
 
   const resetHover = () => {
@@ -485,6 +585,16 @@ document.addEventListener('DOMContentLoaded', () => {
     chromeSettle = setTimeout(() => { if (mode === 'intro') paintChrome(); }, 140);
   }, { passive: true });
 
+  // Every scroller reconciles the two bands against what is actually at the
+  // screen's edges — the bottom one especially, which changes under you as
+  // the black footer or the After Hours floor comes up. Cheap: the setters
+  // early-out unless the colour really moved.
+  [intro, lab, abt].forEach(el => {
+    if (el) el.addEventListener('scroll', syncBands, { passive: true });
+  });
+  addEventListener('resize', syncBands, { passive: true });
+  addEventListener('orientationchange', () => trackBands(400), { passive: true });
+
   // The browser's own scrollTo({behavior:'smooth'}) is a short, near-linear
   // ease that reads as a snap, not a glide — nothing like the long, decelerating
   // scroll-jack Apple's product pages use. This drives scrollTop by hand instead,
@@ -706,6 +816,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!e.persisted) return;
     if (mode === 'intro') { wasDark = null; wasBotDark = null; paintChrome(); }
     else setChromeFor(mode);
+    // The cache would otherwise agree with the stale bars it was restored on.
+    topPaint = botPaint = '';
+    trackBands(300);
   });
 
   // TEMP: auto-cycles the page transition for cross-browser verification.
