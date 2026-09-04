@@ -209,36 +209,15 @@ document.addEventListener('DOMContentLoaded', () => {
   addEventListener('load', tune);
   onScroll();
 
-  // iOS bottom band follows whichever section sits at the bottom edge,
-  // same treatment as the home page.
-  const darkSecs = [...document.querySelectorAll('[data-dark]')];
+  // The band under the page — the phone's home-indicator strip — continues
+  // the footer, and the footer is black, so the band is black from the top of
+  // the page to the bottom. It used to follow whichever section sat at the
+  // bottom edge, which meant re-reading it on every scroll; there is nothing
+  // left to read. Only the strip is painted: the body is this page's own
+  // background and every prose section sits on it, so blacking that out would
+  // take the whole case study with it.
   const safeBot = $('hm-safe-bot');
-  let wasBotDark = null;
-  const paintChrome = () => {
-    const seen = window.visualViewport ? Math.min(window.visualViewport.height, innerHeight) : innerHeight;
-    // Sample just inside the page's last pixel when the bottom edge has run
-    // past it: iOS rubber-bands beyond the end of the document, the footer's
-    // bottom lifts above the edge for that moment, and the last scroll event
-    // of the bounce could leave the band painted white under a black footer.
-    const docBottom = document.documentElement.getBoundingClientRect().bottom;
-    const y = Math.min(seen - 8, docBottom - 1);
-    const botDark = darkSecs.some(s => {
-      const r = s.getBoundingClientRect();
-      return r.top <= y && r.bottom >= y;
-    });
-    if (botDark === wasBotDark) return;
-    wasBotDark = botDark;
-    const c = botDark ? '#000000' : '#ffffff';
-    document.documentElement.style.background = c;
-    document.body.style.background = c;
-    if (safeBot) safeBot.style.background = c;
-  };
-  // Re-read once the scroll has settled too, so the band always ends on
-  // what is actually under the bottom edge, whatever the last event saw.
-  let settle = 0;
-  addEventListener('scroll', () => { paintChrome(); clearTimeout(settle); settle = setTimeout(paintChrome, 140); }, { passive: true });
-  addEventListener('resize', () => { wasBotDark = null; paintChrome(); });
-  paintChrome();
+  if (safeBot) safeBot.style.background = '#000000';
 
 
   // Footer headline word alternates between what someone might be reaching

@@ -155,7 +155,8 @@
       prevT = now;
       const tc = prevDt > 0 ? dt / prevDt : 1;
       const velCoef = tc * Math.pow(CFG.damping, dt * 60), accCoef = dt * dt;
-      pts[SEG].fixed = dragging;
+      for (let i = 1; i < pts.length; i++) pts[i].fixed = false;
+      pts[grabI].fixed = dragging;
       for (let i = 1; i < pts.length; i++) {
         const p = pts[i];
         if (p.fixed) continue;
@@ -165,7 +166,7 @@
         p.y += vy * velCoef + CFG.gravity * accCoef;
       }
       pts[0].x = AX; pts[0].y = 0;
-      if (dragging) { pts[SEG].ox = pts[SEG].x; pts[SEG].oy = pts[SEG].y; pts[SEG].x = target.x; pts[SEG].y = target.y; }
+      if (dragging) { const g = pts[grabI]; g.ox = g.x; g.oy = g.y; g.x = target.x; g.y = target.y; }
       for (let k = 0; k < CFG.iterations; k++) {
         for (let i = 0; i < SEG; i++) {
           const a = pts[i], b = pts[i + 1];
@@ -221,7 +222,10 @@
     if (side) new MutationObserver(layout).observe(side, { attributes: true, attributeFilter: ['style'] });
     layout();
 
-    let pulled = false, clicked = false, didDrag = false, x0 = 0, y0 = 0;
+    // Which link of the rope the hand has hold of. The drag drives that point
+    // rather than the end, so the rope bends where you took it and the slack
+    // below swings from your hand under its own weight.
+    let pulled = false, clicked = false, didDrag = false, x0 = 0, y0 = 0, grabI = SEG, grabY = restY;
     const pull = () => {
       toggleLights();
       if (!pulled) { pulled = true; cordEl.classList.add('is-pulled'); }
@@ -231,7 +235,12 @@
     hit.addEventListener('pointerdown', e => {
       if (e.button !== 0) return;
       dragging = true; didDrag = false; clicked = false; x0 = e.clientX; y0 = e.clientY;
-      target.x = AX; target.y = restY;
+      // The cord's box is 64 units wide and drawn at 64px, so a client offset
+      // is a rope unit. Link 0 is the fixing and cannot be dragged.
+      const gy = e.clientY - cordEl.getBoundingClientRect().top;
+      grabI = clamp(Math.round(gy / restSeg), 1, SEG);
+      grabY = restSeg * grabI;
+      target.x = AX; target.y = grabY;
       try { hit.setPointerCapture(e.pointerId); } catch (x) {}
       lab.classList.add('is-pulling');
       wake();
@@ -239,17 +248,18 @@
     });
     hit.addEventListener('pointermove', e => {
       if (!dragging) return;
-      const rx = e.clientX - x0, ry = restY + (e.clientY - y0);
+      const rx = e.clientX - x0, ry = grabY + (e.clientY - y0);
       if (Math.abs(rx) > 3 || Math.abs(e.clientY - y0) > 3) didDrag = true;
-      const dist = Math.hypot(rx, ry) || 1e-4, maxD = restY + CFG.stretchMax;
+      const dist = Math.hypot(rx, ry) || 1e-4, maxD = grabY + CFG.stretchMax;
       const k = dist > maxD ? maxD / dist : 1;
       target.x = AX + rx * k; target.y = ry * k;
-      if (!clicked && dist - restY >= Math.min(CFG.stretchToggle, CFG.stretchMax - 1)) { clicked = true; pull(); }
+      // Pulled far enough past where this link hangs, wherever it hangs.
+      if (!clicked && dist - grabY >= Math.min(CFG.stretchToggle, CFG.stretchMax - 1)) { clicked = true; pull(); }
     });
     const up = () => {
       if (!dragging) return;
       dragging = false; lab.classList.remove('is-pulling');
-      const p = pts[SEG], vx = p.x - p.ox, vy = p.y - p.oy, v = Math.hypot(vx, vy);
+      const p = pts[grabI], vx = p.x - p.ox, vy = p.y - p.oy, v = Math.hypot(vx, vy);
       if (v > CFG.maxVelocity) { const k = CFG.maxVelocity / v; p.ox = p.x - vx * k; p.oy = p.y - vy * k; }
       wake();
       if (!didDrag && !clicked) scripted();
