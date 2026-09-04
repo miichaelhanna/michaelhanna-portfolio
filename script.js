@@ -22,14 +22,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const ABOUT_BG = '#0c0c0e';
   // The site's body never scrolls (pages are layers with their own overflow
   // scrollers inside a fixed 100dvh stage), so iOS Safari cannot sample the
-  // content behind its chrome, and with viewport-fit=cover both exposed
-  // safe-area bands paint from the single document background — one colour
-  // for two bands that often need to differ mid-scroll (white header at the
-  // top, black footer at the bottom). Two fixed strips in the markup
-  // (#hm-safe-top/#hm-safe-bot) give each band its own paint: the top strip
-  // always continues the header, the bottom strip always continues whatever
-  // is at the bottom edge. theme-color and the root background still track
-  // alongside for the browsers that use them (and for rubber-band overscroll).
+  // content behind its chrome. Two fixed strips in the markup
+  // (#hm-safe-top/#hm-safe-bot) paint the safe-area bands inside the page:
+  // the top strip continues the header, the bottom strip continues whatever
+  // is at the bottom edge.
+  //
+  // The document background is a third surface, and it belongs to the top.
+  // iPhone Safari fills the band behind the status bar from it — not from
+  // theme-color, which it ignores here, and not from the pixels under it,
+  // which are the header's. It used to be written by the bottom setter, so
+  // the black footer coming up the screen turned the status bar black over
+  // a white header (and before that, the mortgage card's cream turned it
+  // cream). It follows the header now. The bottom band has the strip, and
+  // Safari's own toolbar sits over the page's real pixels down there.
   const safeTop = $('hm-safe-top'), safeBot = $('hm-safe-bot');
   // iOS Safari tints its status bar and bottom toolbar from theme-color and
   // does not reliably notice the content attribute changing; a fresh meta
@@ -73,14 +78,16 @@ document.addEventListener('DOMContentLoaded', () => {
       themeMeta.replaceWith(fresh); themeMeta = fresh;
     }
     if (safeTop) safeTop.style.background = c;
+    // The band behind the status bar, on the phones that paint it from the
+    // document rather than from theme-color or the page's own pixels.
+    document.documentElement.style.background = c;
+    document.body.style.background = c;
   };
   const setChromeBottom = c => {
     if (!c) return;
     c = isLight(c) ? CHROME_LIGHT : BOT_DARK;
     if (c === botPaint) return;
     botPaint = c;
-    document.documentElement.style.background = c;
-    document.body.style.background = c;
     if (safeBot) safeBot.style.background = c;
   };
   const setTheme = c => { setChromeTop(c); setChromeBottom(c); };
@@ -100,8 +107,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Up through the ancestors until something actually paints: the layers
     // and most sections are transparent and sit on the ground behind them.
     // The walk stops short of <body>, whose background is not the page's —
-    // it is this function's own output for the bottom band, so reading it
-    // back would feed one band its answer from the other.
+    // it is the status bar's, written by the top setter, so reading it back
+    // would feed one band its answer from the other.
     while (el && el !== document.body && el !== document.documentElement && guard++ < 24) {
       // Inline background before computed, for the same reason the header's
       // is read that way: when the After Hours ground eases from night to
