@@ -195,7 +195,7 @@
       cordSvg.setAttribute('viewBox', '0 0 64 ' + (restY + 140));
       knob.setAttribute('cy', restY);
       const glove = $('#hm-cord-glove'); if (glove) glove.setAttribute('transform', 'translate(' + (AX - 8 * PX) + ' ' + (restY - 10 * PX) + ')');
-      hit.style.top = (restY - 23) + 'px';
+      hit.style.top = '0px'; hit.style.height = (restY + 23) + 'px';
       if (note) note.style.top = (restY - 11) + 'px';
       cancelAnimationFrame(raf); running = false;
       make(); render();

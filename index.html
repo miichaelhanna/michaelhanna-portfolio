@@ -15,7 +15,7 @@
   // the bars already in that page's colour — waiting for the main script at
   // the end of the body left them white for the whole load.
   (function () {
-    // After Hours has a phone mode (touch layout, no torch, the deck).
+    // After Hours has a phone mode (touch layout, no torch or cord).
     // It keys off this class rather than the media query directly so a
     // desktop browser can be put into it with ?touch for testing.
     if (matchMedia('(hover:none)').matches || /[?&]touch(=|&|$)/.test(location.search)) document.documentElement.classList.add('hm-touch');
@@ -318,7 +318,11 @@
   .cord-glove{opacity:0;transition:opacity .18s ease;pointer-events:none}
   .cord-glove rect{shape-rendering:crispEdges}
   .lab-cord.is-hover .cord-glove,#hm-lab.is-pulling .cord-glove{opacity:1}
-  .cord-hit{position:absolute;left:9px;top:0;width:46px;height:46px;border:0;background:transparent;padding:0;pointer-events:auto;touch-action:none;border-radius:50%;
+  /* A strip down the whole rope, not a disc on the ball: the cord is pulled from
+     wherever the hand lands on it. The drag is a delta from the grab point, so
+     taking it mid-rope moves the knob by the same distance with no jump; the
+     height is set by lab.js to run from the anchor to just past the knob. */
+  .cord-hit{position:absolute;left:14px;top:0;width:36px;border:0;background:transparent;padding:0;pointer-events:auto;touch-action:none;border-radius:18px;
       -webkit-tap-highlight-color:transparent;appearance:none;-webkit-appearance:none}
   .cord-hit:focus-visible{outline:2px solid var(--lab-acid);outline-offset:-9px}
   /* The note beside the knob, in handwriting, until the first pull. */
@@ -331,6 +335,9 @@
   /* A pull that runs past the cord must not start a text selection. */
   #hm-lab.is-pulling,#hm-lab.is-pulling *{-webkit-user-select:none;user-select:none}
 
+  /* The wall switch, phones only. A plate on the wall to the left of the
+     name, in the room the name leaves empty, and nothing else near it: the
+     rocker's tilt and its little lamp are the whole status. */
   /* The wall switch, phones only. A plate on the wall to the left of the
      name, in the room the name leaves empty, and nothing else near it: the
      rocker's tilt and its little lamp are the whole status. */
@@ -348,6 +355,7 @@
   html.hm-touch #hm-lab.is-lit .lab-plate i::after{background:var(--lab-acid);box-shadow:0 0 8px var(--lab-acid)}
   html.hm-touch .lab-plate:active i{transform:rotateX(0deg)}
   html.hm-touch .lab-sign{display:none}
+  html.hm-touch .lab-kicker > span:first-child{display:none}
 
   /* The sign and the statement beside the name. */
   .lab-sign{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:.8rem;font-weight:500;letter-spacing:.02em;text-transform:lowercase;color:var(--lab-mute);
@@ -530,6 +538,11 @@
   .lab-foot{display:flex;justify-content:space-between;align-items:center;gap:12px 24px;flex-wrap:wrap;
       margin-top:clamp(28px,5vh,48px);font-size:.8rem;font-weight:500;letter-spacing:.02em;text-transform:lowercase;color:var(--lab-mute)}
   .lab-foot [data-go]{cursor:pointer;color:var(--lab-ink)}
+  /* A drawn arrow, not a glyph: the ↩ rendered as an emoji on some phones. */
+  .lab-back{display:inline-flex;align-items:center;gap:9px}
+  .lab-back svg{width:20px;height:13px;flex:none;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;
+      transition:transform .3s var(--lab-ease)}
+  @media (hover:hover){.lab-back:hover svg{transform:translateX(-3px)}}
   @media (hover:hover){.lab-foot [data-go]:hover{color:var(--lab-green)}}
   .lab-cta{position:relative;z-index:0;margin-top:auto;box-sizing:border-box;text-align:center;padding:clamp(32px,5vh,64px) var(--lab-gut) calc(clamp(24px,4vh,40px) + env(safe-area-inset-bottom,0px))}
 
@@ -997,11 +1010,11 @@
       </div>
 
       <div class="lab-foot">
-        <span data-go="intro">↩ back to the day job</span>
+        <span data-go="intro" class="lab-back"><svg viewBox="0 0 24 16" aria-hidden="true"><path d="M9 2 L2 8 L9 14 M2 8 H22"/></svg>back to the day job</span>
         <span>built at 1am · shipped when it feels right</span>
       </div>
 
-      <p class="lab-aside">the dark in here is hiding something. a thumb will never find it — open this on a laptop.</p>
+      <p class="lab-aside">the dark in here is hiding something. a thumb will never find it. open this on a laptop.</p>
     </div>
 
     <section id="hm-lab-cta" class="lab-cta" data-screen-label="After Hours — contact">
@@ -1031,8 +1044,8 @@
     </section>
   </div>
 </div>
-<script src="script.js?v=97"></script>
-<script src="lab.js?v=13"></script>
+<script src="script.js?v=98"></script>
+<script src="lab.js?v=14"></script>
 <script>
   // Lanyard is web-only: it's a heavy WebGL scene (three.js + rapier physics
   // + a 2.4MB card model) built around a pointer drag that touch can't

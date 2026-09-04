@@ -30,10 +30,18 @@ document.addEventListener('DOMContentLoaded', () => {
   // always continues the header, the bottom strip always continues whatever
   // is at the bottom edge. theme-color and the root background still track
   // alongside for the browsers that use them (and for rubber-band overscroll).
-  const themeMeta = document.querySelector('meta[name="theme-color"]');
   const safeTop = $('hm-safe-top'), safeBot = $('hm-safe-bot');
+  // iOS Safari tints its status bar and bottom toolbar from theme-color and
+  // does not reliably notice the content attribute changing; a fresh meta
+  // element in its place is what makes it look again. The strip stays as
+  // the paint under the status bar for the browsers that sample the page.
+  let themeMeta = document.querySelector('meta[name="theme-color"]');
   const setChromeTop = c => {
-    if (themeMeta) themeMeta.setAttribute('content', c);
+    if (themeMeta) {
+      const fresh = document.createElement('meta');
+      fresh.setAttribute('name', 'theme-color'); fresh.setAttribute('content', c);
+      themeMeta.replaceWith(fresh); themeMeta = fresh;
+    }
     if (safeTop) safeTop.style.background = c;
   };
   const setChromeBottom = c => {
