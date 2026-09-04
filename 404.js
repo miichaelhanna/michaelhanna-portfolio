@@ -466,7 +466,12 @@
     ctx.translate(0, -HIP_TO_FEET - bounce);
 
     // back leg, back arm (behind torso)
-    ctx.save(); ctx.translate(A.hipB[0], A.hipB[1]); part(P.legB, legB); ctx.restore();
+    // The back leg's sprite is cut with its toe trailing — its foot reaches
+    // 15px behind the hip while the front leg's reaches 28px ahead — so the
+    // runner led with one foot and dragged the other heel-first. Mirrored
+    // about the hip so both toes point the way he is going; the rotation is
+    // negated with it so the leg still swings the same way it always did.
+    ctx.save(); ctx.translate(A.hipB[0], A.hipB[1]); ctx.scale(-1, 1); part(P.legB, -legB); ctx.restore();
     ctx.save(); ctx.rotate(lean); ctx.scale(1, tScaleY);
     ctx.save(); ctx.translate(A.shB[0], A.shB[1]); part(P.armB, armB); ctx.restore();
     part(P.torso, 0);
