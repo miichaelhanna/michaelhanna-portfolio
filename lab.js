@@ -428,7 +428,9 @@
       ctx.scale(SC, SC);
       ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.beginPath(); ctx.ellipse(0, 2, 20, 5, 0, 0, Math.PI * 2); ctx.fill();
       ctx.translate(0, -24.3 - bounce);
-      ctx.save(); ctx.translate(A.hipB[0], A.hipB[1]); part(P.legB, legB); ctx.restore();
+      // Same cut, same fix as the game: the back leg's sprite trails its toe,
+      // so it is mirrored about the hip and its rotation negated with it.
+      ctx.save(); ctx.translate(A.hipB[0], A.hipB[1]); ctx.scale(-1, 1); part(P.legB, -legB); ctx.restore();
       ctx.save(); ctx.rotate(lean);
       ctx.save(); ctx.translate(A.shB[0], A.shB[1]); part(P.armB, armB); ctx.restore();
       part(P.torso, 0);
