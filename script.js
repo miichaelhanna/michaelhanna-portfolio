@@ -57,6 +57,10 @@ document.addEventListener('DOMContentLoaded', () => {
     el.style.color = dark ? '#fff' : '#1a1a1a';
   });
   const PAGE_BG = { about: ABOUT_BG, lab: '#0f0d0b' };
+  // After Hours keeps its floor dark: the ID card band at the foot of the
+  // page, and with it the browser's bottom bar, stay the night colour even
+  // when the lights are on. Only the top follows the switch.
+  const LAB_FLOOR = '#0f0d0b';
   // After Hours has its own light switch (lab.js): its ground goes from a
   // warm black to ecru and back. Which ink the nav needs there depends on
   // that state, so it is asked for rather than assumed dark.
@@ -64,7 +68,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const inkFor = m => m === 'intro' ? false : m === 'lab' ? labDark : true;
   const setChromeFor = m => {
     if (m !== 'lab' && typeof labClock === 'function') labClock(false);
-    setTheme(PAGE_BG[m] || '#ffffff');
+    if (m === 'lab') { setChromeTop(PAGE_BG.lab); setChromeBottom(LAB_FLOOR); }
+    else setTheme(PAGE_BG[m] || '#ffffff');
     // Landing back on home mid-scroll (the curtain-only return from deep in
     // the page) must re-derive both bars from the actual scroll position —
     // the flat white set above is only right at the top.
@@ -101,14 +106,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Mid-travel the curtain owns the chrome; apply once it has settled.
     if (navBusy) { setTimeout(() => dispatchEvent(new CustomEvent('hm-lab-lights', { detail: e.detail })), 200); return; }
     labClock(true);
-    setTheme(PAGE_BG.lab);
+    setChromeTop(PAGE_BG.lab); setChromeBottom(LAB_FLOOR);
     if (head) head.style.background = PAGE_BG.lab;
     navInk(labDark);
     // iOS samples the tint for its bottom toolbar on its own schedule, and a
     // single change during a fade can be missed: the same colour is stated
     // again once the fade has landed, which is when Safari looks next.
     clearTimeout(labSettle);
-    labSettle = setTimeout(() => { setTheme(PAGE_BG.lab); if (head) head.style.background = PAGE_BG.lab; }, 850);
+    labSettle = setTimeout(() => { setChromeTop(PAGE_BG.lab); setChromeBottom(LAB_FLOOR); if (head) head.style.background = PAGE_BG.lab; }, 850);
   });
 
   const resetHover = () => {

@@ -249,8 +249,10 @@
   .lab-ground{position:fixed;inset:0;z-index:0;background:var(--lab-bg);transition:background .8s ease}
   #hm-lab{color:var(--lab-ink);transition:color .8s ease}
   #hm-labname{color:var(--lab-strong);transition:color .8s ease}
-  #hm-lab.is-lit .cta-id{color:#141210}
-  #hm-lab.is-lit .cta-name,#hm-lab.is-lit .cta-badge,#hm-lab.is-lit .cta-clock{color:rgba(20,18,16,.62)}
+  /* The floor of the room stays dark whatever the lights do: the ID card
+     band keeps the night ground and its light type in both states, and the
+     browser's bottom bar is held to the same colour in script.js. */
+  .lab-cta{background:#0f0d0b;color:#F4F1EA}
   #hm-lab ::selection{background:var(--lab-lamp);color:#1a1208}
   #hm-lab{display:flex;flex-direction:column}
   #hm-lab-hero{position:relative;z-index:0;flex:0 0 auto;width:100%;box-sizing:border-box}
@@ -544,7 +546,7 @@
       transition:transform .3s var(--lab-ease)}
   @media (hover:hover){.lab-back:hover svg{transform:translateX(-3px)}}
   @media (hover:hover){.lab-foot [data-go]:hover{color:var(--lab-green)}}
-  .lab-cta{position:relative;z-index:0;margin-top:auto;box-sizing:border-box;text-align:center;padding:clamp(32px,5vh,64px) var(--lab-gut) calc(clamp(24px,4vh,40px) + env(safe-area-inset-bottom,0px))}
+  .lab-cta{position:relative;z-index:1;margin-top:auto;box-sizing:border-box;text-align:center;padding:clamp(32px,5vh,64px) var(--lab-gut) calc(clamp(24px,4vh,40px) + env(safe-area-inset-bottom,0px))}
 
   @media (max-width:900px){
     .lab-piece,.lab-piece--filed{grid-template-columns:minmax(0,1fr);gap:clamp(24px,5vh,40px);padding:clamp(40px,7vh,72px) 0}
@@ -1044,7 +1046,7 @@
     </section>
   </div>
 </div>
-<script src="script.js?v=99"></script>
+<script src="script.js?v=100"></script>
 <script src="lab.js?v=14"></script>
 <script>
   // Lanyard is web-only: it's a heavy WebGL scene (three.js + rapier physics
