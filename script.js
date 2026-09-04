@@ -494,15 +494,18 @@ document.addEventListener('DOMContentLoaded', () => {
   // itself kick off a browser-smoothed hop, and the two would fight frame to frame.
   const easeOutExpo = p => p >= 1 ? 1 : 1 - Math.pow(2, -10 * p);
   const SNAP_MS = 900;
-  const scrollSnap = (el, toY, ms) => new Promise(done => {
+  // The curve is an argument, not a constant: a nav click and a wheel step want
+  // different motion, and used to share this one (see the wheel handler below).
+  const scrollSnap = (el, toY, ms, ease) => new Promise(done => {
     const fromY = el.scrollTop, dist = toY - fromY;
     if (!dist || !ms) { el.scrollTop = toY; return done(); }
+    const curve = ease || easeOutExpo;
     const prevBehavior = el.style.scrollBehavior;
     el.style.scrollBehavior = 'auto';
     const t0 = performance.now();
     const frame = t => {
       const p = Math.min(1, (t - t0) / ms);
-      el.scrollTop = fromY + dist * easeOutExpo(p);
+      el.scrollTop = fromY + dist * curve(p);
       if (p < 1) return requestAnimationFrame(frame);
       el.style.scrollBehavior = prevBehavior;
       done();
@@ -522,17 +525,63 @@ document.addEventListener('DOMContentLoaded', () => {
   // page feels sticky. Stepping section-to-section makes every scroll land.
   // Only the opening screen steps. Past it the work sections scroll normally —
   // they are shorter than the viewport, and snapping those fights the gesture.
-  let sectionLock = false;
+  //
+  // The step keeps its own timing rather than borrowing the nav click's. A click
+  // has no hand still moving, so it can afford the long expo landing; a wheel is
+  // mid-gesture. On the click's 900ms expo this step put 500 of its 900 pixels
+  // in the first 140ms and then crawled the last 40 for another 650, swallowing
+  // every wheel event in the meantime — a lurch, then a screen that appeared to
+  // have frozen. An even in-out curve over half the time lands while the gesture
+  // is still going, so the page moves with the hand instead of away from it.
+  const easeInOutCubic = p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+  const STEP_MS = 520, DRAIN_MS = 180, STEP_TRIGGER = 12;
+  let sectionLock = false, drainUntil = 0, drainLast = 0, wheelAcc = 0, wheelAt = 0;
   intro.addEventListener('wheel', e => {
     if (mode !== 'intro' || e.ctrlKey) return;
     if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+    // A trackpad goes on firing for the best part of a second after the flick.
+    // Those leftovers land after the step has finished, by which point the
+    // scroller is past the first screen and the position check below would hand
+    // them to the browser — a second, native scroll that slid the page straight
+    // past the section it had just arrived at. Drain them instead. This sits
+    // above the position check for exactly that reason.
+    //
+    // How long a tail runs is the trackpad's business, not something to guess at
+    // with a fixed window: a flick's momentum decays, so the window is held open
+    // for as long as the deltas keep shrinking, and the first one that grows is
+    // a new gesture and gets the page straight back.
+    const a = Math.abs(e.deltaY);
+    if (sectionLock) { drainLast = a; e.preventDefault(); return; }
+    if (performance.now() < drainUntil) {
+      if (a <= drainLast) {
+        drainLast = a;
+        drainUntil = performance.now() + DRAIN_MS;
+        e.preventDefault();
+        return;
+      }
+      drainUntil = 0;
+    }
     const h = intro.clientHeight, y = intro.scrollTop;
     if (y > h - 2) return;
     if (y <= 0 && e.deltaY < 0) return;
     e.preventDefault();
-    if (sectionLock || Math.abs(e.deltaY) < 6) return;
+    // A gentle scroll arrives as a run of small deltas, no one of which is a
+    // gesture on its own; the old floor threw each of them away, so a slow
+    // scroll moved nothing at all. Sum them instead, and forget the sum once the
+    // wheel has been still for a moment or the direction turns round.
+    const now = performance.now();
+    if (now - wheelAt > 200 || (wheelAcc < 0) !== (e.deltaY < 0)) wheelAcc = 0;
+    wheelAt = now;
+    wheelAcc += e.deltaY;
+    if (Math.abs(wheelAcc) < STEP_TRIGGER) return;
+    const down = wheelAcc > 0;
+    wheelAcc = 0;
     sectionLock = true;
-    scrollSnap(intro, e.deltaY > 0 ? h : 0, still.matches ? 0 : SNAP_MS).then(() => { sectionLock = false; });
+    scrollSnap(intro, down ? h : 0, still.matches ? 0 : STEP_MS, easeInOutCubic).then(() => {
+      sectionLock = false;
+      // Nothing to protect when the move was a cut, so nothing to drain.
+      drainUntil = still.matches ? 0 : performance.now() + DRAIN_MS;
+    });
   }, { passive: false });
 
   const tune = () => {
