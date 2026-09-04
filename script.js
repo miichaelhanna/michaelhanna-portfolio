@@ -287,6 +287,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const from = NODES[mode], to = NODES[toKey];
     if (navBusy || !to || !from || toKey === mode) { if (onDone) onDone(); return; }
     navBusy = true;
+    // Leaving After Hours: its lights run the header on a slow .8s clock, and
+    // that clock is only cleared when the wipe finishes — so the whole travel
+    // ran with a header a half-second behind the page. The nav owns the
+    // header from here, and any pending restate from a last-moment toggle is
+    // dropped rather than repainting the chrome after the page has changed.
+    clearTimeout(labSettle);
+    labClock(false);
     whenFontsReady(() => {
     // The name can only travel if it is on screen to travel from. Deeper into
     // the page it is not, and yanking the scroll to the top first read as a
